@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 )
@@ -33,4 +34,25 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		// If the session is valid, call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
+}
+
+func CreateSession(w http.ResponseWriter, r *http.Request, userID int) {
+	// Generate a new session ID
+	sessionID, err := models.CreateSession(userID)
+	if err != nil {
+		http.Error(w, "Failed to create session", http.StatusInternalServerError)
+		return
+	}
+
+	// Set the session ID as a cookie
+	cookie := &http.Cookie{
+		Name:     "session_id",
+		Value:    sessionID,
+		Path:     "/",
+		HttpOnly: true,
+		Expires:  time.Now().Add(24 * time.Hour), 
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, cookie)
 }
