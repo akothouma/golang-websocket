@@ -65,3 +65,17 @@ func GetUserByID(userID int)(*User, error){
 
 }
 
+func GetUserByUsername(username string) (*User, error) {
+	query := "SELECT id, email, username, password FROM Users WHERE username = ?"
+	row := DB.QueryRow(query, username)
+	user := User{}
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+	if err != nil {
+		if err==sql.ErrNoRows{
+			return nil,nil
+		}
+		log.Printf("Failed to get user by username: %v", err)
+        return nil, fmt.Errorf("failed to get user by username: %w", err)
+	}
+	return &user, nil
+}
