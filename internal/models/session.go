@@ -13,7 +13,6 @@ type Session struct {
 	ExpiresAt time.Time
 }
 
-
 func CreateSession(userID int) (string, error) {
 	querry := `DELETE FROM Sessions WHERE user_id=?`
 	_, err := DB.Exec(querry, userID)
@@ -31,3 +30,16 @@ func CreateSession(userID int) (string, error) {
 
 	return SessionID, nil
 }
+
+func GetSession(sessionID string)(*Session,error){
+	query:=`SELECT id, user_id, expires_at FROM Sessions WHERE id=?`
+	row:=DB.QueryRow(query,sessionID)
+	var session Session
+
+	err:=row.Scan(&session.ID,&session.UserID,&session.ExpiresAt)
+	if err!=nil{
+		return nil,fmt.Errorf("failed to get session: %w",err)
+	}
+	return &session,nil
+}
+

@@ -3,9 +3,9 @@ package middleware
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 func AuthMiddleware(next http.Handler) http.Handler {
@@ -50,7 +50,7 @@ func CreateSession(w http.ResponseWriter, r *http.Request, userID int) {
 		Value:    sessionID,
 		Path:     "/",
 		HttpOnly: true,
-		Expires:  time.Now().Add(24 * time.Hour), 
+		Expires:  time.Now().Add(24 * time.Hour),
 		SameSite: http.SameSiteStrictMode,
 	}
 

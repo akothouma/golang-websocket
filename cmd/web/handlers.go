@@ -1,10 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
+
+	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
+	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
 var tmpl = template.Must(template.ParseGlob("ui/html/*.html"))
@@ -42,7 +45,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !utils.ValidateEmail(email) {
-		app.errorLog.Println("Error could not validate email format")
+		log.Println("Error could not validate email format")
 		http.Error(w, "Invalid email address", http.StatusBadRequest)
 		return
 	}
