@@ -34,3 +34,22 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+
+func ValidateCSRFToken(r *http.Request) bool {
+	// Get the CSRF token from the form
+	formToken := r.FormValue("csrf_token")
+	log.Printf("CSRF token from form: %s\n", formToken)
+	if formToken == "" {
+		return false
+	}
+
+	// Get the CSRF token from the cookie
+	cookie, err := r.Cookie("csrf_token")
+	if err != nil || cookie.Value == "" {
+		return false
+	}
+
+	// Compare the tokens
+	return formToken == cookie.Value
+}
