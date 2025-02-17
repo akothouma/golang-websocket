@@ -53,7 +53,7 @@ func GetUserByID(userID int)(*User, error){
 
 	row:=DB.QueryRow(query,userID)
 	user:=User{}
-	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.ImagePath)
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
     if err != nil {
         if err == sql.ErrNoRows {
             return nil, nil
