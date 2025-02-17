@@ -42,3 +42,9 @@ func GetUserByEmail(email string) (*User, error) {
 	}
 	return &user, nil
 }
+
+func (u *User) CheckPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password))
+	return err == nil
+}
+
