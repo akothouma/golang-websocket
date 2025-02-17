@@ -48,3 +48,20 @@ func (u *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
+func GetUserByID(userID int)(*User, error){
+	query:="SELECT id, email, username, password, image_path FROM Users WHERE id=?"
+
+	row:=DB.QueryRow(query,userID)
+	user:=User{}
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password, &user.ImagePath)
+    if err != nil {
+        if err == sql.ErrNoRows {
+            return nil, nil
+        }
+		log.Printf("Failed to get user by ID: %v", err)
+        return nil, fmt.Errorf("failed to get user by ID: %w", err)
+    }
+    return &user, nil
+
+}
+
