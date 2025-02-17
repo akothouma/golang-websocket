@@ -1,5 +1,12 @@
 package models
 
+import (
+	"fmt"
+	"log"
+
+	"golang.org/x/crypto/bcrypt"
+)
+
 
 type User struct{
 	ID int 
@@ -7,3 +14,18 @@ type User struct{
 	Username string
 	Password string
 }
+
+func CreateUser(email, username, password string) error{
+	hashedPassword,err:=bcrypt.GenerateFromPassword([]byte(password),bcrypt.DefaultCost)
+	if err !=nil{
+		return fmt.Errorf("failed to hash password: %w",err)
+	}
+
+	querystatement:="INSERT INTO Users(email, username, password) VALUES(?,?,?)"
+	_,err=DB.Exec(querystatement,email,username,string(hashedPassword))
+	if err != nil {
+		return fmt.Errorf("failed to insert user: %w", err) 
+	}
+	return nil
+}
+
