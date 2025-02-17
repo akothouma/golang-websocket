@@ -43,3 +43,12 @@ func GetSession(sessionID string)(*Session,error){
 	return &session,nil
 }
 
+func DeleteSession(sessionID string)error{
+	query:="DELETE FROM Sessions WHERE id=?"
+	_,err:=DB.Exec(query,sessionID)
+	if err!=nil{
+		return fmt.Errorf("failed to delete session: %w",err)
+	}
+	return nil
+}
+
