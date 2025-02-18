@@ -14,7 +14,7 @@ func InitializeDB() error {
 		return err
 	}
 
-	defer dataBase.Close()
+	// defer dataBase.Close()
 
 	// create the database queries tables
 	query := `
@@ -80,5 +80,7 @@ func InitializeDB() error {
 		dataBase.Close()
 		return err
 	}
+
+	DB = dataBase
 	return nil
 }
