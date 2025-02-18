@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 func main() {
 	addr := flag.String("addr", ":8000", "HTTP network address")
-	if err := models.InitializeDB();err !=nil{
+	if err := database.InitializeDB();err !=nil{
 		log.Fatalf("Failed to initialize database: %v",err)
 	}
 	mux := http.NewServeMux()
