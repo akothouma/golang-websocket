@@ -22,7 +22,7 @@ func CreateUser(email, username, password string) error {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	querystatement := "INSERT INTO Users(email, username, password) VALUES(?,?,?)"
+	querystatement := "INSERT INTO users(email, username, password) VALUES(?,?,?)"
 	_, err = database.DB.Exec(querystatement, email, username, string(hashedPassword))
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
@@ -31,7 +31,7 @@ func CreateUser(email, username, password string) error {
 }
 
 func GetUserByEmail(email string) (*User, error) {
-	query := "SELECT id, email, username, password FROM Users WHERE email = ?"
+	query := "SELECT id, email, username, password FROM users WHERE email = ?"
 	row := database.DB.QueryRow(query, email)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
@@ -50,7 +50,7 @@ func (u *User) CheckPassword(password string) bool {
 }
 
 func GetUserByID(userID int)(*User, error){
-	query:="SELECT id, email, username, password, image_path FROM Users WHERE id=?"
+	query:="SELECT id, email, username, password, image_path FROM users WHERE id=?"
 
 	row:=database.DB.QueryRow(query,userID)
 	user:=User{}
@@ -67,7 +67,7 @@ func GetUserByID(userID int)(*User, error){
 }
 
 func GetUserByUsername(username string) (*User, error) {
-	query := "SELECT id, email, username, password FROM Users WHERE username = ?"
+	query := "SELECT id, email, username, password FROM users WHERE username = ?"
 	row := database.DB.QueryRow(query, username)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
