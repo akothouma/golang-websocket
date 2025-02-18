@@ -6,10 +6,14 @@ import (
 	"net/http"
 
 	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 func main() {
 	addr := flag.String("addr", ":8000", "HTTP network address")
+	if err := database.InitializeDB();err !=nil{
+		log.Fatalf("Failed to initialize database: %v",err)
+	}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", HomeHandler)
 	mux.Handle("/register", middleware.CSRFMiddleware(http.HandlerFunc(RegisterHandler)))

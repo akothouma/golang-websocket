@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"golang.org/x/crypto/bcrypt"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 type User struct {
@@ -22,7 +23,7 @@ func CreateUser(email, username, password string) error {
 	}
 
 	querystatement := "INSERT INTO Users(email, username, password) VALUES(?,?,?)"
-	_, err = DB.Exec(querystatement, email, username, string(hashedPassword))
+	_, err = database.DB.Exec(querystatement, email, username, string(hashedPassword))
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
@@ -31,7 +32,7 @@ func CreateUser(email, username, password string) error {
 
 func GetUserByEmail(email string) (*User, error) {
 	query := "SELECT id, email, username, password FROM Users WHERE email = ?"
-	row := DB.QueryRow(query, email)
+	row := database.DB.QueryRow(query, email)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
@@ -51,7 +52,7 @@ func (u *User) CheckPassword(password string) bool {
 func GetUserByID(userID int)(*User, error){
 	query:="SELECT id, email, username, password, image_path FROM Users WHERE id=?"
 
-	row:=DB.QueryRow(query,userID)
+	row:=database.DB.QueryRow(query,userID)
 	user:=User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
     if err != nil {
@@ -67,7 +68,7 @@ func GetUserByID(userID int)(*User, error){
 
 func GetUserByUsername(username string) (*User, error) {
 	query := "SELECT id, email, username, password FROM Users WHERE username = ?"
-	row := DB.QueryRow(query, username)
+	row := database.DB.QueryRow(query, username)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
