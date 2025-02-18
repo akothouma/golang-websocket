@@ -12,7 +12,7 @@ var Tables=[]string{
         id TEXT PRIMARY KEY,
         user_id INTEGER,
         expires_at DATETIME NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Added created_at
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES Users(id)
     );`,
 
