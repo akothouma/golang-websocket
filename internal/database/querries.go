@@ -1,4 +1,4 @@
-package models
+package database
 
 var Tables=[]string{
 	`CREATE TABLE IF NOT EXISTS Users(
