@@ -1,4 +1,4 @@
-package database
+package models
 
 import (
 	"database/sql"
@@ -6,12 +6,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
 
-func InitializeDB() error {
+type ForumModel struct{
+	DB *sql.DB
+}
+
+func InitializeDB() (*sql.DB,error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	// defer dataBase.Close()
@@ -37,23 +40,20 @@ func InitializeDB() error {
 
 	CREATE TABLE IF NOT EXISTS posts(
 		id TEXT PRIMARY KEY,
-		user_id TEXT NOT NULL,
-		category TEXT NOT NULL, 
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
 		media BLOB, 
-		content_type TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (category) REFERENCES post_categories(category)
 	);
 
-	CREATE TABLE IF NOT EXISTS post_categories(
-		post_id TEXT NOT NULL,
-		category_id TEXT NOT NULL,
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		PRIMARY KEY (post_id, category_id)
-	);
+	// CREATE TABLE IF NOT EXISTS post_categories(
+	// 	post_id TEXT NOT NULL,
+	// 	category_id TEXT NOT NULL,
+	// 	FOREIGN KEY (post_id) REFERENCES posts(id),
+	// 	PRIMARY KEY (post_id, category_id)
+	// );
 
 	CREATE TABLE IF NOT EXISTS comments(
 		id TEXT PRIMARY KEY,
@@ -78,9 +78,9 @@ func InitializeDB() error {
 
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()
-		return err
+		return nil,err
 	}
 
-	DB = dataBase
-	return nil
+	
+	return dataBase,nil
 }
