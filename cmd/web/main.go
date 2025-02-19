@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 
 	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
@@ -15,6 +16,12 @@ func main() {
 	if err := database.InitializeDB(); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
+	// leveled logging, informational messages output to standard out(stdout)
+	// Error messages output to standard error(stderr)
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t",
+log.Ldate|log.Ltime|log.Lshortfile)
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", handlers.HomeHandler)
 	mux.Handle("/register", middleware.CSRFMiddleware(http.HandlerFunc(handlers.RegisterHandler)))
@@ -26,7 +33,7 @@ func main() {
 		Addr:    *addr,
 	}
 
-	log.Printf("Starting server on port %v:", *addr)
+	infoLog.Printf("Starting server on port %v:", *addr)
 	err := serv.ListenAndServe()
-	log.Fatal(err)
+	errorLog.Fatal(err)
 }
