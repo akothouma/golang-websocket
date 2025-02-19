@@ -20,16 +20,16 @@ func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		dep.ClientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 	if !middleware.ValidateCSRFToken(r) {
-		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+		dep.ClientError(w, http.StatusForbidden)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Cannot parse form", http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -39,43 +39,43 @@ func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) 
 	password := r.FormValue("password")
 
 	if email == "" || username == "" || password == "" {
-		http.Error(w, "All fields are required", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
 	if !utils.ValidateEmail(email) {
 		dep.ErrorLog.Println("Error could not validate email format")
-		http.Error(w, "Invalid email address", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
 	userByEmail, err := models.GetUserByEmail(email)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		dep.ServerError(w, err)
 		return
 	}
 	if userByEmail != nil {
-		http.Error(w, "Email already taken", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
 	userByUsername, err := models.GetUserByUsername(username)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		dep.ServerError(w, err)
 		return
 	}
 	if userByUsername != nil {
-		http.Error(w, "Username already taken", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
 	if len(password) < 8 {
-		http.Error(w, "Password must be at least 8 characters", http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
 	if err := models.CreateUser(email, username, password); err != nil {
-		http.Error(w, "Cannot create user", http.StatusInternalServerError)
+		dep.ServerError(w, err)
 		return
 	}
 

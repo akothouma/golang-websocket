@@ -15,7 +15,7 @@ func (dep *Dependencies)LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	err = models.DeleteSession(cookie.Value)
 	if err != nil {
-		http.Error(w, "Failed to delete session", http.StatusInternalServerError)
+		dep.ServerError(w,err)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{

@@ -16,7 +16,7 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		dep.ClientError(w,http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -26,7 +26,7 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		http.Error(w, "Cannot parse form", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
@@ -34,23 +34,23 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if email == "" || password == "" {
-		http.Error(w, "All fields are required", http.StatusBadRequest)
+		dep.ClientError(w,http.StatusBadRequest)
 		return
 	}
 
 	user, err := models.GetUserByEmail(email)
 	if err != nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		dep.ServerError(w, err)
 		return
 	}
 
 	if user == nil {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		dep.ClientError(w,http.StatusUnauthorized)
 		return
 	}
 
 	if !user.CheckPassword(password) {
-		http.Error(w, "Invalid credentials", http.StatusUnauthorized)
+		dep.ClientError(w, http.StatusUnauthorized)
 		return
 	}
 	middleware.CreateSession(w, r, user.ID)
