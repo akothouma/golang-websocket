@@ -17,7 +17,7 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if dep.ValidateCSRFToken(r) {
+	if !dep.ValidateCSRFToken(r) {
 		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 		return
 	}
