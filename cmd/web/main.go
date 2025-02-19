@@ -5,15 +5,14 @@ import (
 	"log"
 	"net/http"
 	"os"
-
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // struct to hold application-wide dependencies
 type Dependencies struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
-	Forum	*database.ForumModel
+	Forum    *models.ForumModel
 }
 
 func main() {
@@ -23,7 +22,7 @@ func main() {
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t",
 		log.Ldate|log.Ltime|log.Lshortfile)
-	db,err := database.InitializeDB()
+	db, err := models.InitializeDB()
 	if err != nil {
 		errorLog.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -35,7 +34,7 @@ func main() {
 	dep := &Dependencies{
 		ErrorLog: errorLog,
 		InfoLog:  infoLog,
-		Forum: &database.ForumModel{DB: db},
+		Forum:    &models.ForumModel{DB: db},
 	}
 
 	serv := &http.Server{

@@ -3,8 +3,6 @@ package main
 import (
 	"net/http"
 	"time"
-
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 func (dep *Dependencies)LogoutHandler(w http.ResponseWriter, r *http.Request) {
@@ -13,7 +11,7 @@ func (dep *Dependencies)LogoutHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	err = models.DeleteSession(cookie.Value)
+	err = dep.Forum.DeleteSession(cookie.Value)
 	if err != nil {
 		dep.ServerError(w,err)
 		return

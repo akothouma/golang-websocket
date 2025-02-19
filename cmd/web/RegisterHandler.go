@@ -4,14 +4,12 @@ import (
 	"html/template"
 	"net/http"
 
-	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
 var Tmpl *template.Template
 
-func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
 		Tmpl.ExecuteTemplate(w, "register.html", map[string]interface{}{
@@ -23,7 +21,7 @@ func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		dep.ClientError(w, http.StatusMethodNotAllowed)
 		return
 	}
-	if !middleware.ValidateCSRFToken(r) {
+	if !dep.ValidateCSRFToken(r) {
 		dep.ClientError(w, http.StatusForbidden)
 		return
 	}
@@ -39,33 +37,33 @@ func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) 
 	password := r.FormValue("password")
 
 	if email == "" || username == "" || password == "" {
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
 	if !utils.ValidateEmail(email) {
 		dep.ErrorLog.Println("Error could not validate email format")
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
-	userByEmail, err := models.GetUserByEmail(email)
+	userByEmail, err := dep.Forum.GetUserByEmail(email)
 	if err != nil {
 		dep.ServerError(w, err)
 		return
 	}
 	if userByEmail != nil {
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
-	userByUsername, err := models.GetUserByUsername(username)
+	userByUsername, err := dep.Forum.GetUserByUsername(username)
 	if err != nil {
 		dep.ServerError(w, err)
 		return
 	}
 	if userByUsername != nil {
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -74,7 +72,7 @@ func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if err := models.CreateUser(email, username, password); err != nil {
+	if err := dep.Forum.CreateUser(email, username, password); err != nil {
 		dep.ServerError(w, err)
 		return
 	}

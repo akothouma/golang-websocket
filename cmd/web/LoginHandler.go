@@ -2,12 +2,9 @@ package main
 
 import (
 	"net/http"
-
-	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
 		Tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
@@ -16,17 +13,17 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
-		dep.ClientError(w,http.StatusMethodNotAllowed)
+		dep.ClientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 
-	if !middleware.ValidateCSRFToken(r) {
+	if dep.ValidateCSRFToken(r) {
 		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
@@ -34,18 +31,18 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if email == "" || password == "" {
-		dep.ClientError(w,http.StatusBadRequest)
+		dep.ClientError(w, http.StatusBadRequest)
 		return
 	}
 
-	user, err := models.GetUserByEmail(email)
+	user, err := dep.Forum.GetUserByEmail(email)
 	if err != nil {
 		dep.ServerError(w, err)
 		return
 	}
 
 	if user == nil {
-		dep.ClientError(w,http.StatusUnauthorized)
+		dep.ClientError(w, http.StatusUnauthorized)
 		return
 	}
 
@@ -53,7 +50,7 @@ func (dep *Dependencies)LoginHandler(w http.ResponseWriter, r *http.Request) {
 		dep.ClientError(w, http.StatusUnauthorized)
 		return
 	}
-	middleware.CreateSession(w, r, user.ID)
+	dep.CreateSession(w, r, user.ID)
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
