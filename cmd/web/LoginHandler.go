@@ -1,13 +1,18 @@
 package main
 
 import (
+	"html/template"
 	"net/http"
 )
 
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	loginTemplate, err := template.ParseFiles("../../ui/templates/login.html")
+	if err != nil {
+		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
+	}
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
-		Tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		loginTemplate.ExecuteTemplate(w, "login.html", map[string]interface{}{
 			"CSRFToken": csrfToken,
 		})
 		return
