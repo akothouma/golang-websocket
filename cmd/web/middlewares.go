@@ -32,7 +32,7 @@ func (dep *Dependencies) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		// Add the user ID to the request context
-		ctx := context.WithValue(r.Context(),"user_id",session.UserID)
+		ctx := context.WithValue(r.Context(), "user_id", session.UserID)
 		// If the session is valid, call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
@@ -59,7 +59,7 @@ func (dep *Dependencies) CreateSession(w http.ResponseWriter, r *http.Request, u
 	http.SetCookie(w, cookie)
 }
 
-func (dep *Dependencies)CSRFMiddleware(next http.Handler) http.Handler {
+func (dep *Dependencies) CSRFMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("csrf_token")
 		var csrfToken string
@@ -85,7 +85,7 @@ func (dep *Dependencies)CSRFMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (dep *Dependencies)ValidateCSRFToken(r *http.Request) bool {
+func (dep *Dependencies) ValidateCSRFToken(r *http.Request) bool {
 	// ValidateCSRFToken checks if the CSRF token is valid
 	// Get the CSRF token from the form
 	formToken := r.FormValue("csrf_token")

@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 type Post struct {
@@ -16,17 +15,17 @@ type Post struct {
 	Media       string   `json:"videoLink"`
 }
 
-func CreatePost(id, title, postContent string, category []string) error {
+func (f *ForumModel)CreatePost(id, title, postContent string, category []string) error {
 	query := "INSERT INTO posts(id,category,title,content) VALUES(?,?,?,?)"
-	_, err := database.DB.Exec(query, id, title, postContent, category)
+	_, err := f.DB.Exec(query, id, title, postContent, category)
 	if err != nil {
 		return fmt.Errorf("failed to insert a post")
 	}
 	return nil
 }
-func FindPostById(id string)(*Post,error){
+func (f *ForumModel)FindPostById(id string)(*Post,error){
 query:="SELECT id,category,title,content FROM posts WHERE id=?"
-row:=database.DB.QueryRow(query,id)
+row:=f.DB.QueryRow(query,id)
 post:=Post{}
 err:=row.Scan(&post.PostId,&post.Category,&post.Title,&post.PostContent)
 if err !=nil{
