@@ -10,7 +10,7 @@ import (
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
-		Tmpl.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		Tmpl.ExecuteTemplate(w, "posts.html", map[string]interface{}{
 			"CSRFToken": csrfToken,
 		})
 		return

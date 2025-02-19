@@ -2,7 +2,7 @@ package models
 
 import (
 	"database/sql"
-
+	
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -10,6 +10,12 @@ import (
 type ForumModel struct{
 	DB *sql.DB
 }
+// CREATE TABLE IF NOT EXISTS post_categories(
+// 	post_id TEXT NOT NULL,
+// 	category_id TEXT NOT NULL,
+// 	FOREIGN KEY (post_id) REFERENCES posts(id),
+// 	PRIMARY KEY (post_id, category_id)
+// );
 
 func InitializeDB() (*sql.DB,error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
@@ -39,7 +45,7 @@ func InitializeDB() (*sql.DB,error) {
     );
 
 	CREATE TABLE IF NOT EXISTS posts(
-		id TEXT PRIMARY KEY,
+		post_id TEXT PRIMARY KEY,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
 		media BLOB, 
@@ -48,12 +54,6 @@ func InitializeDB() (*sql.DB,error) {
 		FOREIGN KEY (category) REFERENCES post_categories(category)
 	);
 
-	// CREATE TABLE IF NOT EXISTS post_categories(
-	// 	post_id TEXT NOT NULL,
-	// 	category_id TEXT NOT NULL,
-	// 	FOREIGN KEY (post_id) REFERENCES posts(id),
-	// 	PRIMARY KEY (post_id, category_id)
-	// );
 
 	CREATE TABLE IF NOT EXISTS comments(
 		id TEXT PRIMARY KEY,
