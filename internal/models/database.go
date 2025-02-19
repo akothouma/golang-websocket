@@ -1,4 +1,4 @@
-package database
+package models
 
 import (
 	"database/sql"
@@ -6,15 +6,18 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
 
-func InitializeDB() error {
+type ForumModel struct{
+	DB *sql.DB
+}
+
+func InitializeDB() (*sql.DB,error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
 	if err != nil {
-		return err
+		return nil,err
 	}
 
-	defer dataBase.Close()
+	// defer dataBase.Close()
 
 	// create the database queries tables
 	query := `
@@ -75,7 +78,9 @@ func InitializeDB() error {
 
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()
-		return err
+		return nil,err
 	}
-	return nil
+
+	
+	return dataBase,nil
 }

@@ -5,18 +5,18 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 type Session struct {
 	ID        string
 	UserID    int
 	ExpiresAt time.Time
+	// Forum *database.ForumModel
 }
 
-func CreateSession(userID int) (string, error) {
+func (f *ForumModel) CreateSession(userID int) (string, error) {
 	querry := `DELETE FROM Sessions WHERE user_id=?`
-	_, err := database.DB.Exec(querry, userID)
+	_, err := f.DB.Exec(querry, userID)
 	if err != nil {
 		return "", fmt.Errorf("failed to delete existing sessions: %w", err)
 	}
@@ -24,7 +24,7 @@ func CreateSession(userID int) (string, error) {
 	expiresAt := time.Now().Add(24 * time.Hour)
 
 	query := "INSERT INTO Sessions(id, user_id, expires_at) VALUES(?, ?, ?)"
-	_, err = database.DB.Exec(query, SessionID, userID, expiresAt)
+	_, err = f.DB.Exec(query, SessionID, userID, expiresAt)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert session: %w", err)
 	}
@@ -32,9 +32,9 @@ func CreateSession(userID int) (string, error) {
 	return SessionID, nil
 }
 
-func GetSession(sessionID string) (*Session, error) {
+func (f *ForumModel) GetSession(sessionID string) (*Session, error) {
 	query := `SELECT id, user_id, expires_at FROM Sessions WHERE id=?`
-	row := database.DB.QueryRow(query, sessionID)
+	row := f.DB.QueryRow(query, sessionID)
 	var session Session
 
 	err := row.Scan(&session.ID, &session.UserID, &session.ExpiresAt)
@@ -44,9 +44,9 @@ func GetSession(sessionID string) (*Session, error) {
 	return &session, nil
 }
 
-func DeleteSession(sessionID string) error {
+func (f *ForumModel) DeleteSession(sessionID string) error {
 	query := "DELETE FROM Sessions WHERE id=?"
-	_, err := database.DB.Exec(query, sessionID)
+	_, err := f.DB.Exec(query, sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to delete session: %w", err)
 	}
