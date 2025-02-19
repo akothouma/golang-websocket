@@ -2,14 +2,14 @@ package models
 
 import (
 	"database/sql"
-	
+
 	_ "github.com/mattn/go-sqlite3"
 )
 
-
-type ForumModel struct{
+type ForumModel struct {
 	DB *sql.DB
 }
+
 // CREATE TABLE IF NOT EXISTS post_categories(
 // 	post_id TEXT NOT NULL,
 // 	category_id TEXT NOT NULL,
@@ -17,10 +17,10 @@ type ForumModel struct{
 // 	PRIMARY KEY (post_id, category_id)
 // );
 
-func InitializeDB() (*sql.DB,error) {
+func InitializeDB() (*sql.DB, error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 
 	// defer dataBase.Close()
@@ -48,6 +48,8 @@ func InitializeDB() (*sql.DB,error) {
 		post_id TEXT PRIMARY KEY,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
+		user_id INTEGER,
+		category TEXT,
 		media BLOB, 
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
@@ -78,9 +80,8 @@ func InitializeDB() (*sql.DB,error) {
 
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()
-		return nil,err
+		return nil, err
 	}
 
-	
-	return dataBase,nil
+	return dataBase, nil
 }
