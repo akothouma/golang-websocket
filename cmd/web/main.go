@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
@@ -27,21 +26,15 @@ func main() {
 	errorLog := log.New(os.Stderr, "ERROR\t",
 		log.Ldate|log.Ltime|log.Lshortfile)
 
-	//Initialize new instance of the dependency struct
-	//containing dependencies
-	dep:=&Dependencies{
+	// Initialize new instance of the dependency struct
+	// containing dependencies
+	dep := &Dependencies{
 		ErrorLog: errorLog,
-		InfoLog: infoLog,
+		InfoLog:  infoLog,
 	}
 
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", dep.HomeHandler)
-	mux.Handle("/register", middleware.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
-	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
-	mux.Handle("/login", middleware.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
-
 	serv := &http.Server{
-		Handler:  mux,
+		Handler:  dep.Routes(),
 		Addr:     *addr,
 		ErrorLog: errorLog,
 	}
