@@ -56,8 +56,9 @@ func InitializeDB() error {
 	);
 
 	CREATE TABLE IF NOT EXISTS comments(
-		id TEXT PRIMARY KEY,
-		post_id TEXT NOT NULL,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id TEXT,
+		parent_comment_id INTEGER,
 		user_id TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
