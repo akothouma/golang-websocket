@@ -10,6 +10,11 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/handlers"
 )
+//struct to hold application-wide dependencies
+type Dependencies struct{
+ErrorLog *log.Logger
+InfoLog *log.Logger
+}
 
 func main() {
 	addr := flag.String("addr", ":8000", "HTTP network address")
@@ -31,6 +36,7 @@ log.Ldate|log.Ltime|log.Lshortfile)
 	serv := &http.Server{
 		Handler: mux,
 		Addr:    *addr,
+		ErrorLog: errorLog,
 	}
 
 	infoLog.Printf("Starting server on port %v:", *addr)
