@@ -2,7 +2,6 @@ package main
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 
 	middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
@@ -10,9 +9,9 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
-var Tmpl = template.Must(template.ParseGlob("ui/html/*.html"))
+var Tmpl *template.Template
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies)RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
 		Tmpl.ExecuteTemplate(w, "register.html", map[string]interface{}{
@@ -45,7 +44,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !utils.ValidateEmail(email) {
-		log.Println("Error could not validate email format")
+		dep.ErrorLog.Println("Error could not validate email format")
 		http.Error(w, "Invalid email address", http.StatusBadRequest)
 		return
 	}

@@ -5,6 +5,6 @@ import (
 	"net/http"
 )
 
-func HomeHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies)HomeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, "Welcome to Forum")
 }

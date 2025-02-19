@@ -7,7 +7,7 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies)LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
