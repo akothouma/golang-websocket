@@ -2,15 +2,22 @@ package main
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"github.com/google/uuid"
 )
 
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
+	// Load the template file to use. ("posts")
+	PostTemplate, err := template.ParseFiles("../../ui/templates/posts.html")
+	if err != nil {
+		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
+		return
+	}
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
-		Tmpl.ExecuteTemplate(w, "posts.html", map[string]interface{}{
+		PostTemplate.ExecuteTemplate(w, "posts.html", map[string]interface{}{
 			"CSRFToken": csrfToken,
 		})
 		return
