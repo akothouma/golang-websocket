@@ -13,24 +13,29 @@ import (
 type Dependencies struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
+	Forum	*database.ForumModel
 }
 
 func main() {
 	addr := flag.String("addr", ":8000", "HTTP network address")
-	if err := database.InitializeDB(); err != nil {
-		log.Fatalf("Failed to initialize database: %v", err)
-	}
 	// leveled logging, informational messages output to standard out(stdout)
 	// Error messages output to standard error(stderr)
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t",
 		log.Ldate|log.Ltime|log.Lshortfile)
+	db,err := database.InitializeDB()
+	if err != nil {
+		errorLog.Fatalf("Failed to initialize database: %v", err)
+	}
+
+	defer db.Close()
 
 	// Initialize new instance of the dependency struct
 	// containing dependencies
 	dep := &Dependencies{
 		ErrorLog: errorLog,
 		InfoLog:  infoLog,
+		Forum: &database.ForumModel{DB: db},
 	}
 
 	serv := &http.Server{
@@ -40,6 +45,6 @@ func main() {
 	}
 
 	infoLog.Printf("Starting server on port %v:", *addr)
-	err := serv.ListenAndServe()
+	err = serv.ListenAndServe()
 	errorLog.Fatal(err)
 }

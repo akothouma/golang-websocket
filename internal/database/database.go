@@ -6,12 +6,15 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-var DB *sql.DB
 
-func InitializeDB() error {
+type ForumModel struct{
+	DB *sql.DB
+}
+
+func InitializeDB() (*sql.DB,error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
 	if err != nil {
-		return err
+		return nil,err
 	}
 
 	// defer dataBase.Close()
@@ -78,9 +81,9 @@ func InitializeDB() error {
 
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()
-		return err
+		return nil,err
 	}
 
-	DB = dataBase
-	return nil
+	
+	return dataBase,nil
 }

@@ -14,25 +14,26 @@ type User struct {
 	Email    string
 	Username string
 	Password string
+	forum database.ForumModel
 }
 
-func CreateUser(email, username, password string) error {
+func (u *User)CreateUser(email, username, password string) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
 	querystatement := "INSERT INTO users(email, username, password) VALUES(?,?,?)"
-	_, err = database.DB.Exec(querystatement, email, username, string(hashedPassword))
+	_, err = u.forum.DB.Exec(querystatement, email, username, string(hashedPassword))
 	if err != nil {
 		return fmt.Errorf("failed to insert user: %w", err)
 	}
 	return nil
 }
 
-func GetUserByEmail(email string) (*User, error) {
+func (u *User)GetUserByEmail(email string) (*User, error) {
 	query := "SELECT id, email, username, password FROM users WHERE email = ?"
-	row := database.DB.QueryRow(query, email)
+	row := u.forum.DB.QueryRow(query, email)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
@@ -49,10 +50,10 @@ func (u *User) CheckPassword(password string) bool {
 	return err == nil
 }
 
-func GetUserByID(userID int)(*User, error){
+func (u *User)GetUserByID(userID int)(*User, error){
 	query:="SELECT id, email, username, password, image_path FROM users WHERE id=?"
 
-	row:=database.DB.QueryRow(query,userID)
+	row:=u.forum.DB.QueryRow(query,userID)
 	user:=User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
     if err != nil {
@@ -66,9 +67,9 @@ func GetUserByID(userID int)(*User, error){
 
 }
 
-func GetUserByUsername(username string) (*User, error) {
+func (u *User)GetUserByUsername(username string) (*User, error) {
 	query := "SELECT id, email, username, password FROM users WHERE username = ?"
-	row := database.DB.QueryRow(query, username)
+	row := u.forum.DB.QueryRow(query, username)
 	user := User{}
 	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
 	if err != nil {
