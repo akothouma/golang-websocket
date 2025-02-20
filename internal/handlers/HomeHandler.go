@@ -21,7 +21,6 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("Failed to retrieve posts: %v", err), http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(posts)
 
 	homeTemplate.Execute(w, posts)
 }

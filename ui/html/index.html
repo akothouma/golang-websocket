@@ -197,24 +197,20 @@
       <header class="header">
         <div class="logo">Forum</div>
       </header>
-      <form class="post-form">
-        <textarea class="post-input" placeholder="Enter your Post here" rows="3"></textarea>
+      <form class="post-form" id="postForm">
+        <textarea class="post-input" id="postContent" placeholder="Enter your Post here" rows="3"></textarea>
         <div class="post-form-actions">
           <div class="media-upload">
             <input type="file" id="media-upload" accept="image/*,video/*,.gif" style="display: none;">
             <label for="media-upload" class="media-upload-button">
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z">                  
-                </path>
-                <circle cx="12" cy="13" r="4">                  
-                </circle>
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                <circle cx="12" cy="13" r="4"></circle>
               </svg>
               Mídia
             </label>
           </div>
-          <button type="submit" class="post-button">
-            Post
-          </button>
+          <button type="submit" class="post-button">Post</button>
         </div>
       </form>
       {{ range . }}
@@ -288,6 +284,45 @@
         </div>
     </div>
     {{ end }}
-    <script type="text/babel" src="app.js"></script>
+    <script>
+      document.getElementById("postForm").addEventListener("submit", async function (event) {
+        event.preventDefault(); // Prevent default form submission
+    
+        const userId = 1; // Hardcoded for now; replace with actual user ID if dynamic
+        const content = document.getElementById("postContent").value.trim();
+    
+        if (!content) {
+          alert("Post content cannot be empty!");
+          return;
+        }
+    
+        const formData = new URLSearchParams();
+        formData.append("user_id", userId);
+        formData.append("content", content);
+    
+        try {
+          const response = await fetch("http://localhost:8000/add__post", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: formData.toString()
+          });
+    
+          if (response.ok) {
+            alert("Post added successfully!");
+            document.getElementById("postForm").reset();
+          } else {
+            const errorText = await response.text();
+            alert("Failed to add post: " + errorText);
+          }
+        } catch (error) {
+          console.error("Error posting data:", error);
+          alert("An error occurred while posting.");
+        }
+      });
+    </script>
+    
+    
   </body>
 </html>
