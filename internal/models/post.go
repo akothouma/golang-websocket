@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"fmt"
-
 )
 
 type Post struct {
@@ -15,7 +14,7 @@ type Post struct {
 	Media       string   `json:"videoLink"`
 }
 
-func (f *ForumModel)CreatePost(id, title, postContent string, category []string) error {
+func (f *ForumModel) CreatePost(id, title, postContent string, category []string) error {
 	query := "INSERT INTO posts(id,category,title,content) VALUES(?,?,?,?)"
 	_, err := f.DB.Exec(query, id, title, postContent, category)
 	if err != nil {
@@ -23,16 +22,17 @@ func (f *ForumModel)CreatePost(id, title, postContent string, category []string)
 	}
 	return nil
 }
-func (f *ForumModel)FindPostById(id string)(*Post,error){
-query:="SELECT id,category,title,content FROM posts WHERE id=?"
-row:=f.DB.QueryRow(query,id)
-post:=Post{}
-err:=row.Scan(&post.PostId,&post.Category,&post.Title,&post.PostContent)
-if err !=nil{
-	if err==sql.ErrNoRows{
-		return nil,err
+
+func (f *ForumModel) FindPostById(id string) (*Post, error) {
+	query := "SELECT id,category,title,content FROM posts WHERE id=?"
+	row := f.DB.QueryRow(query, id)
+	post := Post{}
+	err := row.Scan(&post.PostId, &post.Category, &post.Title, &post.PostContent)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return nil, err
+		}
+		return nil, err
 	}
-	return nil,err
-}
-return &post,nil
+	return &post, nil
 }
