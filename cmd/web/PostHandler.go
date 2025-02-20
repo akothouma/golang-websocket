@@ -11,7 +11,7 @@ import (
 
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the template file to use. ("posts")
-	PostTemplate, err := template.ParseFiles("../../ui/templates/posts.html")
+	PostTemplate, err := template.ParseFiles("../../ui/html/posts.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
 		return

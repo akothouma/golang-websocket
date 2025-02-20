@@ -6,7 +6,7 @@ import (
 )
 
 func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
-	homeTemplate, err := template.ParseFiles("./ui/templates/home.html")
+	homeTemplate, err := template.ParseFiles("/home/lakoth/forum-1/ui/html/home.html")
 	if (err == nil) {
 		homeTemplate.Execute(w, nil)
 	}else {

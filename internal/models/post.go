@@ -6,18 +6,18 @@ import (
 )
 
 type Post struct {
-	PostId      string 
+	PostId      string
 	UserId      string
-	Title       string  
-	PostContent string  
-	Media       string 
+	Title       string
+	PostContent string
+	Media       string
 }
 
 func (f *ForumModel) CreatePost(p *Post) error {
 	fmt.Println("here")
-	fmt.Println(p.PostId,p.UserId,p.Title,p.PostContent)
+	fmt.Println(p.PostId, p.UserId, p.Title, p.PostContent)
 	query := "INSERT INTO posts(post_id,title,content) VALUES(?,?,?)"
-	_, err := f.DB.Exec(query, p.PostId,p.UserId, p.Title, p.PostContent)
+	_, err := f.DB.Exec(query, p.PostId, p.UserId, p.Title, p.PostContent)
 	if err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("failed to insert a post")
@@ -38,4 +38,22 @@ func (f *ForumModel) FindPostById(id string) (*Post, error) {
 		return nil, err
 	}
 	return &post, nil
+}
+
+func (f *ForumModel) AllPosts() ([]Post, error) {
+	query := "SELECT * FROM posts"
+	rows, err := f.DB.Query(query)
+	posts := []Post{}
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(&p.PostId, &p.Title, &p.PostContent)
+		if err != nil {
+			return nil, err
+		}
+		posts = append(posts, p)
+	}
+	return posts, nil
 }
