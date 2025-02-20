@@ -9,14 +9,6 @@ import (
 type ForumModel struct {
 	DB *sql.DB
 }
-// id TEXT PRIMARY KEY,
-
-// CREATE TABLE IF NOT EXISTS post_categories(
-// 	post_id TEXT NOT NULL,
-// 	category_id TEXT NOT NULL,
-// 	FOREIGN KEY (post_id) REFERENCES posts(id),
-// 	PRIMARY KEY (post_id, category_id)
-// );
 
 func InitializeDB() (*sql.DB, error) {
 	dataBase, err := sql.Open("sqlite3", "./forum.db")
@@ -25,8 +17,8 @@ func InitializeDB() (*sql.DB, error) {
 	}
 
 	// defer dataBase.Close()
-
-	// create the database queries tables
+	
+	// create the database queries tabCategory: category,les
 	query := `
 	CREATE TABLE IF NOT EXISTS users(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -35,18 +27,21 @@ func InitializeDB() (*sql.DB, error) {
         password TEXT NOT NULL,
         image_path TEXT
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	);
-
-	CREATE TABLE IF NOT EXISTS sessions (
-        id TEXT PRIMARY KEY,
-        user_id INTEGER,
-        expires_at DATETIME NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id)
+		);
+		
+		CREATE TABLE IF NOT EXISTS sessions (
+			id TEXT PRIMARY KEY,
+			user_id INTEGER,
+			expires_at DATETIME NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+			FOREIGN KEY (user_id) REFERENCES users(id)
     );
-
+	
 	CREATE TABLE IF NOT EXISTS posts(
-		post_id TEXT PRIMARY KEY,
+	    id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id TEXT NOT NULL,
+		user_id TEXT NOT NULL,
+		category TEXT,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
 		user_id INTEGER,
@@ -54,10 +49,10 @@ func InitializeDB() (*sql.DB, error) {
 		media BLOB, 
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id),
-		FOREIGN KEY (category) REFERENCES post_categories(category)
+		FOREIGN KEY (category) REFERENCES post_categories(id)
 	);
-
-
+	
+	
 	CREATE TABLE IF NOT EXISTS comments(
 		post_id TEXT NOT NULL,
 		user_id TEXT NOT NULL,
@@ -65,16 +60,30 @@ func InitializeDB() (*sql.DB, error) {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(id),
 		FOREIGN KEY (user_id) REFERENCES users(id)
-	);
-
-	CREATE TABLE IF NOT EXISTS likes(
-		id TEXT PRIMARY KEY,
-		user_id TEXT NOT NULL,
-		post_id TEXT,
+		);
+		
+		CREATE TABLE IF NOT EXISTS likes(
+			id TEXT PRIMARY KEY,
+			user_id TEXT NOT NULL,
+			post_id TEXT,
 		type TEXT CHECK(type IN ('like', 'dislike')),
 		FOREIGN KEY (user_id) REFERENCES users(id),
 		FOREIGN KEY (post_id) REFERENCES posts(id)
-	);
+		);
+		
+		CREATE TABLE IF NOT EXISTS categories( 
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		category_id TEXT NOT NULL,
+		category_value TEXT NOT NULL
+		);
+		
+		CREATE TABLE IF NOT EXISTS post_categories(
+			post_id TEXT NOT NULL,
+			category_id TEXT NOT NULL,
+			FOREIGN KEY (post_id) REFERENCES posts(id),
+			PRIMARY KEY (post_id, category_id)
+		);
+
 
 	`
 
