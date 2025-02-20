@@ -2,7 +2,7 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f8fa;
+    background-color: #ffcccc;
   }
   
   .header {
@@ -29,4 +29,5 @@ body {
   .post-footer h2 {
     display: inline-block;
     margin-right: 1rem;
+    color: #1da1f2;
   }
