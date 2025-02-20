@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/google/uuid"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
@@ -16,19 +15,17 @@ func AddPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title := r.FormValue("title")
+	
 	content := r.FormValue("content")
 	userID := r.FormValue("user_id")
-	category := r.FormValue("category")
+	
 
-	if title == "" || content == "" || userID == "" || category == "" {
+	if  content == "" || userID == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	id := uuid.New().String()
-
-	postID, err := models.AddPost(id, userID, content)
+	postID, err := models.AddPost(userID, content)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to add post: %v", err), http.StatusInternalServerError)
 		return
@@ -41,6 +38,10 @@ func AddPostHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func GetAllPostsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	posts, err := models.GetAllPosts()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve posts: %v", err), http.StatusInternalServerError)

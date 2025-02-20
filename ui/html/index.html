@@ -22,6 +22,15 @@
       padding: 20px;
     }
 
+    .post {
+      background: #14397d;
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+      margin-bottom: 15px;
+    }
+
     .header, .post-form, .post {
       background: #14397d;
       color: white;
@@ -145,6 +154,24 @@
       font-weight: 600;
       color: #1877f2;
     }
+ 
+    .media-upload-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      color: #a0b7e3;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+    .comment-form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
 
     @media (max-width: 600px) {
       .app {
@@ -155,6 +182,14 @@
         margin-bottom: 15px;
       }
     }
+
+    .posts{
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    
   </style>
   </head>
   <body>
@@ -182,16 +217,23 @@
           </button>
         </div>
       </form>
+      {{ range . }}
       <div class="posts">
         <div class="post animated-border">
           <div class="post-header">
             <img src="https://images.websim.ai/avatar/peacefulbubble02951306" alt="peacefulbubble02951306" class="avatar">
             <div>
-              <a href="" class="post-user">@peacefulbubble02951306</a>
-              <span class="post-time">2/19/2025, 2:52:57 PM</span>
+              <a href="" class="post-user">
+                @{{.UserName}}
+              </a>
+              <span class="post-time">
+               {{.CreatedAt}}
+              </span>
             </div>
           </div>
-          <div class="post-content">hello there<div class="post-media">
+          <div class="post-content">
+            {{.Content}}
+            <div class="post-media">
             <img src="https://api.websim.ai/blobs/01951e0d-c812-7d68-b376-be327c3858c6.jpeg" alt="07.jpg" class="post-image">
           </div>
         </div>
@@ -213,17 +255,19 @@
           <div class="comments">
 
             <!-- comments -->
+            
             <div class="comment">
               <img src="https://images.websim.ai/avatar/peacefulbubble02951306" alt="peacefulbubble02951306" class="avatar">
               <div class="comment-content">
                 <a href="" class="comment-user">
-                  @peacefulbubble02951306
+                  
                 </a>
                 <span class="comment-text">
-                  this is not good
+                  
                 </span>
               </div>
             </div>
+            
           </div>
 
           <form class="post-form comment-form" style="position: relative;">
@@ -243,6 +287,7 @@
           </form>
         </div>
     </div>
+    {{ end }}
     <script type="text/babel" src="app.js"></script>
   </body>
 </html>

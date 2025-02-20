@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"time"
@@ -76,28 +77,26 @@ func GetAllRepliesForComment(commentID int) ([]Comment, error) {
 	return replies, nil
 }
 
-
-
-
-
-
 type Post struct {
-	ID          string    `json:"id"`
-	UserID      string    `json:"user_id"`	
-	Content     string    `json:"content"`	
-	CreatedAt   time.Time `json:"created_at"`
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	UserName  string    `json:"user_name"`
+	Content   string    `json:"content"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 // AddPost adds a new post to the database
-func AddPost(id, userID, content string) (string, error) {
-	query := `INSERT INTO posts (id, user_id, category, title, content, media, content_type, created_at) 
-			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+func AddPost(userID, content string) (int64, error) {
+	query := `INSERT INTO posts (user_id, content, created_at) 
+			  VALUES (?, ?, ?)`
 
-	_, err := database.DB.Exec(query, id, userID, content, time.Now())
+	result, err := database.DB.Exec(query, userID, content, time.Now())
 	if err != nil {
 		log.Printf("Failed to add post: %v", err)
-		return "", fmt.Errorf("failed to add post: %w", err)
+		return 0, fmt.Errorf("failed to add post: %w", err)
 	}
+
+	id, _ := result.LastInsertId()
 
 	return id, nil
 }
@@ -117,6 +116,16 @@ func GetAllPosts() ([]Post, error) {
 		var p Post
 		if err := rows.Scan(&p.ID, &p.UserID, &p.Content, &p.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan post: %w", err)
+		}
+
+		query2 := `SELECT username FROM users WHERE id = ?`
+		row := database.DB.QueryRow(query2, p.UserID)
+		err := row.Scan(&p.UserName)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, nil
+			}
+			return nil, fmt.Errorf("failed to get user by email: %w", err)
 		}
 		posts = append(posts, p)
 	}

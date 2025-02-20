@@ -23,6 +23,8 @@ func main() {
 	mux.Handle("/add_comment", middleware.CSRFMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
 	mux.Handle("/get_all_post_comment", middleware.CSRFMiddleware(http.HandlerFunc(handlers.GetAllCommentsForPostHandler)))
 	mux.Handle("/get_all_comment_replies", middleware.CSRFMiddleware(http.HandlerFunc(handlers.GetAllRepliesForCommentHandler)))
+	mux.Handle("/add__post", http.HandlerFunc(handlers.AddPostHandler))
+	mux.Handle("/get_all_posts", http.HandlerFunc(handlers.GetAllPostsHandler))
 
 	serv := &http.Server{
 		Handler: mux,
