@@ -27,7 +27,7 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		{
 			PostId:      "1",
 			UserId:      "user123",
-			Category:    []string{"Tech", "GoLang"},
+			// Category:    []string{"Tech", "GoLang"},
 			Title:       "Go Template Issue",
 			PostContent: "Fixing struct and template mismatches.",
 			Media:       "https://example.com/image.jpg",
@@ -35,7 +35,7 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 		{
 			PostId:      "2",
 			UserId:      "user456",
-			Category:    []string{"Programming"},
+			// Category:    []string{"Programming"},
 			Title:       "Understanding Golang",
 			PostContent: "Golang is powerful for backend development.",
 			Media:       "",
