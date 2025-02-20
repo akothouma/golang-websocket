@@ -1,0 +1,32 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f5f8fa;
+  }
+  
+  .header {
+    background-color: #1da1f2;
+    color: #fff;
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  .posts-container {
+    margin: 1rem auto;
+    max-width: 600px;
+    background: #fff;
+    border: 1px solid #e1e8ed;
+    border-radius: 4px;
+    padding: 1rem;
+  }
+  
+  .post-header h1, .post-header h2 {
+    margin: 0;
+    padding: 0.2rem 0;
+  }
+  
+  .post-footer h2 {
+    display: inline-block;
+    margin-right: 1rem;
+  }
