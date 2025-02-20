@@ -7,78 +7,78 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
-// /home/lakoth/forum-1/ui
-var (
-	Tmpl = template.Must(template.ParseGlob("/home/lakoth/forum-1/ui/html/*.html"))
-	)
 
 func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		csrfToken := r.Context().Value("csrf_token").(string)
-		Tmpl.ExecuteTemplate(w, "register.html", map[string]interface{}{
-			"CSRFToken": csrfToken,
-		})
-		return
+	registerTemp, err := template.ParseFiles("../../ui/templates/register.html")
+	if err == nil {
+		if r.Method == http.MethodGet {
+			csrfToken := r.Context().Value("csrf_token").(string)
+			registerTemp.ExecuteTemplate(w, "register.html", map[string]interface{}{
+				"CSRFToken": csrfToken,
+			})
+			return
+		}
+		if r.Method != http.MethodPost {
+			dep.ClientError(w, http.StatusMethodNotAllowed)
+			return
+		}
+		if !dep.ValidateCSRFToken(r) {
+			dep.ClientError(w, http.StatusForbidden)
+			return
+		}
+	
+		if err := r.ParseForm(); err != nil {
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		// get the form data
+		email := r.FormValue("email")
+		username := r.FormValue("username")
+		password := r.FormValue("password")
+	
+		if email == "" || username == "" || password == "" {
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		if !utils.ValidateEmail(email) {
+			dep.ErrorLog.Println("Error could not validate email format")
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		userByEmail, err := dep.Forum.GetUserByEmail(email)
+		if err != nil {
+			dep.ServerError(w, err)
+			return
+		}
+		if userByEmail != nil {
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		userByUsername, err := dep.Forum.GetUserByUsername(username)
+		if err != nil {
+			dep.ServerError(w, err)
+			return
+		}
+		if userByUsername != nil {
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		if len(password) < 8 {
+			dep.ClientError(w, http.StatusBadRequest)
+			return
+		}
+	
+		if err := dep.Forum.CreateUser(email, username, password); err != nil {
+			dep.ServerError(w, err)
+			return
+		}
 	}
-	if r.Method != http.MethodPost {
-		dep.ClientError(w, http.StatusMethodNotAllowed)
-		return
-	}
-	if !dep.ValidateCSRFToken(r) {
-		dep.ClientError(w, http.StatusForbidden)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	// get the form data
-	email := r.FormValue("email")
-	username := r.FormValue("username")
-	password := r.FormValue("password")
-
-	if email == "" || username == "" || password == "" {
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	if !utils.ValidateEmail(email) {
-		dep.ErrorLog.Println("Error could not validate email format")
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	userByEmail, err := dep.Forum.GetUserByEmail(email)
-	if err != nil {
-		dep.ServerError(w, err)
-		return
-	}
-	if userByEmail != nil {
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	userByUsername, err := dep.Forum.GetUserByUsername(username)
-	if err != nil {
-		dep.ServerError(w, err)
-		return
-	}
-	if userByUsername != nil {
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	if len(password) < 8 {
-		dep.ClientError(w, http.StatusBadRequest)
-		return
-	}
-
-	if err := dep.Forum.CreateUser(email, username, password); err != nil {
-		dep.ServerError(w, err)
-		return
-	}
+	
 
 	http.Redirect(w, r, "/login", http.StatusSeeOther)
 }
