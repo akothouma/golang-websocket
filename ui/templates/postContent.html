@@ -1,0 +1,30 @@
+{{ define "post" }}
+<!-- This defines the view of a post -->
+<div class="posts-container">
+<div class="content-area">
+    <div class="post-header"> 
+        <h1>{{.UserId}}</h1>
+        <h1>{{.Title}}</h1>
+        <h2>{{.Category}}</h2>
+    </div>
+    <!-- This defines the post description -->
+    <div class="post-content">
+        <p>Your Post content goes in here</p>
+        <p>{{.PostContent}}</p>
+    </div>
+
+    <!-- This defines an post image if any -->
+    <div>
+        <p>Incase we have an image that goes in here</p>
+        <img src="{{.Media}}" alt="Post image">
+    </div>
+
+    <div class="post footer">
+        <h2>{{.Comments}} Comments</h2>
+        <h2>{{.Likes}} Likes</h2>
+        <h2>{{.Dislikes}} Dislikes</h2>
+    </div>
+
+</div>
+</div>
+{{ end }}
