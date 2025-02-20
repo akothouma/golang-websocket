@@ -1,12 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="/ui/static/styling/categories.css">
-</head>
-<body>
-    <h1>Welcome to Home</h1>
-</body>
-</html>
+{{ define "content"}}
+{{ range . }}
+{{ template "post" . }}
+{{ else }}
+<p>No posts available.</p>
+{{ end }}
+{{ end }}
+{{ template "base" . }}
