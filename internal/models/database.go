@@ -9,6 +9,7 @@ import (
 type ForumModel struct {
 	DB *sql.DB
 }
+// id TEXT PRIMARY KEY,
 
 // CREATE TABLE IF NOT EXISTS post_categories(
 // 	post_id TEXT NOT NULL,
@@ -58,7 +59,6 @@ func InitializeDB() (*sql.DB, error) {
 
 
 	CREATE TABLE IF NOT EXISTS comments(
-		id TEXT PRIMARY KEY,
 		post_id TEXT NOT NULL,
 		user_id TEXT NOT NULL,
 		content TEXT NOT NULL,
