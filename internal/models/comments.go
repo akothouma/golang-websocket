@@ -31,3 +31,25 @@ func AddComment(postID, parentCommentID *int, userID int, content string) (int64
 	commentID, _ := result.LastInsertId()
 	return commentID, nil
 }
+
+// GetAllCommentsForPost retrieves all top-level comments for a post
+func GetAllCommentsForPost(postID int) ([]Comment, error) {
+	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
+			  FROM comments WHERE post_id = ? AND parent_comment_id IS NULL ORDER BY created_at DESC`
+
+	rows, err := database.DB.Query(query, postID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get comments: %w", err)
+	}
+	defer rows.Close()
+
+	var comments []Comment
+	for rows.Next() {
+		var c Comment
+		if err := rows.Scan(&c.ID, &c.PostID, &c.ParentCommentID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan comment: %w", err)
+		}
+		comments = append(comments, c)
+	}
+	return comments, nil
+}
