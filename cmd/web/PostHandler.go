@@ -8,11 +8,13 @@ import (
 	"github.com/google/uuid"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
-
+// /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the template file to use. ("posts")
-	PostTemplate, err := template.ParseFiles("../../ui/templates/posts.html")
+	PostTemplate, err := template.ParseFiles("/home/clomollo/forum/ui/html/posts.html")
+
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
 		return
 	}
@@ -26,6 +28,10 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
+	}
+   
+	if !dep.ValidateCSRFToken(r){
+		dep.ClientError(w,http.StatusBadRequest)
 	}
 	postContent := r.FormValue("post_content")
 	postId := uuid.New().String()
@@ -46,4 +52,5 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 	fmt.Println("You have to be signed in to be able to post")
+	return
 }

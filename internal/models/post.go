@@ -39,3 +39,4 @@ func (f *ForumModel) FindPostById(id string) (*Post, error) {
 	}
 	return &post, nil
 }
+
