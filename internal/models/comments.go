@@ -10,12 +10,12 @@ import (
 
 // Comment struct
 type Comment struct {
-	ID              int        `json:"id"`
-	PostID          *int       `json:"post_id,omitempty"`
-	ParentCommentID *int       `json:"parent_comment_id,omitempty"`
-	UserID          int        `json:"user_id"`
-	Content         string     `json:"content"`
-	CreatedAt       time.Time  `json:"created_at"`
+	ID              int       `json:"id"`
+	PostID          *int      `json:"post_id,omitempty"`
+	ParentCommentID *int      `json:"parent_comment_id,omitempty"`
+	UserID          int       `json:"user_id"`
+	Content         string    `json:"content"`
+	CreatedAt       time.Time `json:"created_at"`
 }
 
 // AddComment adds a new comment (post or reply)
@@ -77,3 +77,49 @@ func GetAllRepliesForComment(commentID int) ([]Comment, error) {
 }
 
 
+
+
+
+
+type Post struct {
+	ID          string    `json:"id"`
+	UserID      string    `json:"user_id"`	
+	Content     string    `json:"content"`	
+	CreatedAt   time.Time `json:"created_at"`
+}
+
+// AddPost adds a new post to the database
+func AddPost(id, userID, content string) (string, error) {
+	query := `INSERT INTO posts (id, user_id, category, title, content, media, content_type, created_at) 
+			  VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err := database.DB.Exec(query, id, userID, content, time.Now())
+	if err != nil {
+		log.Printf("Failed to add post: %v", err)
+		return "", fmt.Errorf("failed to add post: %w", err)
+	}
+
+	return id, nil
+}
+
+// GetAllPosts retrieves all posts from the database
+func GetAllPosts() ([]Post, error) {
+	query := `SELECT id, user_id, content, created_at FROM posts ORDER BY created_at DESC`
+
+	rows, err := database.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get posts: %w", err)
+	}
+	defer rows.Close()
+
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		if err := rows.Scan(&p.ID, &p.UserID, &p.Content, &p.CreatedAt); err != nil {
+			return nil, fmt.Errorf("failed to scan post: %w", err)
+		}
+		posts = append(posts, p)
+	}
+
+	return posts, nil
+}

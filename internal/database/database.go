@@ -36,16 +36,11 @@ func InitializeDB() error {
     );
 
 	CREATE TABLE IF NOT EXISTS posts(
-		id TEXT PRIMARY KEY,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		user_id TEXT NOT NULL,
-		category TEXT NOT NULL, 
-		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
-		media BLOB, 
-		content_type TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-		FOREIGN KEY (category) REFERENCES post_categories(category)
 	);
 
 	CREATE TABLE IF NOT EXISTS post_categories(
