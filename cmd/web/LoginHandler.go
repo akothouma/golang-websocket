@@ -6,7 +6,7 @@ import (
 )
 
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	loginTemplate, err := template.ParseFiles("../../ui/templates/login.html")
+	loginTemplate, err := template.ParseFiles("/home/clomollo/forum/ui/html/login.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
 	}

@@ -52,5 +52,4 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 	}
 	fmt.Println("You have to be signed in to be able to post")
-	return
 }
