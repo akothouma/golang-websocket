@@ -22,8 +22,8 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 				Value:    csrfToken,
 				Path:     "/",
 				HttpOnly: true,
-				Secure:   false,                          
-				Expires:  time.Now().Add(24 * time.Hour), 
+				Secure:   false,
+				Expires:  time.Now().Add(24 * time.Hour),
 			})
 		} else {
 			csrfToken = cookie.Value
@@ -35,13 +35,9 @@ func CSRFMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func ValidateCSRFToken(r *http.Request) bool {
+	formToken := r.FormValue("csrf_token")
 
-func ValidateCSRFToken(r *http.Request, csrf string) bool {
-	formToken := csrf
-	if csrf == ""{
-		formToken = r.FormValue("csrf_token")
-	}
-	
 	log.Printf("CSRF token from form: %s\n", formToken)
 	if formToken == "" {
 		return false

@@ -24,7 +24,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	if !middleware.ValidateCSRFToken(r, "") {
+	if !middleware.ValidateCSRFToken(r) {
 		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 		return
 	}

@@ -63,7 +63,8 @@ func InitializeDB() error {
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE,
-		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+		FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY (parent_comment_id) REFERENCES comments(id) ON DELETE CASCADE
 	);
 
 	CREATE TABLE IF NOT EXISTS likes(

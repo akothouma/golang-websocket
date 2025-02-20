@@ -20,7 +20,7 @@ func LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !middleware.ValidateCSRFToken(r, "") {
+	if !middleware.ValidateCSRFToken(r) {
 		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
 		return
 	}
