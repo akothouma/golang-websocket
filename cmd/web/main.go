@@ -20,6 +20,9 @@ func main() {
 	mux.Handle("/register", middleware.CSRFMiddleware(http.HandlerFunc(handlers.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(handlers.LogoutHandler))
 	mux.Handle("/login", middleware.CSRFMiddleware(http.HandlerFunc(handlers.LoginHandler)))
+	mux.Handle("/add_comment", middleware.CSRFMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
+	mux.Handle("/get_all_post_comment", middleware.CSRFMiddleware(http.HandlerFunc(handlers.GetAllCommentsForPostHandler)))
+	mux.Handle("/get_all_comment_replies", middleware.CSRFMiddleware(http.HandlerFunc(handlers.GetAllRepliesForCommentHandler)))
 
 	serv := &http.Server{
 		Handler: mux,
