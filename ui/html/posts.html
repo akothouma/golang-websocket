@@ -15,22 +15,24 @@
         <input type="text" name="post_title" placeholder="title">
         <input type="text" name="post_content" placeholder="What's up">
         <input type="file" accept="image/*,video/*" id="media" name="media">
-        <label>Categories</label>
+    
+        <label>Categories </label>
         <div>
-            <input type="checkbox" id="education" name="education">
+            <input type="checkbox" name="category[]" value="education" id="education">
             <label for="education">Education</label>
 
         </div>
         <div>
-            <input type="checkbox" id="politics" name="politics">
+            <input type="checkbox" name="category[]" value="politics"  id="politics">
             <label for="politics">Politics</label>
 
         </div>
         <div>
-            <input type="checkbox" id="sports" name="sports">
+            <input type="checkbox"  name="category[]" value="sports" id="sports">
             <label for="sports">Sports</label>
 
-        </div>
+        </label>
+        <button  type="submit">Create Post</button>
     </form>
 </body>
 
