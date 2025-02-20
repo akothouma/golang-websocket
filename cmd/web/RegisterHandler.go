@@ -7,7 +7,10 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
-var Tmpl = template.Must(template.ParseGlob("ui/html/*.html"))
+// /home/lakoth/forum-1/ui
+var (
+	Tmpl = template.Must(template.ParseGlob("/home/lakoth/forum-1/ui/html/*.html"))
+	)
 
 func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
