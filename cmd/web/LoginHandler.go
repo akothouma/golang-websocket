@@ -6,9 +6,10 @@ import (
 )
 
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	loginTemplate, err := template.ParseFiles("../../ui/templates/login.html")
+	loginTemplate, err := template.ParseFiles("../../ui/html/login.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
+		return
 	}
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
@@ -55,7 +56,7 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		dep.ClientError(w, http.StatusUnauthorized)
 		return
 	}
-	dep.CreateSession(w, r, user.ID)
+	dep.CreateSession(w, r, user.UserID)
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	http.Redirect(w, r, "/post", http.StatusSeeOther)
 }
