@@ -25,7 +25,7 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			// Category:    []string{"Tech", "GoLang"},
 			Title:       "Go Template Issue",
 			PostContent: "Fixing struct and template mismatches.",
-			Media:       "https://example.com/image.jpg",
+			
 		}, 
 		{
 			PostId:      "2",
@@ -33,12 +33,12 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 			// Category:    []string{"Programming"},
 			Title:       "Understanding Golang",
 			PostContent: "Golang is powerful for backend development.",
-			Media:       "",
+			
 		}, 
 	}
 
 	// Execute the template with data
-	err = tmpl.ExecuteTemplate(w, "base", posts) 
+	err = homeTemplate.ExecuteTemplate(w, "base", posts) 
 	if err != nil {
 		dep.ErrorLog.Println("Error executing template:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
