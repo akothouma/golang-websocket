@@ -9,13 +9,13 @@ import (
 
 type Session struct {
 	ID        string
-	UserID    int
+	UserID    string
 	ExpiresAt time.Time
 	// Forum *database.ForumModel
 }
 
-func (f *ForumModel) CreateSession(userID int) (string, error) {
-	querry := `DELETE FROM Sessions WHERE user_id=?`
+func (f *ForumModel) CreateSession(userID string) (string, error) {
+	querry := `DELETE FROM Sessions WHERE user_uuid=?`
 	_, err := f.DB.Exec(querry, userID)
 	if err != nil {
 		return "", fmt.Errorf("failed to delete existing sessions: %w", err)
@@ -23,7 +23,7 @@ func (f *ForumModel) CreateSession(userID int) (string, error) {
 	SessionID := uuid.New().String()
 	expiresAt := time.Now().Add(24 * time.Hour)
 
-	query := "INSERT INTO Sessions(id, user_id, expires_at) VALUES(?, ?, ?)"
+	query := "INSERT INTO Sessions(id, user_uuid, expires_at) VALUES(?, ?, ?)"
 	_, err = f.DB.Exec(query, SessionID, userID, expiresAt)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert session: %w", err)
@@ -33,7 +33,7 @@ func (f *ForumModel) CreateSession(userID int) (string, error) {
 }
 
 func (f *ForumModel) GetSession(sessionID string) (*Session, error) {
-	query := `SELECT id, user_id, expires_at FROM Sessions WHERE id=?`
+	query := `SELECT id, user_uuid, expires_at FROM Sessions WHERE id=?`
 	row := f.DB.QueryRow(query, sessionID)
 	var session Session
 
