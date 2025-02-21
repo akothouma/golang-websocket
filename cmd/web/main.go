@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"html/template"
 	"log"
 	"net/http"
 	"os"
@@ -11,12 +12,20 @@ import (
 
 // struct to hold application-wide dependencies
 type Dependencies struct {
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
-	Forum    *models.ForumModel
+	ErrorLog  *log.Logger
+	InfoLog   *log.Logger
+	Forum     *models.ForumModel
+	Templates *template.Template
 }
 
 func main() {
+	// DEBUG
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println("Current working directory:", cwd)
+
 	addr := flag.String("addr", ":8000", "HTTP network address")
 	// leveled logging, informational messages output to standard out(stdout)
 	// Error messages output to standard error(stderr)
@@ -30,14 +39,14 @@ func main() {
 
 	defer db.Close()
 
-	// Initialize new instance of the dependency struct
-	// containing dependencies
+	// initializing dependencies
 	dep := &Dependencies{
-		ErrorLog: errorLog,
-		InfoLog:  infoLog,
-		Forum:    &models.ForumModel{DB: db},
+		ErrorLog:  errorLog,
+		InfoLog:   infoLog,
+		Forum:     &models.ForumModel{DB: db},
 	}
 
+	// Creating a server
 	serv := &http.Server{
 		Handler:  dep.Routes(),
 		Addr:     *addr,

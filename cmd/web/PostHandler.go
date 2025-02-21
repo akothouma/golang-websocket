@@ -8,11 +8,12 @@ import (
 	"github.com/google/uuid"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
-
+// /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	// Load the template file to use. ("posts")
 	PostTemplate, err := template.ParseFiles("../../ui/html/posts.html")
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
 		return
 	}
