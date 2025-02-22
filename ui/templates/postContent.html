@@ -1,30 +1,33 @@
 {{ define "post" }}
 <!-- This defines the view of a post -->
-<div class="posts-container">
 <div class="content-area">
     <div class="post-header"> 
-        <h1>{{.UserId}}</h1>
-        <h1>{{.Title}}</h1>
-        <h2>{{.Category}}</h2>
+        <h1>{{.Post.UserId}}</h1>
+        <h1>{{.Post.Title}}</h1>
     </div>
     <!-- This defines the post description -->
     <div class="post-content">
-        <p>Your Post content goes in here</p>
-        <p>{{.PostContent}}</p>
+        <p>{{.Post.PostContent}}</p>
     </div>
 
     <!-- This defines an post image if any -->
     <div>
-        <p>Incase we have an image that goes in here</p>
-        <img src="{{.Media}}" alt="Post image">
+        <img src="{{.Post.Media}}" alt="Post image">
     </div>
-
-    <div class="post footer">
-        <h2>{{.Comments}} Comments</h2>
-        <h2>{{.Likes}} Likes</h2>
-        <h2>{{.Dislikes}} Dislikes</h2>
+    <div class="likes-dislikes">
+        <i class="fa-solid fa-thumbs-up" style="color:white;"></i>{{.Likes}}
+       <i class="fa-solid fa-thumbs-down" style="color:white;"></i>{{.Dislikes}}
     </div>
-
-</div>
+    <hr>
+    <div class="post-footer">
+        <div class="comments">
+            {{ range .Comments }}
+                <p>{{ . }}</p>
+            {{ else }}
+                <p>No comments yet.</p>
+            {{ end }}
+        </div>  
+    </div>
+    <hr>
 </div>
 {{ end }}
