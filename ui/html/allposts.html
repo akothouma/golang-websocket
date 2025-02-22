@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Posts</title>
+</head>
+
+<body>
+    <h1>Posts</h1>
+    <div class="post_cards">
+        {{range .}}
+        <a href="/post?id={{.PostId}}" class="post_card">
+         <p class="post_title">{{.Title}}</p>
+         <p class="post_content">{{.PostContent}}</p>
+        </a>
+        {{end}}
+    </div>
+
+</body>
+
+</html>

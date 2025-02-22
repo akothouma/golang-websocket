@@ -32,13 +32,13 @@ func (dep *Dependencies) AuthMiddleware(next http.Handler) http.Handler {
 			return
 		}
 		// Add the user ID to the request context
-		ctx := context.WithValue(r.Context(), "user_id", session.UserID)
+		ctx := context.WithValue(r.Context(), "user_uuid", session.UserID)
 		// If the session is valid, call the next handler
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
-func (dep *Dependencies) CreateSession(w http.ResponseWriter, r *http.Request, userID int) {
+func (dep *Dependencies) CreateSession(w http.ResponseWriter, r *http.Request, userID string) {
 	// Generate a new session ID
 	sessionID, err := dep.Forum.CreateSession(userID)
 	if err != nil {
