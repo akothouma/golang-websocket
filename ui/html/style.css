@@ -240,3 +240,143 @@ main .container .left .profile{
     text-align: center;
     padding: 1rem 0;
 }
+
+/* ==================== MIDDLE ==================== */
+
+/* ------------------- CREATE POST ------------------- */
+.middle .create-post {
+    width: 100%;
+    height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 1rem;
+    background: var(--color-white);
+    padding:  0.4rem var(--card-padding);
+    border-radius: var(--border-radius);
+}
+
+.middle .create-post .uil{
+    color: var(--color-primary);
+    font-size: 1.9rem; 
+    padding-left: 1rem;
+}
+
+.middle .create-post input[type="text"]{
+    justify-self: start;
+    width: 100%;
+    padding-left: 1rem;
+    background: transparent;
+    color: var(--color-dark);
+}
+
+.middle .feeds .feed{
+    background: var(--color-white);
+    border-radius: var(--card-border-radius);
+    padding: var(--card-padding);
+    margin: 1rem 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+.middle .feeds .head{
+    display: flex;
+    justify-content: space-between;
+}
+
+.middle .feed .user{
+    display: flex;
+    gap: 1rem;
+}
+
+.middle .feed .photo{
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    margin: 0.7rem 0;
+}
+
+.middle .feed .action-button{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.4rem;
+    margin: 0.6rem;
+}
+
+.middle .liked-by{
+    display: flex;
+}
+
+.middle .liked-by span{
+    width: 1.4rem;
+    height: 1.4rem;
+    display: block;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--color-white);
+    margin-left: -0.6rem;
+}
+
+.middle .liked-by span:first-child{
+    margin: 0;
+}
+
+.middle .liked-by p{
+    margin-left: 0.5rem;
+}
+
+.middle .feed-content{
+    margin: 1.2rem;
+    color: var(--color-black);
+}
+
+main .container .right{
+    height: max-content;
+    position: sticky;
+    top: var(--sticky-top-right);
+    bottom: 0;
+}
+
+main .container .right {
+    height: max-content;
+    position: sticky;
+    top: var(--sticky-top-right);
+}
+
+
+.right .heading{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.right .category div{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem;
+}
+
+.right .category div input{
+    cursor: pointer;
+    margin-right: 1rem;
+    
+}
+.right .category div input::after{
+    color: var(--color-primary);
+    font-size: large;
+
+}
+
+
+.right .categories{
+    display: flex;
+    flex-direction: column;
+    background: var(--color-white);
+    padding: var(--card-padding);
+    border-radius: var(--card-border-radius);
+    font-size: 1.4rem;
+    height: max-content;
+   
+}
