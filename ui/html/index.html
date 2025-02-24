@@ -71,8 +71,107 @@
           </a>
         </div>
         <!-------------END OF  SIDEBAR ------------->
+
+        <!------------- CREATE POST ------------->
+        <label for="create-post" class="btn btn-primary">Create Post</label>
+        <!------------- END OF CREATE POST ------------->
+
       </div>
       <!--====================== END OF LEFT ======================-->
+
+
+
+      <!--====================== MIDDLE ======================-->
+      <div class="middlE">
+
+        <!------------------- CREATE POST ------------------->
+        <form action="" class="create-post">
+          <div class="profile-photo">
+              <img src="./images/profile-1.jpg">
+          </div>
+          <span><i class="uil uil-image-plus"></i> </span>
+          <input type="text" placeholder="what's on your mind" id="create-post">
+          <input type="submit" value="Post" class="btn btn-primary">
+        </form>
+        <!------------------- END OF CREATE POST ------------------->
+
+
+        <!---------------------- FEEDS/POSTS ---------------------->
+        <div class="feeds">
+          <!---------------------- FEED 1 ---------------------->
+          <div class="feed">
+
+            <div class="head">
+                <!--======= user  =======-->
+                <div class="user">
+                    <div class="profile-photo">
+                        <img src="images/profile-10.jpg">
+                    </div>
+                    <div class="info">
+                        <h3>Lana Rose</h3>
+                        <small>Dubai, 15minute ago</small>
+                    </div>                                
+                </div>
+                <span class="edit">                                    
+                    <i class="uil uil-ellipsis-h"></i>
+                </span>
+                <!--======= END OF user  =======-->
+            </div>
+
+            
+            <!--======= POST CONTENT  =======-->
+            <div class="feed-content">
+                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quaerat quos possimus nihil, repellat architecto natus dignissimos consectetur deleniti libero sint officia doloremque tempora! Dolorem officiis accusamus ut expedita asperiores! Dolore?</p>
+            </div>
+            <!--======= END OF POST CONTENT  =======-->
+
+            <!--======= POST IMAGE  =======-->
+            <div class="photo">
+                <img src="./images/feed-7.jpg">
+            </div>
+            <!--======= END OF POST IMAGE  =======-->
+
+            <div class="action-button">
+
+                <!------------ LIKES AND DISLIKES ------------>
+                <div class="interaction-buttons">
+                    <div class="like"></div>
+                    <span><i class="uil uil-thumbs-up"></i></span>
+                    <span class="like">1</span>
+                    <span><i class="uil uil-thumbs-down"></i></span>
+                    <span class="dislike">0</span>                                                                
+                </div>
+                
+                <!--======= comment button =======-->
+                <div class="comment">
+                    <span><i class="uil uil-comment-alt-dots"></i></span>
+                    <span>1</span>
+                </div>
+                <!--======= END OF comment button =======-->
+            </div>
+                
+            <div class="liked-by">
+                <span><img src="./images/profile-12.jpg"></span>
+                <span><img src="./images/profile-6.jpg"></span>
+                <span><img src="./images/profile-9.jpg"></span>
+                <p>Liked by <b>Benson</b> and <b>22 others</b></p>
+            </div>
+            <!------------ END OF LIKES AND DISLIKES ------------>
+
+
+            <div class="caption">
+                <p><b>Lana Rose</b> Lorem ipsum dolor sit amet consectetur adipisicing. <span class="harsh-tag">#lifestyle</span></p>
+            </div>
+
+            <div class="comments text-muted">
+                View all 277 comments
+            </div>
+            
+          </div>
+          <!---------------------- END OF FEED 1 ---------------------->
+        </div>
+        <!---------------------- END OF FEEDS/POSTS ---------------------->
+      </div>
     </div>
   </main>
   <!----------------------- END OF MAIN ----------------------->
