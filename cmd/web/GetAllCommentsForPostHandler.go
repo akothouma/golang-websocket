@@ -5,12 +5,10 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 
-func GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies)GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -28,7 +26,7 @@ func GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	comments, err := models.GetAllCommentsForPost(postID)
+	comments, err := dep.Forum.GetAllCommentsForPost(postID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve comments: %v", err), http.StatusInternalServerError)
 		return
