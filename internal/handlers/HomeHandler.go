@@ -24,3 +24,4 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 
 	homeTemplate.Execute(w, posts)
 }
+

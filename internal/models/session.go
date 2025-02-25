@@ -5,26 +5,26 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/database"
 )
 
 type Session struct {
 	ID        string
-	UserID    int
+	UserID    string
 	ExpiresAt time.Time
+	// Forum *database.ForumModel
 }
 
-func CreateSession(userID int) (string, error) {
-	querry := `DELETE FROM Sessions WHERE user_id=?`
-	_, err := database.DB.Exec(querry, userID)
+func (f *ForumModel) CreateSession(userID string) (string, error) {
+	querry := `DELETE FROM Sessions WHERE user_uuid=?`
+	_, err := f.DB.Exec(querry, userID)
 	if err != nil {
 		return "", fmt.Errorf("failed to delete existing sessions: %w", err)
 	}
 	SessionID := uuid.New().String()
 	expiresAt := time.Now().Add(24 * time.Hour)
 
-	query := "INSERT INTO Sessions(id, user_id, expires_at) VALUES(?, ?, ?)"
-	_, err = database.DB.Exec(query, SessionID, userID, expiresAt)
+	query := "INSERT INTO Sessions(id, user_uuid, expires_at) VALUES(?, ?, ?)"
+	_, err = f.DB.Exec(query, SessionID, userID, expiresAt)
 	if err != nil {
 		return "", fmt.Errorf("failed to insert session: %w", err)
 	}
@@ -32,9 +32,9 @@ func CreateSession(userID int) (string, error) {
 	return SessionID, nil
 }
 
-func GetSession(sessionID string) (*Session, error) {
-	query := `SELECT id, user_id, expires_at FROM Sessions WHERE id=?`
-	row := database.DB.QueryRow(query, sessionID)
+func (f *ForumModel) GetSession(sessionID string) (*Session, error) {
+	query := `SELECT id, user_uuid, expires_at FROM Sessions WHERE id=?`
+	row := f.DB.QueryRow(query, sessionID)
 	var session Session
 
 	err := row.Scan(&session.ID, &session.UserID, &session.ExpiresAt)
@@ -44,9 +44,9 @@ func GetSession(sessionID string) (*Session, error) {
 	return &session, nil
 }
 
-func DeleteSession(sessionID string) error {
+func (f *ForumModel) DeleteSession(sessionID string) error {
 	query := "DELETE FROM Sessions WHERE id=?"
-	_, err := database.DB.Exec(query, sessionID)
+	_, err := f.DB.Exec(query, sessionID)
 	if err != nil {
 		return fmt.Errorf("failed to delete session: %w", err)
 	}

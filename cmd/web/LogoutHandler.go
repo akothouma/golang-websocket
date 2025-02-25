@@ -1,21 +1,19 @@
-package handlers
+package main
 
 import (
 	"net/http"
 	"time"
-
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies) LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	err = models.DeleteSession(cookie.Value)
+	err = dep.Forum.DeleteSession(cookie.Value)
 	if err != nil {
-		http.Error(w, "Failed to delete session", http.StatusInternalServerError)
+		dep.ServerError(w, err)
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
