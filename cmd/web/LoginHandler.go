@@ -4,9 +4,9 @@ import (
 	"html/template"
 	"net/http"
 )
-
+// /home/lakoth/forum-1/ui/html/login.html
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	loginTemplate, err := template.ParseFiles("../../ui/html/login.html")
+	loginTemplate, err := template.ParseFiles("./ui/html/login.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
 		return
@@ -58,5 +58,5 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	dep.CreateSession(w, r, user.UserID)
 
-	http.Redirect(w, r, "/post", http.StatusSeeOther)
+	http.Redirect(w, r, "/allposts", http.StatusSeeOther)
 }
