@@ -53,9 +53,10 @@ func InitializeDB() (*sql.DB, error) {
 		user_uuid TEXT NOT NULL,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (user_uuid) REFERENCES users(id)
+		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE
 		);
+
 		
 		CREATE TABLE IF NOT EXISTS likes(
 		id TEXT PRIMARY KEY,
