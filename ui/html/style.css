@@ -283,9 +283,7 @@ main .container .left .profile{
 }
 
 .left .create-post div{
-    display: flex;
-    flex-direction: row;
-    
+    display: flex;    
 }
 .left .create-post h4{
     margin: 0.5rem;
@@ -362,19 +360,24 @@ main .container .right {
     margin-bottom: 1rem;
 }
 
-.right .category div{
+.left .category{
+    display: flex;
+    flex-direction: column;
+}
+
+.category div{
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 0.8rem;
 }
 
-.right .category div input{
+.category div input{
     cursor: pointer;
     margin-right: 1rem;
     
 }
-.right .category div input::after{
+.category div input::after{
     color: var(--color-primary);
     font-size: large;
 
