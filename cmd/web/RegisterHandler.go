@@ -10,7 +10,7 @@ import (
 )
 
 func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	registerTemp, err := template.ParseFiles("../../ui/html/register.html")
+	registerTemp, err := template.ParseFiles("./ui/html/register.html")
 	if err == nil {
 		if r.Method == http.MethodGet {
 			csrfToken := r.Context().Value("csrf_token").(string)
