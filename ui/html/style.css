@@ -47,10 +47,33 @@ body{
 }
 
 .profile-photo{
-    width: 2.7rem;
-    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    width: 3rem;
+    height: 3rem;
     border-radius: 50%;
     overflow: hidden;
+    background-color: #48cae4;
+    font-size: 3.5vh;
+    color: white; 
+}
+
+.pic{
+    background-color: #48cae4;
+    border-radius: 50%;
+    height: 2.5rem;
+    overflow: hidden;
+    font-size: 2rem;
+    color: white;
+    text-transform: uppercase;
+    aspect-ratio: 1/1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    
 }
 
 img{
@@ -244,25 +267,31 @@ main .container .left .profile{
 /* ==================== MIDDLE ==================== */
 
 /* ------------------- CREATE POST ------------------- */
-.middle .create-post {
+.left .create-post {
     width: 100%;
-    height: 4rem;
-    display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 1rem;
-    background: var(--color-white);
+    /* margin: 1rem; */
     padding:  0.4rem var(--card-padding);
     border-radius: var(--border-radius);
 }
 
-.middle .create-post .uil{
+.left .create-post .uil{
     color: var(--color-primary);
     font-size: 1.9rem; 
-    padding-left: 1rem;
+    margin-left: 0rem;
 }
 
-.middle .create-post input[type="text"]{
+.left .create-post div{
+    display: flex;
+    flex-direction: row;
+    
+}
+.left .create-post h4{
+    margin: 0.5rem;
+}
+
+.left .create-post input[type="text"]{
     justify-self: start;
     width: 100%;
     padding-left: 1rem;
