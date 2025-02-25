@@ -13,9 +13,22 @@ func (dep *Dependencies) AddCommentHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	postIDStr := r.FormValue("post_id")
-	parentCommentIDStr := r.FormValue("parent_comment_id")
-	userIDStr := r.FormValue("user_id")
+	sessionId := r.Context().Value("session_id")
+	sess1, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println("error biggy", err)
+		return
+	}
+	if sess1.Value != sessionId {
+		log.Println("sess1.Value", sess1.Value, sessionId)
+		log.Println("sessioId", sessionId)
+		return
+	}
+
+	postID := r.FormValue("post_id")
+	userID := r.Context().Value("user_uuid").(string)
+	fmt.Println("commentHere", userID)
+
 	content := r.FormValue("content")
 
 	if userIDStr == "" || content == "" {
