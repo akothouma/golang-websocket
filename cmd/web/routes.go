@@ -8,7 +8,7 @@ import (
 func (dep *Dependencies) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(dep.HomeHandler)))
-	mux.Handle("/post", dep.AuthMiddleware(dep.CSRFMiddleware(http.HandlerFunc(dep.PostHandler))))
+	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
 	mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
