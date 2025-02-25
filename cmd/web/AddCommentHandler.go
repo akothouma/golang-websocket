@@ -9,7 +9,6 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-
 func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -58,7 +57,7 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	response := map[string]interface{}{
-		"message":   "Comment added successfully",
+		"message":    "Comment added successfully",
 		"comment_id": commentID,
 	}
 	w.Header().Set("Content-Type", "application/json")
