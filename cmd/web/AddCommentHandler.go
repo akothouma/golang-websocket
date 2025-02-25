@@ -31,37 +31,14 @@ func (dep *Dependencies) AddCommentHandler(w http.ResponseWriter, r *http.Reques
 
 	content := r.FormValue("content")
 
-	if userIDStr == "" || content == "" {
+	fmt.Println("post id:", postID, "\nuser id", userID, "\ncontent", content)
+
+	if userID == "" || content == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	var postID, parentCommentID *int
-	if postIDStr != "" {
-		id, err := strconv.Atoi(postIDStr)
-		if err != nil {
-			http.Error(w, "Invalid post ID", http.StatusBadRequest)
-			return
-		}
-		postID = &id
-	}
-
-	if parentCommentIDStr != "" {
-		id, err := strconv.Atoi(parentCommentIDStr)
-		if err != nil {
-			http.Error(w, "Invalid parent comment ID", http.StatusBadRequest)
-			return
-		}
-		parentCommentID = &id
-	}
-
-	userID, err := strconv.Atoi(userIDStr)
-	if err != nil {
-		http.Error(w, "Invalid user ID", http.StatusBadRequest)
-		return
-	}
-
-	commentID, err := models.AddComment(postID, parentCommentID, userID, content)
+	commentID, err := dep.Forum.AddComment(postID, userID, content)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to add comment: %v", err), http.StatusInternalServerError)
 		return
