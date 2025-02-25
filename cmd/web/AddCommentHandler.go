@@ -3,13 +3,11 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
-	"strconv"
-
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies) AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
