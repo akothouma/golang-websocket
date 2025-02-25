@@ -11,7 +11,6 @@
 
 <body>
     <form action="/post" method="POST">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <input type="text" name="post_title" placeholder="title">
         <input type="text" name="post_content" placeholder="What's up">
         <input type="file" accept="image/*,video/*" id="media" name="media">
@@ -34,6 +33,17 @@
         </label>
         <button  type="submit">Create Post</button>
     </form>
+
+    <h1>Posts</h1>
+    <div class="post_cards">                                                                                     cccccPostId}}" class="post_card"> -->
+         <p class="post_title">{{.Title}}</p>
+         <p class="post_content">{{.PostContent}}</p>
+        </a>
+        <p>hello</p>
+          <!-- Like and Dislike Form -->
+        {{end}}
+    </div>
+
 </body>
 
 </html>
