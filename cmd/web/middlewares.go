@@ -27,14 +27,14 @@ func (dep *Dependencies) AuthMiddleware(next http.Handler) http.Handler {
 				Path:    "/",
 				Expires: time.Unix(0, 0),
 			})
-
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 		// Add the user ID to the request context
 		ctx := context.WithValue(r.Context(), "user_uuid", session.UserID)
-		// If the session is valid, call the next handler
+		ctx = context.WithValue(ctx, "session_id", session.ID)
 		next.ServeHTTP(w, r.WithContext(ctx))
+		
 	})
 }
 
