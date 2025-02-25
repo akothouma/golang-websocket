@@ -14,5 +14,6 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("../../ui/static/styling"))))
+	mux.Handle("/add_comment",dep.AuthMiddleware(http.HandlerFunc(dep.AddCommentHandler)))
 	return mux
 }

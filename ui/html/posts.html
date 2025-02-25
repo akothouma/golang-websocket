@@ -41,6 +41,14 @@
         </a>
         <p>hello</p>
           <!-- Like and Dislike Form -->
+
+        <form action="/add_comment" method="POST">
+            <input type="text" name="user_id" placeholder="user-id">
+            <input type="text" name="post_id" placeholder="post-id">
+            <input type="text" name="content" placeholder="What's up">    
+            
+            <button  type="submit">Add comment</button>
+        </form>
         {{end}}
     </div>
 

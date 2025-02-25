@@ -49,13 +49,15 @@ func InitializeDB() (*sql.DB, error) {
 		);
 	
 	CREATE TABLE IF NOT EXISTS comments(
-		post_id TEXT NOT NULL,
-		user_uuid TEXT NOT NULL,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		post_id INTERGER,
+		user_id INTEGER NOT NULL,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (user_uuid) REFERENCES users(id)
-		);
+		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
+		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE
+	);
+
 		
 		CREATE TABLE IF NOT EXISTS likes(
 		id TEXT PRIMARY KEY,
