@@ -44,52 +44,66 @@ func InitializeDB() (*sql.DB, error) {
 		user_uuid TEXT NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
+		media BLOB, --binary data - video, image and GIFs
+		content_type TEXT, --content type tracking(text, image, gif)
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_uuid) REFERENCES users(id)
+		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid)
 		);
 	
 	CREATE TABLE IF NOT EXISTS comments(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id INTERGER,
 		user_id INTEGER NOT NULL,
+		parent_id TEXT,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE
+		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE,
+		FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
 	);
 
 		
-		CREATE TABLE IF NOT EXISTS likes(
+	CREATE TABLE IF NOT EXISTS post_likes(
 		id TEXT PRIMARY KEY,
-		user_uuid TEXT NOT NULL,
+		user_id TEXT NOT NULL,
 		post_id TEXT,
 		type TEXT CHECK(type IN ('like', 'dislike')),
-		FOREIGN KEY (user_uuid) REFERENCES users(id),
+		FOREIGN KEY (user_id) REFERENCES users(user_uuid),
 		FOREIGN KEY (post_id) REFERENCES posts(id)
-		);
+	);
+
+	CREATE TABLE IF NOT EXISTS comment_likes(
+		id TEXT PRIMARY KEY,
+		user_id TEXT NOT NULL,
+		comment_id TEXT NOT NULL,
+		type TEXT CHECK(type IN('like', 'dislike')),
+		FOREIGN KEY (user_id) REFERENCES users(id),
+		FOREIGN KEY (comment_id) REFERENCES comments(id)
+	);
 		
-		CREATE TABLE IF NOT EXISTS categories( 
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		category_value TEXT NOT NULL
-	    );
+	CREATE TABLE IF NOT EXISTS categories (
+		id TEXT PRIMARY KEY,
+		name TEXT UNIQUE NOT NULL,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	);
 		
 		CREATE TABLE IF NOT EXISTS post_categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT NOT NULL,
-		category_id TEXT NOT NULL,
+		category_id TEXT,
 		FOREIGN KEY (post_id) REFERENCES posts(id),
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 		);
+		
+		INSERT OR IGNORE INTO categories (id, name) VALUES
+		('tech','tech'),
+		('lifestyle', 'lifestyle'),
+		('gaming', 'gaming'),
+		('food', 'food'),
+		('travel', 'travel'),
+		('other', 'other');
 
-
-		INSERT into categories(category_value) VALUES
-		('education'),
-		('politics'),
-		('sports'),
-		('lifestyle'),
-		('Health'),
-		('Real-estate'),
-		('Governance');
+	
 	`
 
 	if _, err := dataBase.Exec(query); err != nil {
@@ -99,3 +113,21 @@ func InitializeDB() (*sql.DB, error) {
 
 	return dataBase, nil
 }
+
+/*
+	INSERT into categories(category_value) VALUES
+		('education'),
+		('politics'),
+		('sports'),
+		('lifestyle'),
+		('religion'),
+		('relationship and family'),
+		('Health'),
+		('Real-estate'),
+		('Governance'),
+		('technology'),
+    	('gaming'),
+    	('food'),
+    	('travel'),
+    	('other');
+*/

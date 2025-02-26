@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -17,14 +18,28 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Check user authentication
-	cookies, err := r.Cookie("Token")
+	// cookies, err := r.Cookie("Token")
+	// if err != nil {
+	// 	http.Error(w, "User not logged in", http.StatusUnauthorized)
+	// 	return
+	// }
+
+	// sessionId := r.Context().Value("session_id")
+	sess1, err := r.Cookie("session_id")
 	if err != nil {
-		http.Error(w, "User not logged in", http.StatusUnauthorized)
+		log.Println("error biggy", err)
 		return
 	}
-	
-	userID := cookies.Value
+	// if sess1.Value != sessionId {
+	// 	log.Println("sess1.Value", sess1.Value, sessionId)
+	// 	log.Println("sessioId", sessionId)
+	// 	return
+	// }
+
+	userID := sess1.Value
+	// userID := r.Context().Value("user_uuid").(string)
 	// Parse form data
+	fmt.Println(userID)
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return

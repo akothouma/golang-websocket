@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"html/template"
@@ -10,7 +10,7 @@ import (
 // prone to change if there exists a better one
 func ErrorHandler(w http.ResponseWriter, code int) {
 	w.WriteHeader(code)
-	temp, err := template.ParseFiles("templates/error.html")
+	temp, err := template.ParseFiles("./ui/html/error.html")
 	if err != nil {
 		log.Println("Error while parsing the error page:", err)
 		http.Error(w, "Page temporarily down", http.StatusInternalServerError)
