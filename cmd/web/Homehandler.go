@@ -17,10 +17,10 @@ type PostView struct {
 func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse base, home, and post templates
 	tmpl, err := template.ParseFiles(
-		"../../ui/templates/base.html",
-		"../../ui/templates/home.html",
-		"../../ui/templates/postContent.html",
-		"../../ui/templates/categories.html",
+		"./ui/templates/base.html",
+		"./ui/templates/home.html",
+		"./ui/templates/postContent.html",
+		"./ui/templates/categories.html",
 	)
 	if err != nil {
 		dep.ErrorLog.Println("Error loading template:", err)
