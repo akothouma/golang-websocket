@@ -26,6 +26,7 @@ func (f *ForumModel) CreatePost(p *Post) error {
 	}
 
 	// Insert categories
+	
 	for _, categoryID := range p.Category {
 		_, err = DB.Exec(`
             INSERT INTO post_categories (post_id, category_id)
@@ -33,6 +34,8 @@ func (f *ForumModel) CreatePost(p *Post) error {
 			p.PostId, categoryID,
 		)
 		if err != nil {
+			fmt.Println(err)
+
 			return err
 		}
 	}
