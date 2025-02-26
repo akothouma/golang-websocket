@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,6 +18,8 @@ const (
 	MaxFileSize = 20 * 1024 * 1024 // 20MB to allow for some buffer
 	ChunkSize   = 4096             // Read/write in 4KB chunks
 )
+
+var DB *sql.DB
 
 // /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
