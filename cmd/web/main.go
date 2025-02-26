@@ -37,13 +37,15 @@ func main() {
 		errorLog.Fatalf("Failed to initialize database: %v", err)
 	}
 
+	models.DB = db
+
 	defer db.Close()
 
 	// initializing dependencies
 	dep := &Dependencies{
-		ErrorLog:  errorLog,
-		InfoLog:   infoLog,
-		Forum:     &models.ForumModel{DB: db},
+		ErrorLog: errorLog,
+		InfoLog:  infoLog,
+		Forum:    &models.ForumModel{DB: db},
 	}
 
 	// Creating a server
