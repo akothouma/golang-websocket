@@ -11,7 +11,7 @@ type FilteredPosts struct {
 	PostCreationDate string `json:"post_creation_date"`
 }
 
-func (fp *FilteredPosts) Filters(categoryName string, db *ForumModel) ([]FilteredPosts, error) {
+func (f *ForumModel) Filters(categoryName string) ([]FilteredPosts, error) {
 	query := `
 		SELECT posts.id, posts.title, posts.content, posts.created_at
 		FROM posts
@@ -20,7 +20,7 @@ func (fp *FilteredPosts) Filters(categoryName string, db *ForumModel) ([]Filtere
 		WHERE categories.name = ?;
 	`
 
-	rows, err := db.DB.Query(query, categoryName)
+	rows, err := f.DB.Query(query, categoryName)
 	if err != nil {
 		return nil, fmt.Errorf("error executing filters: %w", err)
 	}
