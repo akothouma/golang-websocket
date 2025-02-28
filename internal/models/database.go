@@ -52,14 +52,14 @@ func InitializeDB() (*sql.DB, error) {
 	
 	CREATE TABLE IF NOT EXISTS comments(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		post_id INTERGER,
-		user_id INTEGER NOT NULL,
-		parent_id TEXT,
+		post_id TEXT,
+		user_id TEXT NOT NULL,
+		parent_comment_id INTEGER,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
 		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE,
-		FOREIGN KEY (parent_id) REFERENCES comments(id) ON DELETE CASCADE
+		FOREIGN KEY (parent_comment_id) REFERENCES comments(id) ON DELETE CASCADE
 	);
 
 		

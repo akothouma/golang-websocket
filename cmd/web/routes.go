@@ -22,6 +22,7 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
 	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(dep.AddCommentHandler)))
+	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(dep.AddReplyHandler)))
 
 	mux.Handle("/likes", http.HandlerFunc(LikeHandler))
 

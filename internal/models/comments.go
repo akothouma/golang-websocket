@@ -17,7 +17,7 @@ type Comment struct {
 }
 
 // AddComment adds a new comment (post or reply)
-func (f *ForumModel)AddComment(postID, userID string, content string) (int64, error) {
+func (f *ForumModel) AddComment(postID, userID string, content string) (int64, error) {
 	query := `INSERT INTO comments (post_id, user_id, content, created_at) 
 			  VALUES (?, ?, ?, ?)`
 	result, err := f.DB.Exec(query, postID, userID, content, time.Now())
@@ -30,9 +30,23 @@ func (f *ForumModel)AddComment(postID, userID string, content string) (int64, er
 	return commentID, nil
 }
 
+// AddReply adds a new comment (post or reply)
+func (f *ForumModel) AddReply(parentCommentID, userID string, content string) (int64, error) {
+	query := `INSERT INTO comments (parent_comment_id, user_id, content, created_at) 
+			  VALUES (?, ?, ?, ?)`
+	result, err := f.DB.Exec(query, parentCommentID, userID, content, time.Now())
+	if err != nil {
+		log.Printf("Failed to add comment: %v", err)
+		return 0, fmt.Errorf("failed to add comment: %w", err)
+	}
+
+	commentID, _ := result.LastInsertId()
+	return commentID, nil
+}
+
 // GetAllCommentsForPost retrieves all top-level comments for a post
-func (f *ForumModel)GetAllCommentsForPost(postID int) ([]Comment, error) {
-	query := `SELECT id, post_id, user_id, content, created_at 
+func (f *ForumModel) GetAllCommentsForPost(postID int) ([]Comment, error) {
+	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
 			  FROM comments WHERE post_id = ? AND parent_comment_id IS NULL ORDER BY created_at DESC`
 
 	rows, err := f.DB.Query(query, postID)
@@ -44,7 +58,7 @@ func (f *ForumModel)GetAllCommentsForPost(postID int) ([]Comment, error) {
 	var comments []Comment
 	for rows.Next() {
 		var c Comment
-		if err := rows.Scan(&c.ID, &c.PostID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.PostID, &c.ParentCommentID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan comment: %w", err)
 		}
 		comments = append(comments, c)
@@ -53,7 +67,7 @@ func (f *ForumModel)GetAllCommentsForPost(postID int) ([]Comment, error) {
 }
 
 // GetRepliesForComment retrieves all replies to a specific comment
-func (f *ForumModel)GetAllRepliesForComment(commentID int) ([]Comment, error) {
+func (f *ForumModel) GetAllRepliesForComment(commentID int) ([]Comment, error) {
 	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
 			  FROM comments WHERE parent_comment_id = ? ORDER BY created_at ASC`
 
