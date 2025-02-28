@@ -1,14 +1,16 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
+
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 
-func (dep *Dependencies)GetAllRepliesForCommentHandler(w http.ResponseWriter, r *http.Request) {
+func GetAllRepliesForCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -26,7 +28,7 @@ func (dep *Dependencies)GetAllRepliesForCommentHandler(w http.ResponseWriter, r 
 		return
 	}
 
-	replies, err := dep.Forum.GetAllRepliesForComment(commentID)
+	replies, err := models.GetAllRepliesForComment(commentID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve replies: %v", err), http.StatusInternalServerError)
 		return

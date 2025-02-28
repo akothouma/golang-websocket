@@ -3,6 +3,7 @@ package main
 import (
 	"net/http"
 
+	handlers "learn.zone01kisumu.ke/git/clomollo/forum/internal/Handlers"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 	// middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
 )
@@ -21,8 +22,8 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
-	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(dep.AddCommentHandler)))
-	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(dep.AddReplyHandler)))
+	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
+	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(handlers.AddReplyHandler)))
 
 	mux.Handle("/likes", http.HandlerFunc(LikeHandler))
 
