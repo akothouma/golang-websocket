@@ -114,6 +114,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			commentRows, err := GetAllCommentsForPost(id)
 			if err != nil {
 				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+				fmt.Println("post id:",id,err.Error())
 				return
 			}
 
@@ -137,6 +138,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				replyRow, err := GetAllRepliesForComment(comment.ID)
 				if err != nil {
 					http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
+					fmt.Println(err)
 					return
 				}
 
@@ -154,6 +156,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 					err := DB.QueryRow(query, reply.ID).Scan(&replyLikes, &replyDislikes)
 					if err != nil {
 						http.Error(w, "Failed to parse reply likes", http.StatusInternalServerError)
+						fmt.Println(err)
 						return
 					}
 

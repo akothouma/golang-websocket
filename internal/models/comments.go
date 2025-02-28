@@ -9,9 +9,9 @@ import (
 // Comment struct
 type Comment struct {
 	ID              int       `json:"id"`
-	PostID          *int      `json:"post_id,omitempty"`
-	ParentCommentID *int      `json:"parent_comment_id,omitempty"`
-	UserID          int       `json:"user_id"`
+	PostID          string      `json:"post_id,omitempty"`
+	ParentCommentID int      `json:"parent_comment_id,omitempty"`
+	UserID          string       `json:"user_id"`
 	Content         string    `json:"content"`
 	CreatedAt       time.Time `json:"created_at"`
 }
@@ -46,7 +46,7 @@ func AddReply(parentCommentID, userID string, content string) (int64, error) {
 
 // GetAllCommentsForPost retrieves all top-level comments for a post
 func GetAllCommentsForPost(postID string) ([]Comment, error) {
-	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
+	query := `SELECT id, post_id, user_id, content, created_at 
 			  FROM comments WHERE post_id = ? AND parent_comment_id IS NULL ORDER BY created_at DESC`
 
 	rows, err := DB.Query(query, postID)
@@ -58,7 +58,7 @@ func GetAllCommentsForPost(postID string) ([]Comment, error) {
 	var comments []Comment
 	for rows.Next() {
 		var c Comment
-		if err := rows.Scan(&c.ID, &c.PostID, &c.ParentCommentID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.PostID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan comment: %w", err)
 		}
 		comments = append(comments, c)
@@ -68,7 +68,7 @@ func GetAllCommentsForPost(postID string) ([]Comment, error) {
 
 // GetRepliesForComment retrieves all replies to a specific comment
 func GetAllRepliesForComment(commentID int) ([]Comment, error) {
-	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
+	query := `SELECT id, parent_comment_id, user_id, content, created_at 
 			  FROM comments WHERE parent_comment_id = ? ORDER BY created_at ASC`
 
 	rows, err := DB.Query(query, commentID)
@@ -80,7 +80,7 @@ func GetAllRepliesForComment(commentID int) ([]Comment, error) {
 	var replies []Comment
 	for rows.Next() {
 		var c Comment
-		if err := rows.Scan(&c.ID, &c.PostID, &c.ParentCommentID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
+		if err := rows.Scan(&c.ID, &c.ParentCommentID, &c.UserID, &c.Content, &c.CreatedAt); err != nil {
 			return nil, fmt.Errorf("failed to scan reply: %w", err)
 		}
 		replies = append(replies, c)
