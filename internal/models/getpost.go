@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-	// "learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // var database *models.ForumModel
@@ -62,7 +61,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			 // Convert media to base64 if it exists
+			// Convert media to base64 if it exists
 			var mediaBase64 string
 			if len(media) > 0 {
 				mediaBase64 = base64.StdEncoding.EncodeToString(media)
@@ -112,37 +111,71 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			commentRows, err := DB.Query(`
-                SELECT c.id, c.content, c.created_at,
-                (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'like') as likes,
-                (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'dislike') as dislikes
-                FROM comments c
-                WHERE c.post_id = ?
-                ORDER BY c.created_at DESC`, id)
+			commentRows, err := GetAllCommentsForPost(id)
 			if err != nil {
 				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
 				return
 			}
-			defer commentRows.Close()
 
 			var comments []map[string]interface{}
-			for commentRows.Next() {
-				var commentID, commentContent string
-				var commentCreatedAt time.Time
+
+			for _, comment := range commentRows {
 				var commentLikes, commentDislikes int
 
-				if err := commentRows.Scan(&commentID, &commentContent, &commentCreatedAt, &commentLikes, &commentDislikes); err != nil {
-					http.Error(w, "Failed to parse comment", http.StatusInternalServerError)
+				query := `SELECT 
+					(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'like') AS likes,
+					(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'dislike') AS dislikes
+				FROM comments c
+				WHERE c.id = ?;`
+
+				err := DB.QueryRow(query, comment.ID).Scan(&commentLikes, &commentDislikes)
+				if err != nil {
+					http.Error(w, "Failed to parse comment likes", http.StatusInternalServerError)
 					return
 				}
 
+				replyRow, err := GetAllRepliesForComment(comment.ID)
+				if err != nil {
+					http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
+					return
+				}
+
+				var replies []map[string]interface{}
+				for _, reply := range replyRow {
+
+					var replyLikes, replyDislikes int
+
+					query := `SELECT 
+						(SELECT COUNT(*) FROM comment_likes WHERE comment_id = r.id AND type = 'like') AS likes,
+						(SELECT COUNT(*) FROM comment_likes WHERE comment_id = r.id AND type = 'dislike') AS dislikes
+						FROM comments r
+						WHERE r.id = ?;`
+
+					err := DB.QueryRow(query, reply.ID).Scan(&replyLikes, &replyDislikes)
+					if err != nil {
+						http.Error(w, "Failed to parse reply likes", http.StatusInternalServerError)
+						return
+					}
+
+					replies = append(replies, map[string]interface{}{
+						"ID":        reply.ID,
+						"Content":   reply.Content,
+						"CreatedAt": reply.CreatedAt,
+						"Likes":     replyLikes,
+						"Dislikes":  replyDislikes,
+					})
+
+				}
+
 				comments = append(comments, map[string]interface{}{
-					"ID":        commentID,
-					"Content":   commentContent,
-					"CreatedAt": commentCreatedAt,
+					"ID":        comment.ID,
+					"Content":   comment.Content,
+					"CreatedAt": comment.CreatedAt,
 					"Likes":     commentLikes,
 					"Dislikes":  commentDislikes,
+					"Replies":   replies,
 				})
+
 			}
 
 			posts = append(posts, map[string]interface{}{

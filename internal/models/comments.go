@@ -45,7 +45,7 @@ func AddReply(parentCommentID, userID string, content string) (int64, error) {
 }
 
 // GetAllCommentsForPost retrieves all top-level comments for a post
-func GetAllCommentsForPost(postID int) ([]Comment, error) {
+func GetAllCommentsForPost(postID string) ([]Comment, error) {
 	query := `SELECT id, post_id, parent_comment_id, user_id, content, created_at 
 			  FROM comments WHERE post_id = ? AND parent_comment_id IS NULL ORDER BY created_at DESC`
 

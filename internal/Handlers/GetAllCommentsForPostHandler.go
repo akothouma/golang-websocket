@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strconv"
 
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
@@ -16,15 +15,9 @@ func GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	postIDStr := r.URL.Query().Get("post_id")
-	if postIDStr == "" {
+	postID := r.URL.Query().Get("post_id")
+	if postID == "" {
 		http.Error(w, "Post ID is required", http.StatusBadRequest)
-		return
-	}
-
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		http.Error(w, "Invalid post ID", http.StatusBadRequest)
 		return
 	}
 
