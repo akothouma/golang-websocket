@@ -12,7 +12,7 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
 	models.InitTemplates("./ui/html/")
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../ui/static"))))
 
 	// mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(dep.HomeHandler)))
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))

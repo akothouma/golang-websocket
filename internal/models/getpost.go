@@ -114,7 +114,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			commentRows, err := GetAllCommentsForPost(id)
 			if err != nil {
 				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-				fmt.Println("post id:",id,err.Error())
+				fmt.Println("post id:", id, err.Error())
 				return
 			}
 
@@ -182,17 +182,19 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			}
 
 			posts = append(posts, map[string]interface{}{
-				"ID":          id,
-				"Title":       title,
-				"Content":     content,
-				"Likes":       likes,
-				"Dislikes":    dislikes,
-				"Comments":    comments,
-				"Username":    username,
-				"Categories":  postCategories,
-				"Media":       mediaBase64,
-				"ContentType": contentTypeStr,
-				"CreatedAt":   createdAt,
+				"ID":             id,
+				"Title":          title,
+				"Content":        content,
+				"Likes":          likes,
+				"Dislikes":       dislikes,
+				"Comments":       comments,
+				"CommentsLenght": len(comments),
+				"Username":       username,
+				"Initial":        string(username[0]),
+				"Categories":     postCategories,
+				"Media":          mediaBase64,
+				"ContentType":    contentTypeStr,
+				"CreatedAt":      createdAt,
 			})
 		}
 
@@ -201,6 +203,6 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			"Categories": categories,
 		}
 
-		RenderTemplates(w, "posts.html", data)
+		RenderTemplates(w, "index.html", data)
 	}
 }
