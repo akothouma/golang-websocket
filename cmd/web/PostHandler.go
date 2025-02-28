@@ -52,17 +52,19 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodPost {
-		// log.Println("Method not allowed")
+		log.Println("Method not allowed")
 
 		sessionId := r.Context().Value("session_id")
 		sess1, err := r.Cookie("session_id")
 		if err != nil {
-			log.Println("error biggy", err)
+			log.Println("error biggy")
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
 			return
 		}
 		if sess1.Value != sessionId {
 			log.Println("sess1.Value", sess1.Value, sessionId)
 			log.Println("sessioId", sessionId)
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
 			return
 		}
 
@@ -178,4 +180,26 @@ func getContentType(ext string) string {
 		".webm": "video/webm",
 	}
 	return contentTypes[ext]
+}
+
+func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	FilteredTemplate, err := template.ParseFiles("./ui/html/allposts.html")
+	if err != nil {
+		http.Error(w, "Failed to parse file", http.StatusInternalServerError)
+		return
+	}
+
+	categories := r.Form["category[]"]
+	filteredPosts, err := dep.Forum.FilterCategories(categories)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
+		return
+	}
+	FilteredTemplate.ExecuteTemplate(w, "allposts.html", &filteredPosts)
 }
