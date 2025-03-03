@@ -79,7 +79,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			categoryRows, err := DB.Query(`
                 SELECT c.id, c.name 
                 FROM categories c 
-                JOIN post_categories pc ON c.id = pc.category_id 
+                JOIN post_categories pc ON c.name = pc.category_id 
                 WHERE pc.post_id = ?`, id)
 			if err != nil {
 				http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)

@@ -26,12 +26,13 @@ func (f *ForumModel) CreatePost(p *Post) error {
 	}
 
 	// Insert categories
+	fmt.Println("categories",p.Category)
 	
-	for _, categoryID := range p.Category {
+	for _, categoryNames := range p.Category {
 		_, err = DB.Exec(`
             INSERT INTO post_categories (post_id, category_id)
             VALUES (?, ?)`,
-			p.PostId, categoryID,
+			p.PostId, categoryNames,
 		)
 		if err != nil {
 			fmt.Println(err)
@@ -39,8 +40,7 @@ func (f *ForumModel) CreatePost(p *Post) error {
 			return err
 		}
 	}
-
-	fmt.Println("Your post has ben succesfully created")
+	fmt.Println("Your post has been succesfully created")
 	return nil
 }
 
@@ -72,6 +72,26 @@ func (f *ForumModel) AllPosts() ([]Post, error) {
 			return nil, err
 		}
 		posts = append(posts, p)
+	}
+	return posts, nil
+}
+
+func (f *ForumModel) FilterCategories(categories []string) ([]Post, error) {
+	posts := []Post{}
+	for _, categoryID := range categories {
+		query := "SELECT post_id, user_uuid, title, content,  media, content_type FROM posts p JOIN post_categories pc ON p.post_id=pc.post_id AND pc.category_id=?"
+		rows, err := f.DB.Query(query, categoryID)
+		if err != nil {
+			return nil, err
+		}
+		for rows.Next() {
+			var p Post
+			err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.PostContent, &p.ContentType, &p.TimeStamp)
+			if err != nil {
+				return nil, err
+			}
+			posts = append(posts, p)
+		}
 	}
 	return posts, nil
 }

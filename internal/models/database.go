@@ -82,7 +82,7 @@ func InitializeDB() (*sql.DB, error) {
 	);
 		
 	CREATE TABLE IF NOT EXISTS categories (
-		id TEXT PRIMARY KEY,
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		name TEXT UNIQUE NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	);
@@ -95,16 +95,22 @@ func InitializeDB() (*sql.DB, error) {
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 		);
 		
-		INSERT OR IGNORE INTO categories (id, name) VALUES
-		('tech','tech'),
-		('lifestyle', 'lifestyle'),
-		('gaming', 'gaming'),
-		('food', 'food'),
-		('travel', 'travel'),
-		('other', 'other');
+		INSERT OR IGNORE INTO categories (name) VALUES
+		('education'),
+		('politics'),
+		('sports'),
+		('lifestyle'),
+		('religion'),
+		('relationship and family'),
+		('Health'),
+		('Real-estate'),
+		('Governance'),
+		('technology'),
+    	('gaming'),
+    	('food'),
+    	('travel'),
+    	('other');`
 
-	
-	`
 
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()

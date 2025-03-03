@@ -17,6 +17,7 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
 	// mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	mux.Handle("/allposts", http.HandlerFunc(models.RenderPostsPage))
+	
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
