@@ -26,12 +26,13 @@ func (f *ForumModel) CreatePost(p *Post) error {
 	}
 
 	// Insert categories
+	fmt.Println("categories",p.Category)
 	
-	for _, categoryID := range p.Category {
+	for _, categoryNames := range p.Category {
 		_, err = DB.Exec(`
             INSERT INTO post_categories (post_id, category_id)
             VALUES (?, ?)`,
-			p.PostId, categoryID,
+			p.PostId, categoryNames,
 		)
 		if err != nil {
 			fmt.Println(err)
@@ -39,7 +40,7 @@ func (f *ForumModel) CreatePost(p *Post) error {
 			return err
 		}
 	}
-	fmt.Println("Your post has beEn succesfully created")
+	fmt.Println("Your post has been succesfully created")
 	return nil
 }
 

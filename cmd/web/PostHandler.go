@@ -78,7 +78,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		// Extract form data
 		postContent := r.FormValue("post_content")
 		postId := uuid.New().String()
-		categories := r.Form["category[]"]
+		categories := r.Form["categories"]
 		title := r.FormValue("post_title")
 		userId := r.Context().Value("user_uuid").(string)
 
@@ -89,7 +89,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:       title,
 			PostContent: postContent,
 		}
-
+ fmt.Println("Categories1",post.Category)
 		// Handle file upload
 		file, header, err := r.FormFile("media")
 		if err == nil {
