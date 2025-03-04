@@ -15,10 +15,9 @@ func (f *ForumModel) Filters(categoryName string) ([]FilteredPosts, error) {
 	query := `
 		SELECT posts.id, posts.title, posts.content, posts.created_at
 		FROM posts
-		JOIN post_categories ON posts.id = post_categories.post_id
-		JOIN categories ON post_categories.category_id = categories.id
-		WHERE categories.name = ?;
-	`
+		JOIN post_categories ON posts.post_id = post_categories.post_id
+		WHERE category_id = ?;
+		`
 
 	rows, err := f.DB.Query(query, categoryName)
 	if err != nil {
@@ -38,6 +37,8 @@ func (f *ForumModel) Filters(categoryName string) ([]FilteredPosts, error) {
 		if err != nil {
 			return nil, fmt.Errorf("error scanning the filtration rows: %w", err)
 		}
+		//DEBUG
+		fmt.Println("This are the filtered posts\n", post)
 		filteredPosts = append(filteredPosts, post)
 	}
 
