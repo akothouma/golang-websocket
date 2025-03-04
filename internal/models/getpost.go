@@ -162,6 +162,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 					replies = append(replies, map[string]interface{}{
 						"ID":        reply.ID,
+						"Username":  reply.UserName,
 						"Content":   reply.Content,
 						"CreatedAt": reply.CreatedAt,
 						"Likes":     replyLikes,
@@ -172,6 +173,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 				comments = append(comments, map[string]interface{}{
 					"ID":        comment.ID,
+					"Username":  comment.UserName,
 					"Content":   comment.Content,
 					"CreatedAt": comment.CreatedAt,
 					"Likes":     commentLikes,

@@ -219,7 +219,7 @@
             background: var(--color-light);
         }
         
-        .left .sidebar i{
+        .left .sidebar .menu-item i{
             font-size: 1.4rem;
             color: var(--color-gray);
             margin-left: 2rem;
@@ -302,9 +302,9 @@
             margin: 0.5rem;
         }
         
-        .create-post input[type="text"]{
+        input[type="text"]{
             justify-self: start;
-            width: 100%;
+            width: 70%;
             padding-left: 1rem;
             white-space: pre;
             background: var(--color-secondary);
@@ -354,10 +354,6 @@
             align-items: center;
             font-size: 1.4rem;
             margin: 0.6rem;
-        }
-        
-        .middle .liked-by p{
-            margin-left: 0.5rem;
         }
         
         .reactions{
@@ -496,7 +492,8 @@
                     </a>
                 </div>
         <!-------------END OF  SIDEBAR ------------->
-
+        
+        
                 
 
             </div>
@@ -595,8 +592,9 @@
                                     <i class="uil uil-thumbs-down"></i>
                                     <h6 id="dislike-count-post-{{.ID}}">{{.Dislikes}}</h6>
                                 </div>                                                                                                
-                            </div>
+                            </div>                          
                             
+
                             <!--======= comment button =======-->
                             <div class="comment">
                                 <span><i class="uil uil-comment-alt-dots"></i></span>
@@ -605,10 +603,15 @@
                             <!--======= END OF comment button =======-->
                         </div>
                             
-                        <div class="liked-by">
-                            <p>Liked by <b>Benson</b> and <b>22 others</b></p>
-                        </div>
                         <!------------ END OF LIKES AND DISLIKES ------------>
+
+                        <!----------------- Comment Form ----------------->
+                        <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
+                            <input type="hidden" name="post_id" value="{{.ID}}">
+                            <input type="text" name="content" placeholder="Add a comment...">    
+                            <input type="submit" value="Comment" class="btn btn-primary">
+                        </form>
+                        <!----------------- END OF Comment Form ----------------->
 
 
                         <div class="caption">
