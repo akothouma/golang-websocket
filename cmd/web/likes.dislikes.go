@@ -1,45 +1,33 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
-var DB *sql.DB
-
 // LikeHandler handles likes/dislikes for both posts and comments
-func LikeHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
-	// Check user authentication
-	// cookies, err := r.Cookie("Token")
-	// if err != nil {
-	// 	http.Error(w, "User not logged in", http.StatusUnauthorized)
-	// 	return
-	// }
 
-	// sessionId := r.Context().Value("session_id")
+	// Check user authentication
+	sessionId := r.Context().Value("session_id")
 	sess1, err := r.Cookie("session_id")
 	if err != nil {
 		log.Println("error biggy", err)
 		return
 	}
-	// if sess1.Value != sessionId {
-	// 	log.Println("sess1.Value", sess1.Value, sessionId)
-	// 	log.Println("sessioId", sessionId)
-	// 	return
-	// }
+	if sess1.Value != sessionId {
+		log.Println("sess1.Value", sess1.Value, sessionId)
+		log.Println("sessioId", sessionId)
+		return
+	}
 
-	userID := sess1.Value
-	// userID := r.Context().Value("user_uuid").(string)
+	userID := r.Context().Value("user_uuid").(string)
+
 	// Parse form data
-	fmt.Println(userID)
 	if err := r.ParseForm(); err != nil {
 		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
 		return
@@ -62,59 +50,12 @@ func LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Process the like/dislike based on item type
-	err = processLike(itemType, itemID, userID, likeType)
+	err = dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
 	if err != nil {
+
 		http.Error(w, "Failed to process like/dislike", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("liked/disliked created successfully"))
-}
-
-// processLike handles the database operations for likes
-func processLike(itemType, itemID, userID, likeType string) error {
-	var tableName, idColumn string
-	// Set table and column names based on item type
-	if itemType == "post" {
-		tableName = "post_likes"
-		idColumn = "post_id"
-	} else {
-		tableName = "comment_likes"
-		idColumn = "comment_id"
-	}
-	// First verify the item exists
-	exists, err := checkItemExists(itemType, itemID)
-	if err != nil {
-		return fmt.Errorf("error checking item existence: %v", err)
-	}
-	if !exists {
-		return fmt.Errorf("item not found")
-	}
-	// Check for existing like
-	var existingType string
-	query := fmt.Sprintf("SELECT type FROM %s WHERE user_id = ? AND %s = ?", tableName, idColumn)
-	err = DB.QueryRow(query, userID, itemID).Scan(&existingType)
-	if err == nil {
-		// Update existing like
-		updateQuery := fmt.Sprintf("UPDATE %s SET type = ? WHERE user_id = ? AND %s = ?", tableName, idColumn)
-		_, err = DB.Exec(updateQuery, likeType, userID, itemID)
-	} else {
-		// Insert new like
-		insertQuery := fmt.Sprintf("INSERT INTO %s (id, user_id, %s, type) VALUES (?, ?, ?, ?)", tableName, idColumn)
-		_, err = DB.Exec(insertQuery, uuid.New().String(), userID, itemID, likeType)
-	}
-	return err
-}
-
-// checkItemExists verifies if the post or comment exists
-func checkItemExists(itemType, itemID string) (bool, error) {
-	var exists bool
-	var query string
-	if itemType == "post" {
-		query = "SELECT EXISTS(SELECT 1 FROM posts WHERE id = ?)"
-	} else {
-		query = "SELECT EXISTS(SELECT 1 FROM comments WHERE id = ?)"
-	}
-	err := DB.QueryRow(query, itemID).Scan(&exists)
-	return exists, err
 }

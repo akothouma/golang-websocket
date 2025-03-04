@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"html/template"
 	"io"
@@ -17,6 +18,8 @@ const (
 	MaxFileSize = 20 * 1024 * 1024 // 20MB to allow for some buffer
 	ChunkSize   = 4096             // Read/write in 4KB chunks
 )
+
+var DB *sql.DB
 
 // /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
@@ -49,17 +52,19 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method == http.MethodPost {
-		// log.Println("Method not allowed")
+		log.Println("Method not allowed")
 
 		sessionId := r.Context().Value("session_id")
 		sess1, err := r.Cookie("session_id")
 		if err != nil {
-			log.Println("error biggy", err)
+			log.Println("error biggy")
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
 			return
 		}
 		if sess1.Value != sessionId {
 			log.Println("sess1.Value", sess1.Value, sessionId)
 			log.Println("sessioId", sessionId)
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
 			return
 		}
 
@@ -73,7 +78,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		// Extract form data
 		postContent := r.FormValue("post_content")
 		postId := uuid.New().String()
-		categories := r.Form["category[]"]
+		categories := r.Form["categories"]
 		title := r.FormValue("post_title")
 		userId := r.Context().Value("user_uuid").(string)
 
@@ -84,7 +89,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:       title,
 			PostContent: postContent,
 		}
-
+ fmt.Println("Categories1",post.Category)
 		// Handle file upload
 		file, header, err := r.FormFile("media")
 		if err == nil {
@@ -175,4 +180,26 @@ func getContentType(ext string) string {
 		".webm": "video/webm",
 	}
 	return contentTypes[ext]
+}
+
+func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	FilteredTemplate, err := template.ParseFiles("./ui/html/allposts.html")
+	if err != nil {
+		http.Error(w, "Failed to parse file", http.StatusInternalServerError)
+		return
+	}
+
+	categories := r.Form["category[]"]
+	filteredPosts, err := dep.Forum.FilterCategories(categories)
+	if err != nil {
+		fmt.Println(err)
+		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
+		return
+	}
+	FilteredTemplate.ExecuteTemplate(w, "allposts.html", &filteredPosts)
 }
