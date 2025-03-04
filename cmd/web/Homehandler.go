@@ -57,15 +57,15 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("This are the selected categories\n", categories)
 	if len(categories) == 0 {
 		// get all the posts data
-		posts, err := dep.Forum.AllPosts()
+		posts, err := models.RenderPostsPage()
 		if err != nil {
 			dep.ErrorLog.Println("Error Retrieving Post data\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
-		// p := PostProcessor(posts)
-
+		//DEBUG
+		fmt.Println("This is the posts data >>", posts)
 		// Execute the template with data
 		err = tmpl.ExecuteTemplate(w, "base", posts)
 		if err != nil {
