@@ -42,24 +42,28 @@ func InitializeDB() (*sql.DB, error) {
 	    id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT UNIQUE NOT NULL,
 		user_uuid TEXT NOT NULL,
+		username TEXT UNIQUE NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
 		media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid)
+		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid),
+		FOREIGN KEY (username) REFERENCES users(username)
 		);
 	
 	CREATE TABLE IF NOT EXISTS comments(
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT,
-		user_id TEXT NOT NULL,
+		user_uuid TEXT NOT NULL,
+		username TEXT UNIQUE NOT NULL,
 		parent_comment_id INTEGER,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (post_id) REFERENCES posts(post_id) ON DELETE CASCADE,
-		FOREIGN KEY (user_id) REFERENCES users(user_uuid) ON DELETE CASCADE,
-		FOREIGN KEY (parent_comment_id) REFERENCES comments(id) ON DELETE CASCADE
+		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid) ON DELETE CASCADE,
+		FOREIGN KEY (parent_comment_id) REFERENCES comments(id) ON DELETE CASCADE,
+		FOREIGN KEY (username) REFERENCES users(username)
 	);
 
 		

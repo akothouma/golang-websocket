@@ -203,6 +203,6 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			"Categories": categories,
 		}
 
-		RenderTemplates(w, "index.html", data)
+		RenderTemplates(w, "posts.html", data)
 	}
 }

@@ -178,6 +178,7 @@
         main .container .left{
             height: max-content;
             position: sticky;
+            overflow-y: auto;
             top: var(--sticky-top-left);
         }
         
@@ -204,7 +205,7 @@
             transition: all 300ms ease;
             position: relative;
         }
-        
+
         .left .sidebar .menu-item h3, .left .sidebar .menu-item span{
             padding-top: 2rem;
             padding-bottom: 2rem;
@@ -289,6 +290,9 @@
             font-size: 1.9rem; 
             margin-left: 0rem;
         }
+        .uil{
+            font-size: large;
+        }
         
         .left .create-post div{
             display: flex;    
@@ -330,7 +334,7 @@
             margin: 0.7rem 0;
         }
         
-        .middle .feed .action-button{
+        .action-button{
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -342,6 +346,12 @@
             margin-left: 0.5rem;
         }
         
+        .reactions{
+            display: flex;
+            flex-direction: row;
+            margin-right: 8px;
+        }
+
         .middle .feed-content{
             margin: 1.2rem;
             color: var(--color-black);
@@ -359,7 +369,9 @@
             position: sticky;
             top: var(--sticky-top-right);
         }
-        
+        .interaction-buttons{
+            display: flex;
+        }
         
         .right .heading{
             display: flex;
@@ -368,24 +380,24 @@
             margin-bottom: 1rem;
         }
         
-        .left .category{
+        .left .category-group{
             display: flex;
             flex-direction: column;
         }
         
-        .category div{
+        .category-group div{
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0.8rem;
         }
         
-        .category div input{
+        .category-group div input{
             cursor: pointer;
             margin-right: 1rem;
             
         }
-        .category div input::after{
+        .category-group div input::after{
             color: var(--color-primary);
             font-size: large;
         
@@ -399,9 +411,9 @@
             padding: var(--card-padding);
             border-radius: var(--card-border-radius);
             font-size: 1.4rem;
-            height: max-content;
-           
+            height: max-content;           
         }
+
         </style>
 </head>
 <body>
@@ -437,7 +449,8 @@
                 <a class="profile">
                     <div class="profile-photo">
                         <!-- <img src="./images/profile-1.jpg"> -->
-                         D
+                         <!-- {{.Initial}} -->
+                          D
                     </div>
                     <div class="handle">
                         <h4>Diana Akoth</h4>
@@ -470,63 +483,7 @@
                 </div>
         <!-------------END OF  SIDEBAR ------------->
 
-                <div class="sidebar">
-                    
-                    <!------------------- CREATE POST ------------------->
-                    <form action="" class="create-post">
-                        <h2>create Post</h2>
-
-                        <h4>Title</h4>
-                        <input type="text" placeholder="Enter title of your post" id="create-post">
-                        <h4>Content</h4>
-                        <div>
-                            <span><i class="uil uil-image-plus"></i> </span>
-                            <input type="text" placeholder="what's on your mind" id="create-post">
-                        </div>
-                        
-                        
-                        <h3>Choose the Categories:</h3>
-                        <div class="category"> 
-                             
-                            <div>
-                                <input type="checkbox" value="Technology"><h5>Technology</h5>
-                            </div>
-    
-                            <div>
-                                <input type="checkbox" value="Science & Education"><h5>Science & Education</h5>
-                            </div>                        
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Business & Finance</h5>
-                            </div>
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Entertainment & Media</h5>
-                            </div>
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Lifestyle & Wellness</h5>
-                            </div>
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Social & Discussions</h5>
-                            </div>
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Career & Skills</h5>
-                            </div>
-                            
-                            <div>
-                                <input type="checkbox" value=""><h5>Forum Community</h5>
-                            </div>                        
-                        </div>
-                        <input type="submit" value="Post" class="btn btn-primary">
-                    </form>
-                    <!------------------- END OF CREATE POST ------------------->
-                </div>
-        <!------------- CREATE POST ------------->
                 
-        <!------------- END OF CREATE POST ------------->
 
             </div>
             <!--====================== END OF LEFT ======================-->
@@ -536,6 +493,36 @@
             <!--====================== MIDDLE ======================-->
       <div class="middle">      
 
+        <div class="sidebar">
+                    
+            <!------------------- CREATE POST ------------------->
+            <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
+                <h2>create Post</h2>
+
+                <h4>Title</h4>
+                <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
+                <h4>Content</h4>
+                <!-- <div> -->
+                    <input type="text"  name="post_content" placeholder="what's on your mind" id="create-post">
+                    <label for="media"><i class="uil uil-image-plus"></i> </label>
+                    <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
+                    <span id="file-name">No file selected</span>                            
+                <!-- </div> -->
+                
+                
+                <h3>Choose the Categories:</h3>
+                <div class="category-group"> 
+                    {{range .Categories}}
+                    <div class="category-option">                
+                        <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                        <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                    </div>
+                    {{end}}                                                
+                </div>
+                <input type="submit" value="Post" class="btn btn-primary">
+            </form>
+            <!------------------- END OF CREATE POST ------------------->
+        </div>
 
         <!---------------------- FEEDS/POSTS ---------------------->
                 <div class="feeds">
@@ -583,11 +570,15 @@
 
                             <!------------ LIKES AND DISLIKES ------------>
                             <div class="interaction-buttons">
-                                <div class="like"></div>
-                                <span><i class="uil uil-thumbs-up"></i></span>
-                                <span class="like">{{.Likes}}</span>
-                                <span><i class="uil uil-thumbs-down"></i></span>
-                                <span class="dislike">{{.Dislikes}}</span>                                                                
+                                <div class="reactions">
+                                    <i class="uil uil-thumbs-up"></i>
+                                    <h6 id="like-count-post-{{.ID}}">{{.Likes}}</h6>                                    
+                                </div>
+                                
+                                <div class="reactions">
+                                    <i class="uil uil-thumbs-down"></i>
+                                    <h6 id="dislike-count-post-{{.ID}}">{{.Dislikes}}</h6>
+                                </div>                                                                                                
                             </div>
                             
                             <!--======= comment button =======-->
@@ -644,12 +635,15 @@
 
                                     <!------------ LIKES AND DISLIKES ------------>
                                     <div class="interaction-buttons">
-                                        <div class="like"></div>
-                                        <span><i class="uil uil-thumbs-up"></i></span>
-                                        <span class="like">1</span>
-                                        <span><i class="uil uil-thumbs-down"></i></span>
-                                        <span class="dislike">0</span>
-                                                                                                       
+                                        <div class="reactions">
+                                            <i class="uil uil-thumbs-up"></i>
+                                            <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                        </div>
+                                        
+                                        <div class="reactions">
+                                            <i class="uil uil-thumbs-down"></i>
+                                            <h6 class="dislike">{{.Dislikes}}</h6>
+                                        </div>                                                                                                
                                     </div>
                                     <span><h6>Reply</h6></span>                                     
                                 </div>
@@ -673,38 +667,13 @@
                     </div>
 
                     <!---------------------- Categories ---------------------->
-                    <div class="category">  
-                        <div>
-                            <input type="checkbox" value="Technology"><h5>Technology</h5>
+                    <div class="category-group">  
+                        {{range .Categories}}
+                        <div class="category-option">                
+                            <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                            <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
                         </div>
-
-                        <div>
-                            <input type="checkbox" value="Science & Education"><h5>Science & Education</h5>
-                        </div>                        
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Business & Finance</h5>
-                        </div>
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Entertainment & Media</h5>
-                        </div>
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Lifestyle & Wellness</h5>
-                        </div>
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Social & Discussions</h5>
-                        </div>
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Career & Skills</h5>
-                        </div>
-                        
-                        <div>
-                            <input type="checkbox" value=""><h5>Forum Community</h5>
-                        </div>                        
+                        {{end}}                                               
                     </div>
                     <!---------------------- END OF Categories ---------------------->
                 </div>
@@ -716,4 +685,11 @@
     </main>
   <!----------------------- END OF MAIN ----------------------->
 </body>
+<script>
+    document.getElementById("media").addEventListener("change", function () {
+        let fileName = this.files.length ? this.files[0].name : "No file selected";
+        document.getElementById("file-name").textContent = fileName;
+    });
+
+</script>
 </html>
