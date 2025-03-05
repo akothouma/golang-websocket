@@ -8,12 +8,12 @@ import (
 func (dep *Dependencies) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	// models.InitTemplates("../../ui/html/")
+	// models.InitTemplates(tempPath)
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(dep.HomeHandler)))
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
-	// mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
+	mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	// mux.Handle("/allposts", http.HandlerFunc(models.RenderPostsPage))
 
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
