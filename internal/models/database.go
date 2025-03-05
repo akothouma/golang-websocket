@@ -56,7 +56,7 @@ func InitializeDB() (*sql.DB, error) {
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT,
 		user_uuid TEXT NOT NULL,
-		username TEXT UNIQUE NOT NULL,
+		username TEXT NOT NULL,
 		parent_comment_id INTEGER,
 		content TEXT NOT NULL,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

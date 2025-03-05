@@ -26,7 +26,6 @@ func AddComment(postID, UserUuiD string, content string) (int64, error) {
 		log.Printf("Failed to fetch username: %v", err)
 		return 0, fmt.Errorf("failed to fetch username: %w", err)
 	}
-	fmt.Println("Username:", username)
 
 	query := `INSERT INTO comments (post_id, user_uuid, username, content, created_at) 
 			  VALUES (?, ?, ?, ?, ?)`
@@ -41,13 +40,21 @@ func AddComment(postID, UserUuiD string, content string) (int64, error) {
 }
 
 // AddReply adds a new comment (post or reply)
-func AddReply(parentCommentID, userID string, content string) (int64, error) {
-	query := `INSERT INTO comments (parent_comment_id, user_id, content, created_at) 
-			  VALUES (?, ?, ?, ?)`
-	result, err := DB.Exec(query, parentCommentID, userID, content, time.Now())
+func AddReply(parentCommentID, UserUuiD string, content string) (int64, error) {
+	//query to get the user name
+	var username string
+	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", UserUuiD).Scan(&username)
 	if err != nil {
-		log.Printf("Failed to add comment: %v", err)
-		return 0, fmt.Errorf("failed to add comment: %w", err)
+		log.Printf("Failed to fetch username: %v", err)
+		return 0, fmt.Errorf("failed to fetch username: %w", err)
+	}
+
+	query := `INSERT INTO comments (parent_comment_id, username, user_uuid, content, created_at) 
+			  VALUES (?, ?, ?, ?, ?)`
+	result, err := DB.Exec(query, parentCommentID, username, UserUuiD, content, time.Now())
+	if err != nil {
+		log.Printf("Failed to add Reply: %v", err)
+		return 0, fmt.Errorf("failed to add Reply: %w", err)
 	}
 
 	commentID, _ := result.LastInsertId()
