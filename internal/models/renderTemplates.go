@@ -19,13 +19,7 @@ func InitTemplates() (*template.Template, error) {
 	}
 	// constructing the correct path
 	tmplPath := wd + "/ui/templates/"
-	tmpl, err := template.ParseFiles(
-		tmplPath+"base.html",
-		tmplPath+"categories.html",
-		tmplPath+"home.html",
-		tmplPath+"postContent.html",
-		tmplPath+"posts.html",
-	)
+	tmpl, err := template.ParseGlob(tmplPath+"*.html")
 	if err != nil {
 		return nil, fmt.Errorf("error parsing templates: %w", err) // Wrap the error
 	}
