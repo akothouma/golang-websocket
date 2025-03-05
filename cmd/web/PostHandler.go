@@ -1,14 +1,10 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"html/template"
-	"io"
 	"log"
 	"net/http"
-	"path/filepath"
-	"strings"
 
 	"github.com/google/uuid"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
@@ -19,119 +15,64 @@ const (
 	ChunkSize   = 4096             // Read/write in 4KB chunks
 )
 
-var DB *sql.DB
-
 // /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		// Fetch categories for the form
-		rows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
-		if err != nil {
+	// if r.Method != http.MethodPost {
+	// 	dep.ErrorLog.Println("Error: Method not allowed:")
+	// 	http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	// 	return
+	// }
+	fmt.Println(">>> Method: ", r.Method)
 
-			http.Error(w, "Failed to load categories", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-		var categories []struct {
-			ID   string
-			Name string
-		}
-		for rows.Next() {
-			var cat struct {
-				ID   string
-				Name string
-			}
-			if err := rows.Scan(&cat.ID, &cat.Name); err != nil {
-				continue
-			}
-			categories = append(categories, cat)
-		}
-		RenderTemplates(w, "posts.html", map[string]interface{}{
-			"Categories": categories,
-		})
+	postTempl, err := models.InitTemplates() // initialize the post template
+	if err != nil {
+		dep.ErrorLog.Println("Error initializing post template:\n", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	if r.Method == http.MethodPost {
-		log.Println("Method not allowed")
 
-		sessionId := r.Context().Value("session_id")
-		sess1, err := r.Cookie("session_id")
-		if err != nil {
-			log.Println("error biggy")
-			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
-			return
-		}
-		if sess1.Value != sessionId {
-			log.Println("sess1.Value", sess1.Value, sessionId)
-			log.Println("sessioId", sessionId)
-			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
-			return
-		}
+	sessionId := r.Context().Value("session_id")
+	sess1, err := r.Cookie("session_id")
+	if err != nil {
+		log.Println("error biggy")
+		http.Error(w, "User not logged in: ", http.StatusUnauthorized)
+		return
+	}
+	if sess1.Value != sessionId {
+		log.Println("sess1.Value", sess1.Value, sessionId)
+		log.Println("sessioId", sessionId)
+		http.Error(w, "User not logged in: ", http.StatusUnauthorized)
+		return
+	}
 
-		// Increase the maximum memory allocated for form parsing
-		if err := r.ParseMultipartForm(MaxFileSize); err != nil {
-			fmt.Println(err)
-			http.Error(w, "File too large", http.StatusBadRequest)
-			return
-		}
+	// Extract form data
+	err = r.ParseForm()
+	if err != nil {
+		dep.ErrorLog.Println("Error parsing post form:\n", err)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+	postContent := r.FormValue("post_content")
+	postId := uuid.New().String()
+	categories := r.Form["category"]
+	fmt.Println("categories: ", categories)
+	title := r.FormValue("post_title")
+	userId := r.Context().Value("user_uuid").(string)
 
-		// Extract form data
-		postContent := r.FormValue("post_content")
-		postId := uuid.New().String()
-		categories := r.Form["categories"]
-		title := r.FormValue("post_title")
-		userId := r.Context().Value("user_uuid").(string)
+	post := models.Post{
+		PostId:      postId,
+		UserId:      userId,
+		Category:    categories,
+		Title:       title,
+		PostContent: postContent,
+	}
+	fmt.Println("Categories1", post.Category)
 
-		post := models.Post{
-			PostId:      postId,
-			UserId:      userId,
-			Category:    categories,
-			Title:       title,
-			PostContent: postContent,
-		}
- fmt.Println("Categories1",post.Category)
-		// Handle file upload
-		file, header, err := r.FormFile("media")
-		if err == nil {
-			defer file.Close()
+	if err := dep.Forum.CreatePost(&post); err != nil {
+		log.Println("Error while quering post db: ", err)
+	} else {
 
-			// Validate file size
-			if header.Size > MaxFileSize {
-				http.Error(w, "File size exceeds maximum limit", http.StatusBadRequest)
-				return
-			}
-
-			// Validate file type
-			ext := strings.ToLower(filepath.Ext(header.Filename))
-			if !isValidFileType(ext) {
-				http.Error(w, "Invalid file type", http.StatusBadRequest)
-				return
-			}
-
-			// Read file in chunks
-			buffer := make([]byte, 0, header.Size)
-			tempBuffer := make([]byte, ChunkSize)
-			for {
-				n, err := file.Read(tempBuffer)
-				if err == io.EOF {
-					break
-				}
-				if err != nil {
-					http.Error(w, "Error reading file", http.StatusInternalServerError)
-					return
-				}
-				buffer = append(buffer, tempBuffer[:n]...)
-			}
-
-			post.Media = buffer
-			post.ContentType = getContentType(ext)
-		}
-
-		if err := dep.Forum.CreatePost(&post); err != nil {
-			log.Println("Error while quering post db: ", err)
-		}
-
-		// http.Redirect(w, r, "/allposts", http.StatusSeeOther)
+		postTempl.ExecuteTemplate(w, "posts.html", nil)
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Post created successfully"))
 	}
@@ -156,32 +97,6 @@ func (dep *Dependencies) AllPostsHandler(w http.ResponseWriter, r *http.Request)
 	PostsTemplate.ExecuteTemplate(w, "allposts.html", &posts)
 }
 
-func isValidFileType(ext string) bool {
-	validTypes := map[string]bool{
-		".jpg":  true,
-		".jpeg": true,
-		".png":  true,
-		".gif":  true,
-		".mp4":  true,
-		".mov":  true,
-		".webm": true,
-	}
-	return validTypes[ext]
-}
-
-func getContentType(ext string) string {
-	contentTypes := map[string]string{
-		".jpg":  "image/jpeg",
-		".jpeg": "image/jpeg",
-		".png":  "image/png",
-		".gif":  "image/gif",
-		".mp4":  "video/mp4",
-		".mov":  "video/quicktime",
-		".webm": "video/webm",
-	}
-	return contentTypes[ext]
-}
-
 func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
@@ -194,7 +109,7 @@ func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	categories := r.Form["category[]"]
+	categories := r.Form["category"]
 	filteredPosts, err := dep.Forum.FilterCategories(categories)
 	if err != nil {
 		fmt.Println(err)
