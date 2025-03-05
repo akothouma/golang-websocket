@@ -42,7 +42,7 @@ func InitializeDB() (*sql.DB, error) {
 	    id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT UNIQUE NOT NULL,
 		user_uuid TEXT NOT NULL,
-		username TEXT UNIQUE NOT NULL,
+		username TEXT NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
 		media BLOB, --binary data - video, image and GIFs
