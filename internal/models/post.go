@@ -18,11 +18,11 @@ type Post struct {
 }
 
 func (f *ForumModel) CreatePost(p *Post) error {
-	query := "INSERT INTO posts(post_id, user_uuid, title, content,  media, content_type) VALUES(?, ?, ?, ?, ?, ?)"
-	_, err := f.DB.Exec(query, p.PostId, p.UserId, p.Title, p.PostContent, p.Media, p.ContentType)
+	query := "INSERT INTO posts(post_id, user_uuid, title, content, content_type) VALUES(?, ?, ?, ?, ?)"
+	_, err := f.DB.Exec(query, p.PostId, p.UserId, p.Title, p.PostContent, p.ContentType)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("failed to insert a post")
+		return fmt.Errorf("failed to insert a post: %v\n", err)
 	}
 
 	// Insert categories
