@@ -369,9 +369,15 @@
         }
         
         .reactions{
+            background: transparent;
+            font-size: large;
             display: flex;
             flex-direction: row;
             margin-right: 8px;
+        }
+
+        .reactions:hover{
+            cursor: pointer;
         }
 
         .middle .feed-content{
@@ -592,17 +598,21 @@
                         <div class="action-button">
 
                             <!------------ LIKES AND DISLIKES ------------>
-                            <div class="interaction-buttons">
-                                <div class="reactions">
-                                    <i class="uil uil-thumbs-up"></i>
-                                    <h6 id="like-count-post-{{.ID}}">{{.Likes}}</h6>                                    
+                            <form class="like-form" action="/likes" method="POST">
+                                <div class="interaction-buttons">
+                                    <input type="hidden" name="id" value="{{.ID}}">
+                                    <input type="hidden" name="item_type" value="post">
+                                    <button type="submit" name="type" value="like" class="reactions">
+                                        <i class="uil uil-thumbs-up"></i>
+                                        <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                    </button>
+                                    
+                                    <button type="submit" name="type" value="dislike" class="reactions">
+                                        <i class="uil uil-thumbs-down"></i>
+                                        <h6 class="dislike">{{.Dislikes}}</h6>
+                                    </button>                                                                                                
                                 </div>
-                                
-                                <div class="reactions">
-                                    <i class="uil uil-thumbs-down"></i>
-                                    <h6 id="dislike-count-post-{{.ID}}">{{.Dislikes}}</h6>
-                                </div>                                                                                                
-                            </div>                          
+                            </form>                         
                             
 
                             <!--======= comment button =======-->
@@ -654,17 +664,21 @@
                                 <div class="action-button">
 
                                     <!------------ LIKES AND DISLIKES ------------>
-                                    <div class="interaction-buttons">
-                                        <div class="reactions">
-                                            <i class="uil uil-thumbs-up"></i>
-                                            <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                    <form class="like-form" action="/likes" method="POST">
+                                        <div class="interaction-buttons">
+                                            <input type="hidden" name="id" value="{{.ID}}">
+                                            <input type="hidden" name="item_type" value="comment">
+                                            <button type="submit" name="type" value="like" class="reactions">
+                                                <i class="uil uil-thumbs-up"></i>
+                                                <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                            </button>
+                                            
+                                            <button type="submit" name="type" value="dislike" class="reactions">
+                                                <i class="uil uil-thumbs-down"></i>
+                                                <h6 class="dislike">{{.Dislikes}}</h6>
+                                            </button>                                                                                                
                                         </div>
-                                        
-                                        <div class="reactions">
-                                            <i class="uil uil-thumbs-down"></i>
-                                            <h6 class="dislike">{{.Dislikes}}</h6>
-                                        </div>                                                                                                
-                                    </div>
+                                    </form>
                                     <!-- <span><h6>Reply</h6></span>                                      -->
                                 </div>
 
@@ -703,17 +717,22 @@
                                     <div class="action-button">
 
                                         <!------------ LIKES AND DISLIKES ------------>
-                                        <div class="interaction-buttons">
-                                            <div class="reactions">
-                                                <i class="uil uil-thumbs-up"></i>
-                                                <h6 id="" class="like">{{.Likes}}</h6>                                    
+
+                                        <form class="like-form" action="/likes" method="POST">
+                                            <div class="interaction-buttons">
+                                                <input type="hidden" name="id" value="{{.ID}}">
+                                                <input type="hidden" name="item_type" value="comment">
+                                                <button type="submit" name="type" value="like" class="reactions">
+                                                    <i class="uil uil-thumbs-up"></i>
+                                                    <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                                </button>
+                                                
+                                                <button type="submit" name="type" value="dislike" class="reactions">
+                                                    <i class="uil uil-thumbs-down"></i>
+                                                    <h6 class="dislike">{{.Dislikes}}</h6>
+                                                </button>                                                                                                
                                             </div>
-                                            
-                                            <div class="reactions">
-                                                <i class="uil uil-thumbs-down"></i>
-                                                <h6 class="dislike">{{.Dislikes}}</h6>
-                                            </div>                                                                                                
-                                        </div>
+                                        </form>
                                         <!-- <span><h6>Reply</h6></span>                                      -->
                                     </div>
 
