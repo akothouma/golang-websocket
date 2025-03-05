@@ -44,7 +44,7 @@ func InitializeDB() (*sql.DB, error) {
 		user_uuid TEXT NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
-		media BLOB, --binary data - video, image and GIFs
+		-- media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid)
@@ -120,20 +120,3 @@ func InitializeDB() (*sql.DB, error) {
 	return dataBase, nil
 }
 
-/*
-	INSERT into categories(category_value) VALUES
-		('education'),
-		('politics'),
-		('sports'),
-		('lifestyle'),
-		('religion'),
-		('relationship and family'),
-		('Health'),
-		('Real-estate'),
-		('Governance'),
-		('technology'),
-    	('gaming'),
-    	('food'),
-    	('travel'),
-    	('other');
-*/
