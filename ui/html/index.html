@@ -298,6 +298,7 @@
         .create-post div{
             display: flex;    
         }
+
         .create-post h4{
             margin: 0.5rem;
         }
@@ -408,7 +409,7 @@
             margin-bottom: 1rem;
         }
         
-        .left .category-group{
+        .category-group{
             display: flex;
             flex-direction: column;
         }
@@ -416,7 +417,6 @@
         .category-group div{
             display: flex;
             align-items: center;
-            justify-content: space-between;
             padding: 0.8rem;
         }
         
@@ -511,6 +511,38 @@
                 </div>
                 <!-------------END OF  SIDEBAR ------------->
 
+                <div class="sidebar">
+                    
+                    <!------------------- CREATE POST ------------------->
+                    <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
+                        <h2>create Post</h2>
+        
+                        <h4>Title</h4>
+                        <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
+                        <h4>Content</h4>
+                        <div>
+                            <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
+                        </div>
+                        
+                        <label for="media"><i class="uil uil-image-plus"></i> </label>
+                        <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
+                        <span id="file-name">No file selected</span>   
+                        
+                        
+                        <h3>Choose the Categories:</h3>
+                        <div class="category-group"> 
+                            {{range .Categories}}
+                            <div class="category-option">                
+                                <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                                <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                            </div>
+                            {{end}}                                                
+                        </div>
+                        <input type="submit" value="Post" class="btn btn-primary">
+                    </form>
+                    <!------------------- END OF CREATE POST ------------------->
+                </div>
+
         </div>
 
             <!--====================== END OF LEFT ======================-->
@@ -520,37 +552,7 @@
             <!--====================== MIDDLE ======================-->
       <div class="middle">      
 
-        <div class="sidebar">
-                    
-            <!------------------- CREATE POST ------------------->
-            <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
-                <h2>create Post</h2>
-
-                <h4>Title</h4>
-                <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
-                <h4>Content</h4>
-                <div>
-                    <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
-                </div>
-                
-                <label for="media"><i class="uil uil-image-plus"></i> </label>
-                <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
-                <span id="file-name">No file selected</span>   
-                
-                
-                <h3>Choose the Categories:</h3>
-                <div class="category-group"> 
-                    {{range .Categories}}
-                    <div class="category-option">                
-                        <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
-                        <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
-                    </div>
-                    {{end}}                                                
-                </div>
-                <input type="submit" value="Post" class="btn btn-primary">
-            </form>
-            <!------------------- END OF CREATE POST ------------------->
-        </div>
+        
 
         <!---------------------- FEEDS/POSTS ---------------------->
                 <div class="feeds">
