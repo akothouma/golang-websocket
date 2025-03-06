@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // var database *models.ForumModel
@@ -170,13 +172,28 @@ func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
 				"CreatedAt":      createdAt,
 			})
 		}
+        
+
 
 		data := map[string]interface{}{
 			"Posts":      posts,
 			"Categories": categories,
 		}
 
-		RenderTemplates(w, "index.html", data)
+		userId:=r.Context().Value("user_uuid").(string)
+
+		query:=`
+		SELECT u.username
+		FROM users u 
+		WHERE u.user_uuid=?`
+        var username string
+		err=DB.QueryRow(query,userId).Scan(&username)
+		if err ==nil{
+           data["UserName"] = username
+		   data["Initial"] = string(username[0])
+		}
+
+		RenderTemplates(w, "posts.html", data)
 	}
 // }
 
