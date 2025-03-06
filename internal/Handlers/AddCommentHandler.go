@@ -1,13 +1,15 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-func (dep *Dependencies) AddCommentHandler(w http.ResponseWriter, r *http.Request) {
+func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -38,7 +40,7 @@ func (dep *Dependencies) AddCommentHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	commentID, err := dep.Forum.AddComment(postID, userID, content)
+	commentID, err := models.AddComment(postID, userID, content)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to add comment: %v", err), http.StatusInternalServerError)
 		return

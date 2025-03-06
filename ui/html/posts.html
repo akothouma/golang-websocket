@@ -129,7 +129,7 @@
             <button type="submit">💬 Comment</button>
         </form>
 
-        <p>Total Comments: <span id="comment-count-{{.ID}}">{{.Comments}}</span></p>
+        <!-- <p>Total Comments: <span id="comment-count-{{.ID}}">{{.Comments}}</span></p> -->
         <hr>
         {{range .Comments}}
         <div class="comment">
@@ -147,13 +147,13 @@
                     👎 Dislike (<span id="dislike-count-comment-{{.ID}}">{{.Dislikes}}</span>)
                 </button>
             </form>
-            <!-- Comment Form for the comments-->
-            <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
-                <input type="hidden" name="parent_id" value="{{.ID}}">
-                <input type="text" name="content" placeholder="Add a comment...">
-                <button type="submit">💬 Comment</button>
-            </form>
-            <hr>
+             <!-- Comment Form for the comments-->
+        <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
+            <input type="hidden" name="parent_comment_id" value="{{.ID}}">
+            <input type="text" name="content" placeholder="Add a comment...">
+            <button type="submit">💬 Comment</button>
+        </form>
+        <hr>
         </div>
         {{end}}
         <hr>
@@ -261,8 +261,39 @@
                 }
             });
         });
-    </script>
-    <script src="/ui/static/script.js"></script>
+
+        // Handle comment form submissions
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new URLSearchParams(new FormData(event.target));
+
+                try {
+                    const response = await fetch('/add_reply', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        alert('Comment created successfully');
+                        window.location.reload();
+                    } else if (response.status === 401) {
+                        alert('Failed to comment: user not logged in.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Failed to comment.');
+                    }
+                } catch (error) {
+                    console.error('Request failed:', error);
+                }
+            });
+        });
+       </script>
+<script src="/ui/static/script.js"></script>
 </body>
 
 </html>

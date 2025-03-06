@@ -8,8 +8,8 @@ import (
 func (dep *Dependencies) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	// models.InitTemplates(tempPath)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	models.InitTemplates("./ui/html/")
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../ui/static"))))
 
 	mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(dep.HomeHandler)))
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
@@ -20,7 +20,8 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
-	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(dep.AddCommentHandler)))
+	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
+	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(handlers.AddReplyHandler)))
 
 	mux.Handle("/likes", dep.AuthMiddleware(http.HandlerFunc(dep.LikeHandler)))
 
