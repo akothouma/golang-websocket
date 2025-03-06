@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
+	// "learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // var database *models.ForumModel
