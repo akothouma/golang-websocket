@@ -2,13 +2,15 @@ package main
 
 import (
 	"net/http"
+
+	handlers "learn.zone01kisumu.ke/git/clomollo/forum/internal/Handlers"
 	// middleware "learn.zone01kisumu.ke/git/clomollo/forum/Middleware"
 )
 
 func (dep *Dependencies) Routes() *http.ServeMux {
 	mux := http.NewServeMux()
 
-	models.InitTemplates("./ui/html/")
+	// models.InitTemplates("./ui/html/")
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("../ui/static"))))
 
 	mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(dep.HomeHandler)))
