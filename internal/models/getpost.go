@@ -14,8 +14,8 @@ var DB *sql.DB
 
 // var f *ForumModel
 
-func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
+	// if r.Method == http.MethodGet {
 		var categories []struct {
 			ID   string
 			Name string
@@ -23,7 +23,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
 		if err != nil {
 			http.Error(w, "Failed to load categories", http.StatusInternalServerError)
-			return
+			return 
 		}
 		defer categoryRows.Close()
 
@@ -45,7 +45,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
         `)
 		if err != nil {
 			http.Error(w, "Failed to load posts", http.StatusInternalServerError)
-			return
+			// return
 		}
 		defer rows.Close()
 
@@ -59,10 +59,10 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			if err := rows.Scan(&id, &username, &title, &content, &media, &contentType, &createdAt); err != nil {
 				fmt.Println(err)
 				http.Error(w, "Failed to parse posts", http.StatusInternalServerError)
-				return
+				return 
 			}
 
-			 // Convert media to base64 if it exists
+			// Convert media to base64 if it exists
 			var mediaBase64 string
 			if len(media) > 0 {
 				mediaBase64 = base64.StdEncoding.EncodeToString(media)
@@ -83,7 +83,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
                 WHERE pc.post_id = ?`, id)
 			if err != nil {
 				http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)
-				return
+				return 
 			}
 			defer categoryRows.Close()
 
@@ -103,13 +103,13 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", id).Scan(&likes)
 			if err != nil {
 				http.Error(w, "Failed to fetch likes", http.StatusInternalServerError)
-				return
+				return 
 			}
 
 			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", id).Scan(&dislikes)
 			if err != nil {
 				http.Error(w, "Failed to fetch dislikes", http.StatusInternalServerError)
-				return
+				return 
 			}
 
 			commentRows, err := DB.Query(`
@@ -121,7 +121,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
                 ORDER BY c.created_at DESC`, id)
 			if err != nil {
 				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-				return
+				return 
 			}
 			defer commentRows.Close()
 
@@ -133,7 +133,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 				if err := commentRows.Scan(&commentID, &commentContent, &commentCreatedAt, &commentLikes, &commentDislikes); err != nil {
 					http.Error(w, "Failed to parse comment", http.StatusInternalServerError)
-					return
+					return 
 				}
 
 				comments = append(comments, map[string]interface{}{
@@ -166,5 +166,6 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		}
 
 		RenderTemplates(w, "posts.html", data)
+		
 	}
-}
+// }
