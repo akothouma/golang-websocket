@@ -45,7 +45,7 @@ func InitializeDB() (*sql.DB, error) {
 		username TEXT NOT NULL,
 		title TEXT NOT NULL,
 		content TEXT NOT NULL, 
-		-- media BLOB, --binary data - video, image and GIFs
+		media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid),
@@ -95,7 +95,7 @@ func InitializeDB() (*sql.DB, error) {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT NOT NULL,
 		category_id TEXT,
-		FOREIGN KEY (post_id) REFERENCES posts(post_id), --make sure the types match
+		FOREIGN KEY (post_id) REFERENCES posts(id),
 		FOREIGN KEY (category_id) REFERENCES categories(id)
 		);
 		
@@ -106,9 +106,9 @@ func InitializeDB() (*sql.DB, error) {
 		('lifestyle'),
 		('religion'),
 		('relationship and family'),
-		('health'),
-		('real-estate'),
-		('governance'),
+		('Health'),
+		('Real-estate'),
+		('Governance'),
 		('technology'),
     	('gaming'),
     	('food'),
@@ -124,3 +124,20 @@ func InitializeDB() (*sql.DB, error) {
 	return dataBase, nil
 }
 
+/*
+	INSERT into categories(category_value) VALUES
+		('education'),
+		('politics'),
+		('sports'),
+		('lifestyle'),
+		('religion'),
+		('relationship and family'),
+		('Health'),
+		('Real-estate'),
+		('Governance'),
+		('technology'),
+    	('gaming'),
+    	('food'),
+    	('travel'),
+    	('other');
+*/

@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"log"
 )
 
 type Post struct {
@@ -18,16 +19,23 @@ type Post struct {
 }
 
 func (f *ForumModel) CreatePost(p *Post) error {
-	query := "INSERT INTO posts(post_id, user_uuid, title, content, content_type) VALUES(?, ?, ?, ?, ?)"
-	_, err := f.DB.Exec(query, p.PostId, p.UserId, p.Title, p.PostContent, p.ContentType)
+	var username string
+	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", p.UserId).Scan(&username)
+	if err != nil {
+		log.Printf("Failed to fetch username: %v", err)
+		return fmt.Errorf("failed to fetch username: %w", err)
+	}
+
+	query := "INSERT INTO posts(post_id, user_uuid, username, title, content,  media, content_type) VALUES(?, ?, ?, ?, ?, ?, ?)"
+	_, err = f.DB.Exec(query, p.PostId, p.UserId, username, p.Title, p.PostContent, p.Media, p.ContentType)
 	if err != nil {
 		fmt.Println(err)
-		return fmt.Errorf("failed to insert a post: %v\n", err)
+		return fmt.Errorf("failed to insert a post")
 	}
 
 	// Insert categories
-	fmt.Println("categories", p.Category)
-
+	fmt.Println("categories",p.Category)
+	
 	for _, categoryNames := range p.Category {
 		_, err = DB.Exec(`
             INSERT INTO post_categories (post_id, category_id)

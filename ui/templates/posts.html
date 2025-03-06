@@ -10,71 +10,28 @@
 
 
 <body>
-    <form action="/post" method="POST">
-        
-        <label>Title </label>
+    <form action="/" method="POST">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <input type="text" name="post_title" placeholder="title">
-        <label>Content </label>
         <input type="text" name="post_content" placeholder="What's up">
+        <input type="file" accept="image/*,video/*" id="media" name="media">
+        <label>Categories</label>
         <div>
-            <input type="checkbox" name="category" value="governance"  id="governance">
-            <label for="governance">Governance</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="health"  id="health">
-            <label for="health">Health</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="real-estate"  id="real-estate">
-            <label for="real-estate">Real Estate</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="education"  id="education">
-            <label for="education">Education</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="food"  id="food">
-            <label for="food">Food</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="gaming"  id="gaming">
-            <label for="gaming">Gaming</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="lifestyle"  id="lifestyle">
-            <label for="lifestyle">Lifestyle</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="politics"  id="politics">
-            <label for="politics">Politics</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="relationships"  id="relationships">
-            <label for="relationships">Relationships And Family</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="religion"  id="religion">
-            <label for="religion">Religion</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="sports"  id="sports">
-            <label for="sports">Sports</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="technology"  id="technology">
-            <label for="technology">Technology</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="travel"  id="travel">
-            <label for="travel">Travel</label> 
-        </div>
-        <div>
-            <input type="checkbox" name="category" value="other"  id="other">
-            <label for="other">Other</label> 
-        </div>
-        <button  type="submit">Create Post</button>
-    </form>
+            <input type="checkbox" id="education" name="education">
+            <label for="education">Education</label>
 
+        </div>
+        <div>
+            <input type="checkbox" id="politics" name="politics">
+            <label for="politics">Politics</label>
+
+        </div>
+        <div>
+            <input type="checkbox" id="sports" name="sports">
+            <label for="sports">Sports</label>
+
+        </div>
+    </form>
 </body>
 
 </html>

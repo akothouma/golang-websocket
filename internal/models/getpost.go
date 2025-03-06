@@ -2,186 +2,228 @@ package models
 
 import (
 	"database/sql"
-	"errors"
+	"encoding/base64"
 	"fmt"
+	"net/http"
 	"time"
 )
 
+// var database *models.ForumModel
 var DB *sql.DB
 
-type AllData struct {
-	Post       []PostData
-	Categories []PostCategory
-	Comments []Comments
-}
-type PostCategory struct {
-	ID   string
-	Name string
-}
+// var f *ForumModel
 
-type PostData struct {
-	Id          string
-	Username    string
-	Title       string
-	Content     string
-	CreatedAt   time.Time
-	ContentType *string
-	Likes int
-	Dislikes int
-}
-type Comments struct {
-	CommentId, 
-	CommentContent string
-	CommentCreatedAt time.Time
-	CommentLikes int
-	CommentDislikes int
-}
-
-func RenderPostsPage() (AllData, error) {
-	var allData AllData
-	categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
-	if err != nil {
-		// Error("Failed to load categories", http.StatusInternalServerError)
-		return allData, errors.New("Failed to load categories")
-	}
-	defer categoryRows.Close()
-
-	allCategories := []PostCategory{} //Populate to all data
-	for categoryRows.Next() {
-		var cat PostCategory
-
-		if err := categoryRows.Scan(&cat.ID, &cat.Name); err != nil {
-			continue
+func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		var categories []struct {
+			ID   string
+			Name string
 		}
-		allCategories = append(allCategories, cat)
-	}
-
-	rows, err := DB.Query(`
-            SELECT p.post_id, u.username, p.title, p.content, p.content_type, p.created_at 
-            FROM posts p 
-            JOIN users u ON p.user_uuid = u.user_uuid
-        `)
-	if err != nil {
-		// http.Error(w, "Failed to load posts", http.StatusInternalServerError)
-		return allData, errors.New("Failed to load posts")
-	}
-	defer rows.Close()
-
-	var posts PostData
-	var AllPosts []PostData
-	var AllComments []Comments
-	for rows.Next() {
-		if err := rows.Scan(&posts.Id, &posts.Username, &posts.Title, &posts.Content, &posts.ContentType, &posts.CreatedAt); err != nil {
-			// fmt.Println(err)
-			// http.Error(w, "Failed to parse posts", http.StatusInternalServerError)
-			return allData, fmt.Errorf("Failed to parse posts:\n%v", err)
-		}
-
-		// Handle contentType
-		// var contentTypeStr string
-		// if posts.ContentType != nil {
-		// 	contentTypeStr = *posts.ContentType // Dereference the pointer
-		// } else {
-		// 	contentTypeStr = "" // Or set a default value if needed
-		// }
-		 
-
-		categoryRows, err := DB.Query(`
-                SELECT c.id, c.name 
-                FROM categories c 
-                JOIN post_categories pc ON c.name = pc.category_id 
-                WHERE pc.post_id = ?`, posts.Id)
+		categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
 		if err != nil {
-			// http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)
-			return allData, errors.New("Failed to fetch post categories")
+			http.Error(w, "Failed to load categories", http.StatusInternalServerError)
+			return
 		}
 		defer categoryRows.Close()
 
-		var postCategories []map[string]string
 		for categoryRows.Next() {
-			var catID, catName string
-			if err := categoryRows.Scan(&catID, &catName); err != nil {
+			var cat struct {
+				ID   string
+				Name string
+			}
+			if err := categoryRows.Scan(&cat.ID, &cat.Name); err != nil {
 				continue
 			}
-			postCategories = append(postCategories, map[string]string{
-				"ID":   catID,
-				"Name": catName,
+			categories = append(categories, cat)
+		}
+
+		rows, err := DB.Query(`
+            SELECT p.post_id, u.username, p.title, p.content, p.media, p.content_type, p.created_at 
+            FROM posts p 
+            JOIN users u ON p.user_uuid = u.user_uuid
+        `)
+		if err != nil {
+			http.Error(w, "Failed to load posts", http.StatusInternalServerError)
+			return
+		}
+		defer rows.Close()
+
+		var posts []map[string]interface{}
+		for rows.Next() {
+			var id, username, title, content string
+			var createdAt time.Time
+			var media []byte
+			var contentType *string
+
+			if err := rows.Scan(&id, &username, &title, &content, &media, &contentType, &createdAt); err != nil {
+				fmt.Println(err)
+				http.Error(w, "Failed to parse posts", http.StatusInternalServerError)
+				return
+			}
+
+			// Convert media to base64 if it exists
+			var mediaBase64 string
+			if len(media) > 0 {
+				mediaBase64 = base64.StdEncoding.EncodeToString(media)
+			}
+
+			// Handle contentType
+			var contentTypeStr string
+			if contentType != nil {
+				contentTypeStr = *contentType // Dereference the pointer
+			} else {
+				contentTypeStr = "" // Or set a default value if needed
+			}
+
+			categoryRows, err := DB.Query(`
+                SELECT c.id, c.name 
+                FROM categories c 
+                JOIN post_categories pc ON c.name = pc.category_id 
+                WHERE pc.post_id = ?`, id)
+			if err != nil {
+				http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)
+				return
+			}
+			defer categoryRows.Close()
+
+			var postCategories []map[string]string
+			for categoryRows.Next() {
+				var catID, catName string
+				if err := categoryRows.Scan(&catID, &catName); err != nil {
+					continue
+				}
+				postCategories = append(postCategories, map[string]string{
+					"ID":   catID,
+					"Name": catName,
+				})
+			}
+
+			var likes, dislikes int
+			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", id).Scan(&likes)
+			if err != nil {
+				http.Error(w, "Failed to fetch likes", http.StatusInternalServerError)
+				return
+			}
+
+			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", id).Scan(&dislikes)
+			if err != nil {
+				http.Error(w, "Failed to fetch dislikes", http.StatusInternalServerError)
+				return
+			}
+
+			commentRows, err := GetAllCommentsForPost(id)
+			if err != nil {
+				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
+				fmt.Println("post id:", id, err.Error())
+				return
+			}
+
+			var comments []map[string]interface{}
+
+			for _, comment := range commentRows {
+				var commentLikes, commentDislikes int
+
+				query := `SELECT 
+					(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'like') AS likes,
+					(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'dislike') AS dislikes
+				FROM comments c
+				WHERE c.id = ?;`
+
+				err := DB.QueryRow(query, comment.ID).Scan(&commentLikes, &commentDislikes)
+				if err != nil {
+					http.Error(w, "Failed to parse comment likes", http.StatusInternalServerError)
+					return
+				}				
+
+				replies, err := CommentREplies(comment, w)
+				if err != nil {
+					http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
+					return
+				}
+
+				comments = append(comments, map[string]interface{}{
+					"ID":        comment.ID,
+					"CommentUsername":  comment.UserName,
+					"CommentInitial":   string(comment.UserName[0]),
+					"Content":   comment.Content,
+					"CreatedAt": comment.CreatedAt,
+					"Likes":     commentLikes,
+					"Dislikes":  commentDislikes,
+					"Replies":   replies,
+				})
+
+			}
+
+			posts = append(posts, map[string]interface{}{
+				"ID":             id,
+				"Title":          title,
+				"Content":        content,
+				"Likes":          likes,
+				"Dislikes":       dislikes,
+				"Comments":       comments,
+				"CommentsLenght": len(comments),
+				"Username":       username,
+				"Initial":        string(username[0]),
+				"Categories":     postCategories,
+				"Media":          mediaBase64,
+				"ContentType":    contentTypeStr,
+				"CreatedAt":      createdAt,
 			})
 		}
 
-		
-		err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", posts.Id).Scan(&posts.Likes)
-		if err != nil {
-			// http.Error(w, "Failed to fetch likes", http.StatusInternalServerError)
-			// return
-			return allData, errors.New("Failed to fetch likes")
+		data := map[string]interface{}{
+			"Posts":      posts,
+			"Categories": categories,
 		}
 
-		err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", posts.Id).Scan(&posts.Dislikes)
-		if err != nil {
-			// http.Error(w, "Failed to fetch dislikes", http.StatusInternalServerError)
-			// return
-			return allData, errors.New("Failed to fetch dislikes")
-		}
+		RenderTemplates(w, "index.html", data)
+	}
+}
 
-		commentRows, err := DB.Query(`
-                SELECT c.id, c.content, c.created_at,
-                (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'like') as likes,
-                (SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'dislike') as dislikes
-                FROM comments c
-                WHERE c.post_id = ?
-                ORDER BY c.created_at DESC`, posts.Id)
-		if err != nil {
-			// http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-			// return
-			return allData, errors.New("Failed to fetch comments")
-		}
-		defer commentRows.Close()
-
-		var comment Comments
-		for commentRows.Next() {
-			
-			if err := commentRows.Scan(&comment.CommentId, &comment.CommentContent, &comment.CommentCreatedAt, &comment.CommentLikes, &comment.CommentDislikes); err != nil {
-				// http.Error(w, "Failed to parse comment", http.StatusInternalServerError)
-				return allData, errors.New("Failed to parse comments")
-			}
-			AllComments = append(AllComments, comment)
-		}
-		//Populate all posts with post data
-		AllPosts = append(AllPosts, posts)
-
-	
-
-		// posts = append(posts, map[string]interface{}{
-		// 	"ID":          id,
-		// 	"Title":       title,
-		// 	"Content":     content,
-		// 	"Likes":       likes,
-		// 	"Dislikes":    dislikes,
-		// 	"Comments":    comments,
-		// 	"Username":    username,
-		// 	"Categories":  postCategories,
-		// 	"ContentType": contentTypeStr,
-		// 	"CreatedAt":   createdAt,
-		// })
+func CommentREplies(comment Comment, w http.ResponseWriter)([]map[string]interface{}, error){
+	replyRow, err := GetAllRepliesForComment(comment.ID)
+	if err != nil {
+		http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
+		return nil, err
 	}
 	
-	allData.Categories = allCategories
-	allData.Post = AllPosts
-	allData.Comments = AllComments
-	// var data map[string]interface{}
-	// data = map[string]interface{}{
-	// 	"Posts":      posts,
-	// 	"Categories": categories,
-	// }
+	var replies []map[string]interface{}
 
-	// // RenderTemplates(w, "posts.html", data)
-	// postHtml, err := template.ParseFiles("./ui/html/posts.html")
-	// if err != nil {
-	// 	// fmt.Println("Error loading posts html\n",err )
-	// 	fmt.Println("")
-	// }
-	// postHtml.Execute(w, data)
-	// }
-	return allData, nil
+	for _, reply := range replyRow {
+
+		var replyLikes, replyDislikes int
+
+		query := `SELECT 
+			(SELECT COUNT(*) FROM comment_likes WHERE comment_id = r.id AND type = 'like') AS likes,
+			(SELECT COUNT(*) FROM comment_likes WHERE comment_id = r.id AND type = 'dislike') AS dislikes
+			FROM comments r
+			WHERE r.id = ?;`
+
+		err := DB.QueryRow(query, reply.ID).Scan(&replyLikes, &replyDislikes)
+		if err != nil {
+			http.Error(w, "Failed to parse reply likes", http.StatusInternalServerError)
+			fmt.Println(err)
+			return nil, err
+		}
+		
+		replies2, err := CommentREplies(reply, w)
+		if err != nil {
+			http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
+			return nil, err
+		}
+
+		replies = append(replies, map[string]interface{}{
+			"ID":        reply.ID,
+			"ReplyUsername":  reply.UserName,
+			"ReplyInitial":   string(reply.UserName[0]),
+			"Content":   reply.Content,
+			"CreatedAt": reply.CreatedAt,
+			"Likes":     replyLikes,
+			"Dislikes":  replyDislikes,
+			"Replies":   replies2,
+		})
+
+	}
+
+	return replies, nil
 }
