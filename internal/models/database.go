@@ -91,8 +91,8 @@ func InitializeDB() (*sql.DB, error) {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
 		post_id TEXT NOT NULL,
 		category_id TEXT,
-		FOREIGN KEY (post_id) REFERENCES posts(id),
-		FOREIGN KEY (category_id) REFERENCES categories(id)
+		FOREIGN KEY (post_id) REFERENCES posts(post_id),
+		FOREIGN KEY (category_id) REFERENCES categories(name)
 		);
 		
 		INSERT OR IGNORE INTO categories (name) VALUES
