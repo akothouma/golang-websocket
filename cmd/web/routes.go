@@ -18,11 +18,14 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	// mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	mux.Handle("/allposts", http.HandlerFunc(models.RenderPostsPage))
 	
+	
+
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
 	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(dep.AddCommentHandler)))
+	mux.Handle("/filtered_posts",http.HandlerFunc(dep.PostsByFilters))
 
 	mux.Handle("/likes", dep.AuthMiddleware(http.HandlerFunc(dep.LikeHandler)))
 
