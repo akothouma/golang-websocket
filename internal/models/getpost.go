@@ -133,7 +133,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				if err != nil {
 					http.Error(w, "Failed to parse comment likes", http.StatusInternalServerError)
 					return
-				}				
+				}
 
 				replies, err := CommentREplies(comment, w)
 				if err != nil {
@@ -142,17 +142,17 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				}
 
 				comments = append(comments, map[string]interface{}{
-					"ID":        comment.ID,
-					"CommentUsername":  comment.UserName,
-					"CommentInitial":   string(comment.UserName[0]),
-					"Content":   comment.Content,
-					"CreatedAt": comment.CreatedAt,
-					"Likes":     commentLikes,
-					"Dislikes":  commentDislikes,
-					"Replies":   replies,
+					"ID":              comment.ID,
+					"CommentUsername": comment.UserName,
+					"CommentInitial":  string(comment.UserName[0]),
+					"Content":         comment.Content,
+					"CreatedAt":       comment.CreatedAt,
+					"Likes":           commentLikes,
+					"Dislikes":        commentDislikes,
+					"Replies":         replies,
 				})
 
-			}
+			}			
 
 			posts = append(posts, map[string]interface{}{
 				"ID":             id,
@@ -180,13 +180,13 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func CommentREplies(comment Comment, w http.ResponseWriter)([]map[string]interface{}, error){
+func CommentREplies(comment Comment, w http.ResponseWriter) ([]map[string]interface{}, error) {
 	replyRow, err := GetAllRepliesForComment(comment.ID)
 	if err != nil {
 		http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
 		return nil, err
 	}
-	
+
 	var replies []map[string]interface{}
 
 	for _, reply := range replyRow {
@@ -205,7 +205,7 @@ func CommentREplies(comment Comment, w http.ResponseWriter)([]map[string]interfa
 			fmt.Println(err)
 			return nil, err
 		}
-		
+
 		replies2, err := CommentREplies(reply, w)
 		if err != nil {
 			http.Error(w, "Failed to fetch Replies", http.StatusInternalServerError)
@@ -213,17 +213,46 @@ func CommentREplies(comment Comment, w http.ResponseWriter)([]map[string]interfa
 		}
 
 		replies = append(replies, map[string]interface{}{
-			"ID":        reply.ID,
-			"ReplyUsername":  reply.UserName,
-			"ReplyInitial":   string(reply.UserName[0]),
-			"Content":   reply.Content,
-			"CreatedAt": reply.CreatedAt,
-			"Likes":     replyLikes,
-			"Dislikes":  replyDislikes,
-			"Replies":   replies2,
+			"ID":            reply.ID,
+			"ReplyUsername": reply.UserName,
+			"ReplyInitial":  string(reply.UserName[0]),
+			"Content":       reply.Content,
+			"CreatedAt":     reply.CreatedAt,
+			"Likes":         replyLikes,
+			"Dislikes":      replyDislikes,
+			"Replies":       replies2,
 		})
 
 	}
 
 	return replies, nil
 }
+
+
+
+
+
+// type postCategory struct {
+// 	ID   string
+// 	Name string
+// }
+
+// type Post struct {
+// 	Id             int
+// 	PostId         string
+// 	UserId         string
+// 	Media          []byte
+// 	Category       []string
+// 	Title          string
+// 	Content        string
+// 	ContentType    string
+// 	TimeStamp      string
+// 	Likes          int
+// 	Dislikes       int
+// 	Comments       Comment
+// 	CommentsLenght int
+// 	Username       string
+// 	Initial        string
+// 	Categories     postCategory
+// 	CreatedAt      time.Time
+// }

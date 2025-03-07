@@ -87,7 +87,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			UserId:      userId,
 			Category:    categories,
 			Title:       title,
-			PostContent: postContent,
+			Content: postContent,
 		}
  fmt.Println("Categories1",post.Category)
 		// Handle file upload

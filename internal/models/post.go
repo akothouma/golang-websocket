@@ -13,10 +13,11 @@ type Post struct {
 	Media       []byte
 	Category    []string
 	Title       string
-	PostContent string
+	Content string
 	ContentType string
 	TimeStamp   string
 }
+
 
 func (f *ForumModel) CreatePost(p *Post) error {
 	var username string
@@ -27,7 +28,7 @@ func (f *ForumModel) CreatePost(p *Post) error {
 	}
 
 	query := "INSERT INTO posts(post_id, user_uuid, username, title, content,  media, content_type) VALUES(?, ?, ?, ?, ?, ?, ?)"
-	_, err = f.DB.Exec(query, p.PostId, p.UserId, username, p.Title, p.PostContent, p.Media, p.ContentType)
+	_, err = f.DB.Exec(query, p.PostId, p.UserId, username, p.Title, p.Content, p.Media, p.ContentType)
 	if err != nil {
 		fmt.Println(err)
 		return fmt.Errorf("failed to insert a post")
@@ -56,7 +57,7 @@ func (f *ForumModel) FindPostById(id string) (*Post, error) {
 	query := "SELECT id,user_uuid,category,title,content FROM posts WHERE id=?"
 	row := f.DB.QueryRow(query, id)
 	post := Post{}
-	err := row.Scan(&post.PostId, &post.UserId, &post.Title, &post.PostContent)
+	err := row.Scan(&post.PostId, &post.UserId, &post.Title, &post.Content)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, err
@@ -75,7 +76,7 @@ func (f *ForumModel) AllPosts() ([]Post, error) {
 	}
 	for rows.Next() {
 		var p Post
-		err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Title, &p.PostContent, &p.TimeStamp)
+		err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Title, &p.Content, &p.TimeStamp)
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +95,7 @@ func (f *ForumModel) FilterCategories(categories []string) ([]Post, error) {
 		}
 		for rows.Next() {
 			var p Post
-			err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.PostContent, &p.ContentType, &p.TimeStamp)
+			err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.Content, &p.ContentType, &p.TimeStamp)
 			if err != nil {
 				return nil, err
 			}
