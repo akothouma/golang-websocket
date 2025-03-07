@@ -295,6 +295,11 @@
             margin-left: 0rem;
         }
         
+        .uil:hover{
+            color: var(--color-primary);
+            cursor: pointer;
+        }
+
         .create-post div{
             display: flex;    
         }
@@ -558,7 +563,7 @@
                 <div class="feeds">
                     {{range .Posts}}
                     <!---------------------- FEED 1 ---------------------->
-                    <div class="feed">
+                    <div class="feed" id="{{.ID}}">
 
                         <!--======= user  =======-->
                         <div class="head">                            
@@ -619,7 +624,7 @@
 
                             <!--======= comment button =======-->
                             <div class="comment">
-                                <span><i class="uil uil-comment-alt-dots"></i></span>
+                                <span><i class="uil uil-comment-alt-dots" id="{{.ID}}"></i></span>
                                 <span>{{.CommentsLenght}}</span>
                             </div>
                             <!--======= END OF comment button =======-->
@@ -627,40 +632,45 @@
                             
                         <!------------ END OF LIKES AND DISLIKES ------------>
 
-                        <!----------------- Comment Form ----------------->
-                        <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
-                            <input type="hidden" name="post_id" value="{{.ID}}">
-                            <input type="text" name="content" placeholder="Add a comment...">    
-                            <input type="submit" value="Comment" class="btn btn-primary">
-                        </form>
-                        <!----------------- END OF Comment Form ----------------->
+                       
 
-                        <div class="comments" >
+                        <div class="comments" style="display: block;" id="comment-{{.ID}}">
+                            <p>Post ID {{.ID}}</p>
+                             <!----------------- Comment Form ----------------->
+                            <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
+                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <input type="text" name="content" placeholder="Add a comment...">    
+                                <input type="submit" value="Comment" class="btn btn-primary" >
+                            </form>
+                            <!----------------- END OF Comment Form ----------------->
 
                             {{range .Comments}}
                             <div class="comment_card">
-                                <div class="head">
-                                    <!--======= user  =======-->
+
+                                <!--============== user Profile ==============-->
+                                <div class="head">                                    
                                     <div class="user">
                                         <div class="profile-photo">
                                             <!-- <img src="images/profile-10.jpg"> -->
-                                            <p>{{.CommentInitial}}</p>
+                                            <p>{{.Initial}}</p>
                                         </div>
         
                                         <div class="info">
-                                            <h3>{{.CommentUsername}}</h3>
+                                            <h3>{{.UserName}}</h3>
                                             <small>Dubai, 15minute ago</small>
                                         </div>                                
-                                    </div>                                    
-                                    <!--======= END OF user  =======-->
-                                    
+                                    </div>
                                 </div>
+                                <!--============== End Of user Profile  ==============-->
+
+
 
                                 <!--======= comment CONTENT  =======-->
                                 <div class="feed-content">
                                     <p>{{.Content}}</p>
                                 </div>
                                 <!--======= END OF comment CONTENT  =======-->
+
 
 
                                 <div class="action-button">
@@ -681,71 +691,83 @@
                                             </button>                                                                                                
                                         </div>
                                     </form>
-                                    <!-- <span><h6>Reply</h6></span>                                      -->
+                                    <span><h6 class="uil reply-btn" id="{{.ID}}">Reply {{.RepliesLenght}}</h6></span>
+                                    
                                 </div>
 
-                                <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
-                                    <input type="hidden" name="parent_comment_id" value="{{.ID}}">
-                                    <input type="text" name="content" placeholder="Add a reply...">
-                                    <input type="submit" value="Reply" class="btn btn-primary">
-                                </form>
+                                
 
-                                {{range .Replies}}
-                                <div class="comment_card">
-                                    <div class="head">
-                                        <!--======= user  =======-->
-                                        <div class="user">
-                                            <div class="profile-photo">
-                                                <!-- <img src="images/profile-10.jpg"> -->
-                                                <p>{{.ReplyInitial}}</p>
-                                            </div>
-            
-                                            <div class="info">
-                                                <h3>{{.ReplyUsername}}</h3>
-                                                <small>Dubai, 15minute ago</small>
-                                            </div>                                
-                                        </div>                                    
-                                        <!--======= END OF user  =======-->
-                                        
-                                    </div>
+                                <div id="reply-{{.ID}}" style="display: block;">
+                                    <p>Comment ID {{.ID}}</p>
 
-                                    <!--======= comment CONTENT  =======-->
-                                    <div class="feed-content">
-                                        <p>{{.Content}}</p>
-                                    </div>
-                                    <!--======= END OF comment CONTENT  =======-->
-
-
-                                    <div class="action-button">
-
-                                        <!------------ LIKES AND DISLIKES ------------>
-
-                                        <form class="like-form" action="/likes" method="POST">
-                                            <div class="interaction-buttons">
-                                                <input type="hidden" name="id" value="{{.ID}}">
-                                                <input type="hidden" name="item_type" value="comment">
-                                                <button type="submit" name="type" value="like" class="reactions">
-                                                    <i class="uil uil-thumbs-up"></i>
-                                                    <h6 id="" class="like">{{.Likes}}</h6>                                    
-                                                </button>
-                                                
-                                                <button type="submit" name="type" value="dislike" class="reactions">
-                                                    <i class="uil uil-thumbs-down"></i>
-                                                    <h6 class="dislike">{{.Dislikes}}</h6>
-                                                </button>                                                                                                
-                                            </div>
-                                        </form>
-                                        <!-- <span><h6>Reply</h6></span>                                      -->
-                                    </div>
-
-                                    <!-- <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
+                                    <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
                                         <input type="hidden" name="parent_comment_id" value="{{.ID}}">
-                                        <input type="text" name="content" placeholder="Add a comment...">
+                                        <input type="text" name="content" placeholder="Add a reply...">
                                         <input type="submit" value="Reply" class="btn btn-primary">
-                                    </form> -->
+                                    </form>
+
+
+                                    {{range .Replies}}
+                                    <div class="comment_card">
+
+                                        <!--============== user Profile ==============-->
+                                        <div class="head">                                        
+                                            <div class="user">
+                                                <div class="profile-photo">
+                                                    <!-- <img src="images/profile-10.jpg"> -->
+                                                    <p>{{.ReplyInitial}}</p>
+                                                </div>
+                
+                                                <div class="info">
+                                                    <h3>{{.UserName}}</h3>
+                                                    <small>Dubai, 15minute ago</small>
+                                                </div>                                
+                                            </div>                                   
+                                        </div>
+                                        <!--============== End OF user Profile ==============-->
+                                        
+
+                                        <!--======= comment CONTENT  =======-->
+                                        <div class="feed-content">
+                                            <p>{{.Content}}</p>
+                                        </div>
+                                        <!--======= END OF comment CONTENT  =======-->
+
+
+                                        <div class="action-button">
+
+                                            <!------------ LIKES AND DISLIKES ------------>
+
+                                            <form class="like-form" action="/likes" method="POST">
+                                                <div class="interaction-buttons">
+                                                    <input type="hidden" name="id" value="{{.ID}}">
+                                                    <input type="hidden" name="item_type" value="comment">
+                                                    <button type="submit" name="type" value="like" class="reactions">
+                                                        <i class="uil uil-thumbs-up"></i>
+                                                        <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                                    </button>
+                                                    
+                                                    <button type="submit" name="type" value="dislike" class="reactions">
+                                                        <i class="uil uil-thumbs-down"></i>
+                                                        <h6 class="dislike">{{.Dislikes}}</h6>
+                                                    </button>                                                                                                
+                                                </div>
+                                            </form>
+                                            <span><h6 class="uil reply-btn" id="{{.ID}}">Reply {{.RepliesLenght}}</h6></span>
+                                        </div>
+
+                                        <!-- <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
+                                            <input type="hidden" name="parent_comment_id" value="{{.ID}}">
+                                            <input type="text" name="content" placeholder="Add a comment...">
+                                            <input type="submit" value="Reply" class="btn btn-primary">
+                                        </form> -->
+
+                                    </div>
+                                    {{end}}
 
                                 </div>
-                                {{end}}
+
+                                
 
                             </div>
                             {{end}}
@@ -790,6 +812,34 @@
         let fileName = this.files.length ? this.files[0].name : "No file selected";
         document.getElementById("file-name").textContent = fileName;
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".uil-comment-alt-dots").forEach(icon => {
+            icon.addEventListener("click", function () {
+                let commentId = this.id; 
+                let commentElement = document.getElementById("comment-" + commentId);
+                console.log("Comment btn clicked and ID = ", replyId)
+                
+                if (commentElement) {
+                    commentElement.style.display = commentElement.style.display === "block" ? "none" : "block";
+                }
+            });
+        });
+
+        document.querySelectorAll(".reply-btn").forEach(btn => {
+            btn.addEventListener("click", function () {                
+                let replyId = this.id; 
+                let replyElement = document.getElementById("reply-" + replyId);
+                console.log("reply btn clicked and ID = ", replyId)
+                
+                if (replyElement) {
+                    replyElement.style.display = replyElement.style.display === "block" ? "none" : "block";
+                }
+            });
+        });
+        
+    });
+
 
     // Handle post creation form submission
     document.getElementById('createPostForm').addEventListener('submit', async (e) => {
