@@ -82,25 +82,54 @@ func (f *ForumModel) AllPosts() ([]Post, error) {
 		}
 		posts = append(posts, p)
 	}
+	fmt.Println("All posts",posts)
 	return posts, nil
 }
 
 func (f *ForumModel) FilterCategories(categories []string) ([]Post, error) {
 	posts := []Post{}
 	for _, categoryID := range categories {
-		query := "SELECT post_id, user_uuid, title, content,  media, content_type FROM posts p JOIN post_categories pc ON p.post_id=pc.post_id AND pc.category_id=?"
-		rows, err := f.DB.Query(query, categoryID)
+		var postId string
+		query1:=`SELECT post_id FROM post_categories WHERE category_id = ?`
+		rows, err := f.DB.Query(query1, categoryID)
 		if err != nil {
+			fmt.Println(err)
 			return nil, err
 		}
-		for rows.Next() {
+
+		for rows.Next(){
+			rows.Scan( &postId)
+			query := `SELECT post_id, user_uuid, title, content,  media, content_type, created_at
+			FROM posts p 		
+			WHERE post_id = ?`
+
 			var p Post
-			err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.Content, &p.ContentType, &p.TimeStamp)
+			err = f.DB.QueryRow(query, postId).Scan(&p.PostId, &p.UserId,  &p.Title,  &p.Content, &p.Media, &p.ContentType, &p.TimeStamp)
+			
 			if err != nil {
 				return nil, err
 			}
 			posts = append(posts, p)
 		}
+
+
+
+
+
+		
+		// rows, err =
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return nil, err
+		// }
+		// for rows.Next() {
+			
+		// 	err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.PostContent, &p.ContentType, &p.TimeStamp)
+		// 	if err != nil {
+		// 		return nil, err
+		// 	}
+		// 	posts = append(posts, p)
+		// }
 	}
 	return posts, nil
 }

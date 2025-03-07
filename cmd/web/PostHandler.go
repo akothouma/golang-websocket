@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"fmt"
 	"html/template"
 	"io"
@@ -19,38 +18,38 @@ const (
 	ChunkSize   = 4096             // Read/write in 4KB chunks
 )
 
-var DB *sql.DB
+// var DB *sql.DB
 
 // /home/clomollo/forum/ui/html/posts.html
 func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
-		// Fetch categories for the form
-		rows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
-		if err != nil {
+	// if r.Method == http.MethodGet {
+	// 	// Fetch categories for the form
+	// 	rows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
+	// 	if err != nil {
 
-			http.Error(w, "Failed to load categories", http.StatusInternalServerError)
-			return
-		}
-		defer rows.Close()
-		var categories []struct {
-			ID   string
-			Name string
-		}
-		for rows.Next() {
-			var cat struct {
-				ID   string
-				Name string
-			}
-			if err := rows.Scan(&cat.ID, &cat.Name); err != nil {
-				continue
-			}
-			categories = append(categories, cat)
-		}
-		RenderTemplates(w, "posts.html", map[string]interface{}{
-			"Categories": categories,
-		})
-		return
-	}
+	// 		http.Error(w, "Failed to load categories", http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	defer rows.Close()
+	// 	var categories []struct {
+	// 		ID   string
+	// 		Name string
+	// 	}
+	// 	for rows.Next() {
+	// 		var cat struct {
+	// 			ID   string
+	// 			Name string
+	// 		}
+	// 		if err := rows.Scan(&cat.ID, &cat.Name); err != nil {
+	// 			continue
+	// 		}
+	// 		categories = append(categories, cat)
+	// 	}
+	// 	RenderTemplates(w, "posts.html", map[string]interface{}{
+	// 		"Categories": categories,
+	// 	})
+	// 	return
+	// }
 	if r.Method == http.MethodPost {
 		log.Println("Method not allowed")
 
@@ -89,7 +88,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			Title:       title,
 			Content: postContent,
 		}
- fmt.Println("Categories1",post.Category)
+
 		// Handle file upload
 		file, header, err := r.FormFile("media")
 		if err == nil {
@@ -129,6 +128,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 		if err := dep.Forum.CreatePost(&post); err != nil {
 			log.Println("Error while quering post db: ", err)
+			return
 		}
 
 		// http.Redirect(w, r, "/allposts", http.StatusSeeOther)
@@ -137,24 +137,25 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (dep *Dependencies) AllPostsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	PostsTemplate, err := template.ParseFiles("./ui/html/allposts.html")
-	if err != nil {
-		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
-		return
-	}
-	posts, err := dep.Forum.AllPosts()
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
-		return
-	}
-	PostsTemplate.ExecuteTemplate(w, "allposts.html", &posts)
-}
+// func (dep *Dependencies) AllPostsHandler(w http.ResponseWriter, r *http.Request) {
+// 	if r.Method != http.MethodGet {
+// 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+// 		return
+// 	}
+// 	PostsTemplate, err := template.ParseFiles("./ui/html/posts.html")
+// 	if err != nil {
+// 		http.Error(w, "NOT FOUND\nError parsing post templates", http.StatusNotFound)
+// 		return
+// 	}
+// 	posts, err := dep.Forum.AllPosts()
+// 	if err != nil {
+// 		fmt.Println(err)
+// 		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
+// 		return
+// 	}
+
+// 	PostsTemplate.ExecuteTemplate(w, "allposts.html", &posts)
+// }
 
 func isValidFileType(ext string) bool {
 	validTypes := map[string]bool{
@@ -188,18 +189,35 @@ func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	FilteredTemplate, err := template.ParseFiles("./ui/html/allposts.html")
+	FilteredTemplate, err := template.ParseFiles("./ui/html/posts.html")
 	if err != nil {
 		http.Error(w, "Failed to parse file", http.StatusInternalServerError)
 		return
 	}
 
-	categories := r.Form["category[]"]
-	filteredPosts, err := dep.Forum.FilterCategories(categories)
+	if err := r.ParseForm(); err != nil {
+		fmt.Println("Error parsing form values", err)
+		return
+	}
+	//var data interface{}
+	categories := r.Form["categories"]
+	// if len(categories) == 0 {
+	// 	data = models.RenderPostsPage()
+
+	// }else {
+
+	fmt.Println("categoriesfilter", categories)
+	posts, err := dep.Forum.FilterCategories(categories)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
 		return
 	}
-	FilteredTemplate.ExecuteTemplate(w, "allposts.html", &filteredPosts)
+			
+	// data=map[string]interface{}{
+	// 	"Posts":posts,
+	// }
+	fmt.Println(posts)
+	FilteredTemplate.ExecuteTemplate(w, "posts.html", posts)
+	// w.WriteHeader(http.StatusOK)
 }

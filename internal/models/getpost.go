@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	// "learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // var database *models.ForumModel
@@ -13,8 +15,8 @@ var DB *sql.DB
 
 // var f *ForumModel
 
-func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
-	if r.Method == http.MethodGet {
+func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
+	// if r.Method == http.MethodGet {
 		var categories []struct {
 			ID   string
 			Name string
@@ -22,7 +24,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
 		if err != nil {
 			http.Error(w, "Failed to load categories", http.StatusInternalServerError)
-			return
+			return 
 		}
 		defer categoryRows.Close()
 
@@ -44,7 +46,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
         `)
 		if err != nil {
 			http.Error(w, "Failed to load posts", http.StatusInternalServerError)
-			return
+			// return
 		}
 		defer rows.Close()
 
@@ -58,9 +60,10 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			if err := rows.Scan(&id, &username, &title, &content, &media, &contentType, &createdAt); err != nil {
 				fmt.Println(err)
 				http.Error(w, "Failed to parse posts", http.StatusInternalServerError)
-				return
+				return 
 			}
 
+			// Convert media to base64 if it exists
 			// Convert media to base64 if it exists
 			var mediaBase64 string
 			if len(media) > 0 {
@@ -82,7 +85,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
                 WHERE pc.post_id = ?`, id)
 			if err != nil {
 				http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)
-				return
+				return 
 			}
 			defer categoryRows.Close()
 
@@ -102,20 +105,19 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", id).Scan(&likes)
 			if err != nil {
 				http.Error(w, "Failed to fetch likes", http.StatusInternalServerError)
-				return
+				return 
 			}
 
 			err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", id).Scan(&dislikes)
 			if err != nil {
 				http.Error(w, "Failed to fetch dislikes", http.StatusInternalServerError)
-				return
+				return 
 			}
 
 			commentRows, err := GetAllCommentsForPost(id)
 			if err != nil {
 				http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-				fmt.Println("post id:", id, err.Error())
-				return
+				return 
 			}
 
 			var comments []map[string]interface{}
@@ -170,15 +172,30 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 				"CreatedAt":      createdAt,
 			})
 		}
+        
+
 
 		data := map[string]interface{}{
 			"Posts":      posts,
 			"Categories": categories,
 		}
 
-		RenderTemplates(w, "index.html", data)
+		userId:=r.Context().Value("user_uuid").(string)
+
+		query:=`
+		SELECT u.username
+		FROM users u 
+		WHERE u.user_uuid=?`
+        var username string
+		err=DB.QueryRow(query,userId).Scan(&username)
+		if err ==nil{
+           data["UserName"] = username
+		   data["Initial"] = string(username[0])
+		}
+
+		RenderTemplates(w, "posts.html", data)
 	}
-}
+// }
 
 func CommentREplies(comment Comment, w http.ResponseWriter) ([]map[string]interface{}, error) {
 	replyRow, err := GetAllRepliesForComment(comment.ID)
