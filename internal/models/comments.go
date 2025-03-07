@@ -11,15 +11,20 @@ type Comment struct {
 	ID              int       `json:"id"`
 	PostID          string    `json:"post_id,omitempty"`
 	ParentCommentID int       `json:"parent_comment_id,omitempty"`
-	UserUuiD          string    `json:"user_id"`
+	UserUuiD        string    `json:"user_id"`
 	UserName        string    `json:"username"`
 	Content         string    `json:"content"`
 	CreatedAt       time.Time `json:"created_at"`
+	Likes           int       `json:"likes"`
+	Dislikes        int       `json:"dislikes"`
+	Replies         []Comment `json:"replies"`
+	RepliesLenght   int       `json:"repliesLenght"`
+	Initial         string    `json:"initial"`
 }
 
 // AddComment adds a new comment (post or reply)
 func AddComment(postID, UserUuiD string, content string) (int64, error) {
-	//query to get the user name
+	// query to get the user name
 	var username string
 	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", UserUuiD).Scan(&username)
 	if err != nil {
@@ -41,7 +46,7 @@ func AddComment(postID, UserUuiD string, content string) (int64, error) {
 
 // AddReply adds a new comment (post or reply)
 func AddReply(parentCommentID, UserUuiD string, content string) (int64, error) {
-	//query to get the user name
+	// query to get the user name
 	var username string
 	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", UserUuiD).Scan(&username)
 	if err != nil {
@@ -76,31 +81,75 @@ func GetAllCommentsForPost(postID string) ([]Comment, error) {
 	for rows.Next() {
 		var c Comment
 		if err := rows.Scan(&c.ID, &c.PostID, &c.UserName, &c.UserUuiD, &c.Content, &c.CreatedAt); err != nil {
-			return nil, fmt.Errorf("failed to scan comment: %w", err)
+			return nil, fmt.Errorf("failed to scan coIDmment: %w", err)
 		}
+		err = c.GetCommentLikesDislikes()
+		if err != nil {
+			fmt.Println("GetAllCommentsForPost err : %w", err)
+			return nil, err
+		}
+
+		err = c.GetAllRepliesForComment()
+		if err != nil {
+			fmt.Println("GetAllCommentsForPost err : %w", err)
+			return nil, err
+		}
+
+		c.RepliesLenght = len(c.Replies)
+		c.Initial = string(c.UserName[0])
+
 		comments = append(comments, c)
 	}
 	return comments, nil
 }
 
 // GetRepliesForComment retrieves all replies to a specific comment
-func GetAllRepliesForComment(commentID int) ([]Comment, error) {
+func (comment *Comment) GetAllRepliesForComment() error {
 	query := `SELECT id, parent_comment_id, username, user_uuid, content, created_at 
 			  FROM comments WHERE parent_comment_id = ? ORDER BY created_at ASC`
 
-	rows, err := DB.Query(query, commentID)
+	rows, err := DB.Query(query, comment.ID)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get replies: %w", err)
+		return fmt.Errorf("failed to get replies: %w", err)
 	}
 	defer rows.Close()
 
-	var replies []Comment
 	for rows.Next() {
 		var c Comment
 		if err := rows.Scan(&c.ID, &c.ParentCommentID, &c.UserName, &c.UserUuiD, &c.Content, &c.CreatedAt); err != nil {
-			return nil, fmt.Errorf("failed to scan reply: %w", err)
+			return fmt.Errorf("failed to scan reply: %w", err)
 		}
-		replies = append(replies, c)
+		err = c.GetCommentLikesDislikes()
+		if err != nil {
+			fmt.Println("GetAllRepliesForComment err : %w", err)
+			return err
+		}
+
+		err = c.GetAllRepliesForComment()
+		if err != nil {
+			fmt.Println("GetAllRepliesForComment err : %w", err)
+			return err
+		}
+
+		c.RepliesLenght = len(c.Replies)
+		c.Initial = string(c.UserName[0])
+
+		comment.Replies = append(comment.Replies, c)
 	}
-	return replies, nil
+	return nil
+}
+
+func (comment *Comment) GetCommentLikesDislikes() error {
+	query := `SELECT 
+			(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'like') AS likes,
+			(SELECT COUNT(*) FROM comment_likes WHERE comment_id = c.id AND type = 'dislike') AS dislikes
+		FROM comments c
+		WHERE c.id = ?;`
+
+	err := DB.QueryRow(query, comment.ID).Scan(&comment.Likes, &comment.Dislikes)
+	if err != nil {
+		return fmt.Errorf("failed to get Likes and Dislikes: %w", err)
+	}
+
+	return nil
 }
