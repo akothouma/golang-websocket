@@ -181,8 +181,8 @@
         
         main .container .left{
             height: max-content;
-            position: sticky;
-            overflow-y: auto;
+            /* position: sticky; */
+            overflow: auto;
             top: var(--sticky-top-left);
         }
         
@@ -328,6 +328,10 @@
             height: 5rem;
             color: var(--color-dark);
         }
+        .middle{
+            height: 100vh;
+            overflow: auto;
+        }
         
         .middle .feeds .feed{
             /* position: relative; */
@@ -397,12 +401,7 @@
             top: var(--sticky-top-right);
             bottom: 0;
         }
-        
-        main .container .right {
-            height: max-content;
-            position: sticky;
-            top: var(--sticky-top-right);
-        }
+
         .interaction-buttons{
             display: flex;
         }
