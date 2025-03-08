@@ -29,7 +29,7 @@ func (dep *Dependencies) HomeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// get all the posts data
-	posts, err := dep.Forum.AllPosts()
+	posts, err := models.AllPosts()
 	if err != nil {
 		dep.ErrorLog.Println("Error Retrieving Post data\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)

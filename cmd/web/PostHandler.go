@@ -126,7 +126,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			post.ContentType = getContentType(ext)
 		}
 
-		if err := dep.Forum.CreatePost(&post); err != nil {
+		if err := models.CreatePost(&post); err != nil {
 			log.Println("Error while quering post db: ", err)
 			return
 		}
@@ -207,7 +207,7 @@ func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) 
 	// }else {
 
 	fmt.Println("categoriesfilter", categories)
-	posts, err := dep.Forum.FilterCategories(categories)
+	posts, err := models.FilterCategories(categories)
 	if err != nil {
 		fmt.Println(err)
 		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)

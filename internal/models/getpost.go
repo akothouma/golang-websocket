@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -64,10 +63,8 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 		// Convert media to base64 if it exists
 		// Convert media to base64 if it exists
-		var mediaBase64 string
-		if len(media) > 0 {
-			mediaBase64 = base64.StdEncoding.EncodeToString(media)
-		}
+		mediaBase64 := MediaToBase64(media)
+	
 
 		// Handle contentType
 		var contentTypeStr string
@@ -136,72 +133,59 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	// for i, com :=range posts{
-	// 	fmt.Println("post",i,":", com["ID"])
-	// }
+	data := make(map[string]interface{})
 
+	username := ""
 
-	data := map[string]interface{}{
-		"Posts":      posts,
-		"Categories": categories,
-	}
-
-	// fmt.Println("categories:", categories)
-
-
-	// Safely get userId from context
-	userId, ok := r.Context().Value("user_uuid").(string)
-	if !ok {
-		log.Println("user_uuid not found in context")
-	}
-
-	// Fetch username from DB
-	query := `SELECT username FROM users WHERE user_uuid=?`
-	var username string
-	err = DB.QueryRow(query, userId).Scan(&username)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			log.Println("No username found for user_uuid:", userId)
-		} else {
-			log.Printf("Database error: %v", err)
-		}
-		username = "" // Ensure username is not nil
-	}
-
-	// Only add username if found
-	if username != "" {
+	if username, err = LogedInUser(r); err != nil{
+		fmt.Println(err)
+	}else{
 		data["UserName"] = username
 		data["Initial"] = string(username[0])
 	}
+
+	data["Posts"] = posts
+	data["Categories"] = categories
+
+
+	// fmt.Println("categories:", categories)
+	
+
 
 	RenderTemplates(w, "index.html", data)
 }
 
 
+func LogedInUser(r *http.Request)(string, error){
 
+	session, err := r.Cookie("session_id")
 
+	if err != nil {
+		return "", fmt.Errorf("Session cookie not found")
+	}
 
-// type postCategory struct {
-// 	ID   string
-// 	Name string
-// }
+	sessionID := session.Value
 
-// type Post struct {
-// 	Id             int
-// 	PostId         string
-// 	UserId         string
-// 	Media          []byte
-// 	Category       []string
-// 	Title          string
-// 	Content        string
-// 	ContentType    string
-// 	TimeStamp      string
-// 	Likes          int
-// 	Dislikes       int
-// 	Comments       Comment
-// 	CommentsLenght int
-// 	Username       string
-// 	Initial        string
-// 	Categories     postCategory
-// 	CreatedAt      time.Time
-// }
+	// Query to check if session is valid and fetch the username
+	query := `
+		SELECT u.username 
+		FROM users u
+		JOIN sessions s ON u.user_uuid = s.user_uuid
+		WHERE s.id = ? AND s.expires_at > CURRENT_TIMESTAMP`
+	
+	var username string
+
+	err = DB.QueryRow(query, sessionID).Scan(&username)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			log.Printf("No valid session found for session ID: %s, err: %v", sessionID, err)
+			return "", fmt.Errorf("no valid session found for session ID: %s", sessionID)
+		} else if err != nil {
+			log.Printf("Database error: %v", err)
+			return "", fmt.Errorf("database error: %w", err)
+		}
+		
+	}
+
+	return username, nil
+}
