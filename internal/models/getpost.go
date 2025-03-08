@@ -97,17 +97,9 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			})
 		}
 
-		var likes, dislikes int
-		err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", id).Scan(&likes)
-		if err != nil {
-			http.Error(w, "Failed to fetch likes", http.StatusInternalServerError)
-			return
-		}
-
-		err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", id).Scan(&dislikes)
-		if err != nil {
-			http.Error(w, "Failed to fetch dislikes", http.StatusInternalServerError)
-			return
+		likes, dislikes, err := PostLikesDislikes(id)
+		if err != nil{
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
 		comments, err := GetAllCommentsForPost(id)
@@ -188,4 +180,24 @@ func LogedInUser(r *http.Request)(string, error){
 	}
 
 	return username, nil
+}
+
+func PostLikesDislikes(id string)(int, int, error){
+	var likes, dislikes int
+	err := DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'like'", id).Scan(&likes)
+	if err != nil {
+		
+		return 0, 0, fmt.Errorf("Failed to fetch likes %w", err)
+	}
+
+	err = DB.QueryRow("SELECT COUNT(*) FROM post_likes WHERE post_id = ? AND type = 'dislike'", id).Scan(&dislikes)
+	if err != nil {
+		return 0, 0, fmt.Errorf("Failed to fetch dislikes %w", err)
+	}
+
+	return likes, dislikes, nil
+}
+
+func AllCategories(){
+	
 }

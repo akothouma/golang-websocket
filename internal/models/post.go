@@ -37,7 +37,7 @@ type Post struct {
 	TimeStamp      string
 	Likes          int
 	Dislikes       int
-	Comments       Comment
+	Comments       []Comment
 	CommentsLenght int
 	Username       string
 	Initial        string
@@ -106,6 +106,11 @@ func AllPosts() ([]Post, error) {
 		if err != nil {
 			return nil, err
 		}
+		p.Comments, err = GetAllCommentsForPost(p.PostId)
+		if err != nil{
+			return nil, err
+		}
+		
 		posts = append(posts, p)
 	}
 	fmt.Println("All posts", posts)
