@@ -136,15 +136,18 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	for i, com :=range posts{
-		fmt.Println("post",i,":", com["ID"])
-	}
+	// for i, com :=range posts{
+	// 	fmt.Println("post",i,":", com["ID"])
+	// }
 
 
 	data := map[string]interface{}{
 		"Posts":      posts,
 		"Categories": categories,
 	}
+
+	// fmt.Println("categories:", categories)
+
 
 	// Safely get userId from context
 	userId, ok := r.Context().Value("user_uuid").(string)

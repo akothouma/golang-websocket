@@ -634,7 +634,7 @@
 
                        
 
-                        <div class="comments" style="display: block;" id="comment-{{.ID}}">
+                        <div class="comments" style="display: none;" id="post-{{.ID}}">
                             <p>Post ID {{.ID}}</p>
                              <!----------------- Comment Form ----------------->
                             <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
@@ -697,7 +697,7 @@
 
                                 
 
-                                <div id="reply-{{.ID}}" style="display: block;">
+                                <div id="reply-{{.ID}}" style="display: none;">
                                     <p>Comment ID {{.ID}}</p>
 
                                     <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
@@ -715,7 +715,7 @@
                                             <div class="user">
                                                 <div class="profile-photo">
                                                     <!-- <img src="images/profile-10.jpg"> -->
-                                                    <p>{{.ReplyInitial}}</p>
+                                                    <p>{{.Initial}}</p>
                                                 </div>
                 
                                                 <div class="info">
@@ -817,8 +817,8 @@
         document.querySelectorAll(".uil-comment-alt-dots").forEach(icon => {
             icon.addEventListener("click", function () {
                 let commentId = this.id; 
-                let commentElement = document.getElementById("comment-" + commentId);
-                console.log("Comment btn clicked and ID = ", replyId)
+                let commentElement = document.getElementById("post-" + commentId);
+                console.log("Comment btn clicked and ID = ", commentId)
                 
                 if (commentElement) {
                     commentElement.style.display = commentElement.style.display === "block" ? "none" : "block";
