@@ -786,6 +786,7 @@
                     </div>
 
                     <!---------------------- Categories ---------------------->
+                    <form action="/filtered_posts" method="POST" id="filterposts">
                     <div class="category-group">  
                         {{range .Categories}}
                         <div class="category-option">                
@@ -794,6 +795,7 @@
                         </div>
                         {{end}}                                               
                     </div>
+                    </form>
                     <!---------------------- END OF Categories ---------------------->
                 </div>
 
@@ -833,6 +835,10 @@
                     replyElement.style.display = replyElement.style.display === "block" ? "none" : "block";
                 }
             });
+        });
+
+        document.querySelectorAll('input[type="checkbox"]').forEach(btn =>{
+            btn.addEventListener("click", filterByCategories);
         });
         
     });
@@ -906,6 +912,48 @@
                 });
             });
         });
+
+        //filter posts by categories
+        async function filterByCategories() {
+            const checkboxes = document.querySelectorAll('input[name="categories"]:checked');
+            
+            // Extract selected categories
+            const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+            console.log("Categories Sent:", selectedCategories); // Debugging
+
+            try {
+                const response = await fetch("/filtered_posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ categories: selectedCategories }),
+                });
+
+                const data = await response.json();
+                console.log("Filtered Data:", data);
+
+                document.querySelectorAll(".feed").forEach(feed => {                   
+
+                    if (data.length == 0){
+                        feed.style.display = "block"
+                    }else{
+                        if (data.includes(feed.id )){
+                            feed.style.display = "block"
+                        }else{
+                            feed.style.display = "none"
+                        }
+                    }
+                })
+            } catch (error) {
+                console.error("Error filtering:", error);
+            }
+        }
+
+
+        
+
 
         // Handle comment form submissions
         document.querySelectorAll('.comment-form').forEach(form => {

@@ -26,23 +26,22 @@ type postCategory struct {
 
 type Post struct {
 	ID             int
-	PostId         string
-	UserId         string
-	Media          []byte
-	MediaString    string
-	Category       []string
-	Title          string
-	Content        string
-	ContentType    string
-	TimeStamp      string
-	Likes          int
-	Dislikes       int
-	Comments       []Comment
-	CommentsLenght int
-	UserName       string
-	Initial        string
-	Categories     []postCategory
-	CreatedAt      time.Time
+	PostId         string         `json:"PostId"`
+	UserId         string         `json:"UserId"`
+	Media          []byte         `json:"Media"`
+	MediaString    string         `json:"MediaString"`
+	Category       []string       `json:"Category"`
+	Title          string         `json:"Title"`
+	Content        string         `json:"Content"`
+	ContentType    string         `json:"ContentType"`
+	Likes          int            `json:"Likes"`
+	Dislikes       int            `json:"Dislikes"`
+	Comments       []Comment      `json:"Comments"`
+	CommentsLenght int            `json:"CommentsLenght"`
+	UserName       string         `json:"UserName"`
+	Initial        string         `json:"Initial"`
+	Categories     []postCategory `json:"Categories"`
+	CreatedAt      time.Time      `json:"CreatedAt"`
 }
 
 // type LikeData struct {
@@ -117,67 +116,88 @@ func AllPosts() ([]Post, error) {
 		p.MediaString = MediaToBase64(p.Media)
 
 		p.Comments, err = GetAllCommentsForPost(p.PostId)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 
-		p.Likes , p.Dislikes, err = PostLikesDislikes(p.PostId)
-		if err != nil{
+		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
+		if err != nil {
 			return nil, err
 		}
 
 		p.Categories, err = Post_Categories(p.PostId)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
-		
+
 		posts = append(posts, p)
 	}
 	return posts, nil
 }
 
-func FilterCategories(categories []string) ([]Post, error) {
-	posts := []Post{}
+func FilterCategories(categories []string) ([]string, error) {
+	// posts := []Post{}
+	data := []string{}
+
 	for _, categoryID := range categories {
-	
-		query := `SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at 
+		id := ""
+
+		query := `SELECT p.post_id
 		FROM posts p 
 		JOIN post_categories pc ON pc.post_id = p.post_id		
 		WHERE pc.category_id = ?`
 
-		var p Post
-		err := DB.QueryRow(query, categoryID).Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
+		err := DB.QueryRow(query, categoryID).Scan(&id)
 		if err != nil {
-			fmt.Println("FilterCategories Err:", err)
-			return nil, err
-		}
-		p.Initial = string(p.UserName[0])
-
-		p.MediaString = MediaToBase64(p.Media)
-
-		p.Comments, err = GetAllCommentsForPost(p.PostId)
-		if err != nil{
-			return nil, err
+			if err == sql.ErrNoRows{
+				// fmt.Println("FilterCategories Err:", err)
+				continue
+			}else{
+				return nil, err
+			}			
 		}
 
-		p.Likes , p.Dislikes, err = PostLikesDislikes(p.PostId)
-		if err != nil{
-			return nil, err
-		}
+		data = append(data, id)
 
-		p.Categories, err = Post_Categories(p.PostId)
-		if err != nil{
-			return nil, err
-		}
-		
-		posts = append(posts, p)
+
+		// query := `SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at 
+		// FROM posts p 
+		// JOIN post_categories pc ON pc.post_id = p.post_id		
+		// WHERE pc.category_id = ?`
+
+		// var p Post
+		// err := DB.QueryRow(query, categoryID).Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
+		// if err != nil {
+		// 	fmt.Println("FilterCategories Err:", err)
+		// 	return nil, err
+		// }
+		// p.Initial = string(p.UserName[0])
+
+		// p.MediaString = MediaToBase64(p.Media)
+
+		// p.Comments, err = GetAllCommentsForPost(p.PostId)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// p.Categories, err = Post_Categories(p.PostId)
+		// if err != nil {
+		// 	return nil, err
+		// }
+
+		// posts = append(posts, p)
 
 	}
-	return posts, nil
+	// return posts, nil
+	return data, nil
 }
 
-
-func MediaToBase64(media []byte)string{
+func MediaToBase64(media []byte) string {
 	var mediaBase64 string
 	if len(media) > 0 {
 		mediaBase64 = base64.StdEncoding.EncodeToString(media)
