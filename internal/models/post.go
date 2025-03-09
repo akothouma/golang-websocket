@@ -107,14 +107,27 @@ func AllPosts() ([]Post, error) {
 			return nil, err
 		}
 
+		p.Initial = string(p.UserName[0])
+
+		p.MediaString = MediaToBase64(p.Media)
+
 		p.Comments, err = GetAllCommentsForPost(p.PostId)
+		if err != nil{
+			return nil, err
+		}
+
+		p.Likes , p.Dislikes, err = PostLikesDislikes(p.PostId)
+		if err != nil{
+			return nil, err
+		}
+
+		p.Categories, err = Post_Categories(p.PostId)
 		if err != nil{
 			return nil, err
 		}
 		
 		posts = append(posts, p)
 	}
-	fmt.Println("All posts", posts)
 	return posts, nil
 }
 

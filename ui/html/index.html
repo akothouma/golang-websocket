@@ -560,7 +560,7 @@
                 <div class="feeds">
                     {{range .Posts}}
                     <!---------------------- FEED 1 ---------------------->
-                    <div class="feed" id="{{.ID}}">
+                    <div class="feed" id="{{.PostId}}">
 
                         <!--======= user  =======-->
                         <div class="head">                            
@@ -621,7 +621,7 @@
 
                             <!--======= comment button =======-->
                             <div class="comment">
-                                <span><i class="uil uil-comment-alt-dots" id="{{.ID}}"></i></span>
+                                <span><i class="uil uil-comment-alt-dots" id="{{.PostId}}"></i></span>
                                 <span>{{.CommentsLenght}}</span>
                             </div>
                             <!--======= END OF comment button =======-->
@@ -631,11 +631,11 @@
 
                        
 
-                        <div class="comments" style="display: none;" id="post-{{.ID}}">
-                            <p>Post ID {{.ID}}</p>
+                        <div class="comments" style="display: none;" id="post-{{.PostId}}">
+                            <p>Post ID {{.PostId}}</p>
                              <!----------------- Comment Form ----------------->
                             <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
-                                <input type="hidden" name="post_id" value="{{.ID}}">
+                                <input type="hidden" name="post_id" value="{{.PostId}}">
                                 <input type="text" name="content" placeholder="Add a comment...">    
                                 <input type="submit" value="Comment" class="btn btn-primary" >
                             </form>

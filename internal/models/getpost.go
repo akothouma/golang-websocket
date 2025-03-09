@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
+	// "time"
 )
 
 // var database *models.ForumModel
@@ -32,75 +32,13 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, cat)
 	}
 
-	rows, err := DB.Query(`
-            SELECT p.post_id, u.username, p.title, p.content, p.media, p.content_type, p.created_at 
-            FROM posts p 
-            JOIN users u ON p.user_uuid = u.user_uuid
-        `)
-	if err != nil {
-		http.Error(w, "Failed to load posts", http.StatusInternalServerError)
-		// return
-	}
-	defer rows.Close()
-
-	var posts []map[string]interface{}
-	for rows.Next() {
-		var id, username, title, content string
-		var createdAt time.Time
-		var media []byte
-		var contentType *string
-
-		if err := rows.Scan(&id, &username, &title, &content, &media, &contentType, &createdAt); err != nil {
-			fmt.Println(err)
-			http.Error(w, "Failed to parse posts", http.StatusInternalServerError)
-			return
-		}
-
-		// Convert media to base64 if it exists
-		// Convert media to base64 if it exists
-		mediaBase64 := MediaToBase64(media)
-
-		// Handle contentType
-		var contentTypeStr string
-		if contentType != nil {
-			contentTypeStr = *contentType // Dereference the pointer
-		} else {
-			contentTypeStr = "" // Or set a default value if needed
-		}
-
-		postCategories, err := Post_Categories(id)
-		if err != nil{
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}		
-
-		likes, dislikes, err := PostLikesDislikes(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		}
-
-		comments, err := GetAllCommentsForPost(id)
-		if err != nil {
-			http.Error(w, "Failed to fetch comments", http.StatusInternalServerError)
-			return
-		}
-
-		posts = append(posts, map[string]interface{}{
-			"ID":             id,
-			"Title":          title,
-			"Content":        content,
-			"Likes":          likes,
-			"Dislikes":       dislikes,
-			"Comments":       comments,
-			"CommentsLenght": len(comments),
-			"UserName":       username,
-			"Initial":        string(username[0]),
-			"Categories":     postCategories,
-			"MediaString":    mediaBase64,
-			"ContentType":    contentTypeStr,
-			"CreatedAt":      createdAt,
-		})
+	posts, err := AllPosts()
+	if err != nil{
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 
+	
 	data := make(map[string]interface{})
 
 	username := ""
