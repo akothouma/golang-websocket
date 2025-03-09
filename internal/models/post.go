@@ -45,6 +45,11 @@ type Post struct {
 	CreatedAt      time.Time
 }
 
+// type LikeData struct {
+//     Count    int
+//     Reaction bool
+// }
+
 func CreatePost(p *Post) error {
 	var username string
 	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", p.UserId).Scan(&username)
@@ -134,41 +139,39 @@ func AllPosts() ([]Post, error) {
 func FilterCategories(categories []string) ([]Post, error) {
 	posts := []Post{}
 	for _, categoryID := range categories {
-		var postId string
-		query1 := `SELECT post_id FROM post_categories WHERE category_id = ?`
-		rows, err := DB.Query(query1, categoryID)
+	
+		query := `SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at 
+		FROM posts p 
+		JOIN post_categories pc ON pc.post_id = p.post_id		
+		WHERE pc.category_id = ?`
+
+		var p Post
+		err := DB.QueryRow(query, categoryID).Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Println("FilterCategories Err:", err)
+			return nil, err
+		}
+		p.Initial = string(p.UserName[0])
+
+		p.MediaString = MediaToBase64(p.Media)
+
+		p.Comments, err = GetAllCommentsForPost(p.PostId)
+		if err != nil{
 			return nil, err
 		}
 
-		for rows.Next() {
-			rows.Scan(&postId)
-			query := `SELECT post_id, user_uuid, title, content,  media, content_type, created_at
-			FROM posts p 		
-			WHERE post_id = ?`
-
-			var p Post
-			err = DB.QueryRow(query, postId).Scan(&p.PostId, &p.UserId, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.TimeStamp)
-			if err != nil {
-				return nil, err
-			}
-			posts = append(posts, p)
+		p.Likes , p.Dislikes, err = PostLikesDislikes(p.PostId)
+		if err != nil{
+			return nil, err
 		}
 
-		// rows, err =
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return nil, err
-		// }
-		// for rows.Next() {
+		p.Categories, err = Post_Categories(p.PostId)
+		if err != nil{
+			return nil, err
+		}
+		
+		posts = append(posts, p)
 
-		// 	err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.PostContent, &p.ContentType, &p.TimeStamp)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	posts = append(posts, p)
-		// }
 	}
 	return posts, nil
 }

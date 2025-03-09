@@ -55,7 +55,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 	// fmt.Println("categories:", categories)
 
-	RenderTemplates(w, "index.html", data)
+	RenderTemplates(w, "posts.html", data)
 }
 
 func LogedInUser(r *http.Request) (string, error) {
