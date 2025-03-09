@@ -116,10 +116,10 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 			"Dislikes":       dislikes,
 			"Comments":       comments,
 			"CommentsLenght": len(comments),
-			"Username":       username,
+			"UserName":       username,
 			"Initial":        string(username[0]),
 			"Categories":     postCategories,
-			"Media":          mediaBase64,
+			"MediaString":          mediaBase64,
 			"ContentType":    contentTypeStr,
 			"CreatedAt":      createdAt,
 		})
@@ -198,6 +198,25 @@ func PostLikesDislikes(id string)(int, int, error){
 	return likes, dislikes, nil
 }
 
-func AllCategories(){
-	
+func (postCategories *postCategory)AllCategories(id string)(error){
+	categoryRows, err := DB.Query(`
+			SELECT c.id, c.name 
+			FROM categories c 
+			JOIN post_categories pc ON c.name = pc.category_id 
+			WHERE pc.post_id = ?`, id)
+	if err != nil {		
+		return fmt.Errorf("Failed to fetch post categories, %w", err)
+	}
+	defer categoryRows.Close()
+
+	for categoryRows.Next() {
+		var catID, catName string
+		if err := categoryRows.Scan(&catID, &catName); err != nil {
+			continue
+		}
+		postCategories.ID = catID
+		postCategories.Name = catName
+		
+	}
+	return nil
 }

@@ -478,12 +478,12 @@
                     <div class="profile-photo">
                         <!-- <img src="./images/profile-1.jpg"> -->
                          <!-- {{.Initial}} -->
-                          D
+                          {{.Initial}}
                     </div>
                     <div class="handle">
-                        <h4>Diana Akoth</h4>
+                        <h4>{{.UserName}}</h4>
                         <p class="text-muted">
-                            @d_akoth
+                            <!-- @d_akoth -->
                         </p>
                     </div>
                 </a>
@@ -569,7 +569,7 @@
                                 </div>
 
                                 <div class="info">
-                                    <h3>{{.Username}}</h3>
+                                    <h3>{{.UserName}}</h3>
                                     <small> {{.CreatedAt}}</small>
                                 </div>                                
                             </div>
@@ -587,11 +587,11 @@
                         </div>
                         <!--======= END OF POST CONTENT  =======-->
 
-                        {{if .Media}}
+                        {{if .MediaString}}
                         <!--======= POST IMAGE  =======-->
                         <div class="photo">
                             {{if or (eq .ContentType "image/jpeg") (eq .ContentType "image/png") (eq .ContentType "image/gif")}}
-                            <img src="data:{{.ContentType}};base64,{{.Media}}" alt="Post image" class="post-media">
+                            <img src="data:{{.ContentType}};base64,{{.MediaString}}" alt="Post image" class="post-media">
                             {{end}}
                         </div>
                         <!--======= END OF POST IMAGE  =======-->

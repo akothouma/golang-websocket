@@ -39,7 +39,7 @@ type Post struct {
 	Dislikes       int
 	Comments       []Comment
 	CommentsLenght int
-	Username       string
+	UserName       string
 	Initial        string
 	Categories     postCategory
 	CreatedAt      time.Time
@@ -102,7 +102,7 @@ func AllPosts() ([]Post, error) {
 	}
 	for rows.Next() {
 		var p Post
-		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.Title, &p.Content, &p.TimeStamp)
+		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
 		if err != nil {
 			return nil, err
 		}
