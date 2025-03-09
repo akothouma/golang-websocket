@@ -41,7 +41,7 @@ type Post struct {
 	CommentsLenght int
 	UserName       string
 	Initial        string
-	Categories     postCategory
+	Categories     []postCategory
 	CreatedAt      time.Time
 }
 
@@ -106,6 +106,7 @@ func AllPosts() ([]Post, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		p.Comments, err = GetAllCommentsForPost(p.PostId)
 		if err != nil{
 			return nil, err

@@ -329,7 +329,7 @@
             color: var(--color-dark);
         }
         .middle{
-            height: 200vh;
+            height: 180vh;
             overflow: auto;
         }
         
@@ -474,6 +474,7 @@
             <div class="left">
 
                 <!------------ PROFILE ------------>
+                {{ if .UserName}}
                 <a class="profile">
                     <div class="profile-photo">
                         <!-- <img src="./images/profile-1.jpg"> -->
@@ -487,6 +488,7 @@
                         </p>
                     </div>
                 </a>
+                {{end}}
             <!------------ END OF PROFILE ------------>
 
 
