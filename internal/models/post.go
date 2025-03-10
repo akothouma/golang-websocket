@@ -38,7 +38,7 @@ func (f *ForumModel) CreatePost(p *Post) error {
 	
 	for _, categoryNames := range p.Category {
 		_, err = DB.Exec(`
-            INSERT INTO post_categories (post_id, category_id)
+            INSERT INTO post_categories (postId, category_id)
             VALUES (?, ?)`,
 			p.PostId, categoryNames,
 		)
@@ -88,47 +88,25 @@ func (f *ForumModel) AllPosts() ([]Post, error) {
 func (f *ForumModel) FilterCategories(categories []string) ([]Post, error) {
 	posts := []Post{}
 	for _, categoryID := range categories {
-		var postId string
-		query1:=`SELECT post_id FROM post_categories WHERE category_id = ?`
-		rows, err := f.DB.Query(query1, categoryID)
+
+		query:=`SELECT post_id,user_uuid,title,content,media,content_type,postcreated_at FROM posts p 
+		JOIN post_categories pc ON p.post_id=pc.postId
+		JOIN categories c ON pc.category_id=c.name 
+		WHERE c.name=?
+		`
+		rows, err := f.DB.Query(query, categoryID)
 		if err != nil {
 			fmt.Println(err)
 			return nil, err
 		}
-
-		for rows.Next(){
-			rows.Scan( &postId)
-			query := `SELECT post_id, user_uuid, title, content,  media, content_type, created_at
-			FROM posts p 		
-			WHERE post_id = ?`
-
+		for rows.Next() {
 			var p Post
-			err = f.DB.QueryRow(query, postId).Scan(&p.PostId, &p.UserId,  &p.Title,  &p.PostContent, &p.Media, &p.ContentType, &p.TimeStamp)
-			
+			err := rows.Scan(&p.PostId, &p.UserId, &p.Title,&p.PostContent,&p.Media,&p.ContentType, &p.TimeStamp)
 			if err != nil {
 				return nil, err
 			}
 			posts = append(posts, p)
 		}
-
-
-
-
-
-		
-		// rows, err =
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return nil, err
-		// }
-		// for rows.Next() {
-			
-		// 	err := rows.Scan(&p.Id, &p.PostId, &p.UserId, &p.Media, &p.Category, &p.Title, &p.PostContent, &p.ContentType, &p.TimeStamp)
-		// 	if err != nil {
-		// 		return nil, err
-		// 	}
-		// 	posts = append(posts, p)
-		// }
 	}
 	return posts, nil
 }
