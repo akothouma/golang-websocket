@@ -457,12 +457,16 @@
                 <input type="search" placeholder="Not functional yet">
             </div>
 
+            
             <div class="create">
-              
-              <!--====================== LEFT ======================-->
-                <label  class="btn btn-primary" >Login</label>
-                <label class="btn btn-primary" >Register</label>
+                {{if .UserName}}
+                <a href="/logout" class="btn btn-primary" >Logout</a>                
+                {{else}}
+                <a href="/login" class="btn btn-primary" >Login</a>
+                <a href="/register" class="btn btn-primary" >Register</a>
+                {{end}}
             </div>
+            
         </div>
     </nav>
   <!--========================== END OF NAV BAR ==========================-->
