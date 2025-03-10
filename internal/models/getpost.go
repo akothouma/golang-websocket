@@ -40,7 +40,7 @@ func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
 		}
 
 		rows, err := DB.Query(`
-            SELECT p.post_id, u.username, p.title, p.content, p.media, p.content_type, p.created_at 
+            SELECT p.post_id, u.username, p.title, p.content, p.media, p.content_type, p.postcreated_at 
             FROM posts p 
             JOIN users u ON p.user_uuid = u.user_uuid
         `)
@@ -82,7 +82,7 @@ func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
                 SELECT c.id, c.name 
                 FROM categories c 
                 JOIN post_categories pc ON c.name = pc.category_id 
-                WHERE pc.post_id = ?`, id)
+                WHERE pc.postId = ?`, id)
 			if err != nil {
 				http.Error(w, "Failed to fetch post categories", http.StatusInternalServerError)
 				return 
@@ -180,18 +180,18 @@ func RenderPostsPage(w http.ResponseWriter,r *http.Request) {
 			"Categories": categories,
 		}
 
-		userId:=r.Context().Value("user_uuid").(string)
+		// userId:=r.Context().Value("user_uuid").(string)
 
-		query:=`
-		SELECT u.username
-		FROM users u 
-		WHERE u.user_uuid=?`
-        var username string
-		err=DB.QueryRow(query,userId).Scan(&username)
-		if err ==nil{
-           data["UserName"] = username
-		   data["Initial"] = string(username[0])
-		}
+		// query:=`
+		// SELECT u.username
+		// FROM users u 
+		// WHERE u.user_uuid=?`
+        // var username string
+		// err=DB.QueryRow(query,userId).Scan(&username)
+		// if err ==nil{
+        //    data["UserName"] = username
+		//    data["Initial"] = string(username[0])
+		// }
 
 		RenderTemplates(w, "posts.html", data)
 	}
