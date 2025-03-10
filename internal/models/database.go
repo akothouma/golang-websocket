@@ -47,7 +47,7 @@ func InitializeDB() (*sql.DB, error) {
 		content TEXT NOT NULL, 
 		media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		postcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid),
 		FOREIGN KEY (username) REFERENCES users(username)
 		);
@@ -93,9 +93,9 @@ func InitializeDB() (*sql.DB, error) {
 		
 		CREATE TABLE IF NOT EXISTS post_categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-		post_id TEXT NOT NULL,
+		postId TEXT NOT NULL,
 		category_id TEXT,
-		FOREIGN KEY (post_id) REFERENCES posts(post_id),
+		FOREIGN KEY (postId) REFERENCES posts(post_id),
 		FOREIGN KEY (category_id) REFERENCES categories(name)
 		);
 		
