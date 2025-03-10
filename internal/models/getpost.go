@@ -80,7 +80,7 @@ func LogedInUser(r *http.Request) (string, error) {
 		if err == sql.ErrNoRows {
 			log.Printf("No valid session found for session ID: %s, err: %v", sessionID, err)
 			return "", fmt.Errorf("no valid session found for session ID: %s", sessionID)
-		} else if err != nil {
+		} else {
 			log.Printf("Database error: %v", err)
 			return "", fmt.Errorf("database error: %w", err)
 		}
@@ -136,7 +136,7 @@ func Post_Categories(id string)([]postCategory, error){
 			JOIN post_categories pc ON c.name = pc.category_id 
 			WHERE pc.post_id = ?`, id)
 	if err != nil {		
-		return nil, fmt.Errorf("Failed to fetch post categories", err)
+		return nil, fmt.Errorf("Failed to fetch post categories %w", err)
 	}
 	defer categoryRows.Close()
 
