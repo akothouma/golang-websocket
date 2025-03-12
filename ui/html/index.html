@@ -155,16 +155,21 @@
         }
         
         main .container{
+            column-gap: 2rem;
+
+            position: relative;
             display: grid;
             grid-template-columns: 18vw auto 20vw;
-            column-gap: 2rem;
-            position: relative;
+           
+            /* display: flex;
+            justify-content: center; */
         }
         
         /* ==================== LEFT ==================== */
         
         main .container .left{
             height: max-content;
+            /* width: 18vw; */
             /* position: sticky; */
             /* overflow: auto; */
             top: var(--sticky-top-left);
@@ -314,6 +319,7 @@
         }
         .middle{
             height: 180vh;
+            /* width: calc(100% - 38vw); */
             overflow: auto;
         }
         
@@ -380,7 +386,10 @@
         }
         
         main .container .right{
-            height: max-content;        }
+            margin-top: 1rem;
+            height: max-content;  
+            /* width: 20vw; */
+        }
 
         .interaction-buttons{
             display: flex;
@@ -425,6 +434,18 @@
             font-size: 1.4rem;
             height: max-content;           
         }
+
+        @media (max-width: 1176px) {
+            main .container {
+                grid-template-columns: auto;
+            }
+
+            .left, 
+            .right {
+                display: none;
+            }
+        }
+
 
         </style>
 </head>
@@ -795,6 +816,27 @@
   <!----------------------- END OF MAIN ----------------------->
 </body>
 <script>
+
+    function handleResize() {
+        if (window.innerWidth < 1176) {
+            
+            
+        } else {
+            
+            
+        }
+    }
+
+    
+    handleResize();
+
+    
+    window.addEventListener("resize", handleResize);
+
+
+
+
+
     document.getElementById("media").addEventListener("change", function () {
         let fileName = this.files.length ? this.files[0].name : "No file selected";
         document.getElementById("file-name").textContent = fileName;
