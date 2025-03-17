@@ -78,6 +78,7 @@
         }
         
         .btn{
+            margin-top: 1rem;
             display: inline-block;
             padding: var(--btn-padding);
             font-weight: 500;
@@ -799,7 +800,7 @@
                     <div class="category-group">  
                         {{range .Categories}}
                         <div class="category-option">                
-                            <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                            <input type="checkbox" id="cat-{{.ID}}" name="filteredcategories" value="{{.Name}}">
                             <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
                         </div>
                         {{end}}                                               
@@ -946,7 +947,7 @@
 
         //filter posts by categories
         async function filterByCategories() {
-            const checkboxes = document.querySelectorAll('input[name="categories"]:checked');
+            const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
             
             
             const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
