@@ -7,23 +7,27 @@ import (
 
 // LikeHandler handles likes/dislikes for both posts and comments
 func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Likes handler called with ID: %s, Type: %s, Action: %s", 
+        r.FormValue("id"), 
+        r.FormValue("item_type"), 
+        r.FormValue("type"))
 	if r.Method != http.MethodPost {
 		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
 
 	// Check user authentication
-	sessionId := r.Context().Value("session_id")
-	sess1, err := r.Cookie("session_id")
-	if err != nil {
-		log.Println("error biggy", err)
-		return
-	}
-	if sess1.Value != sessionId {
-		log.Println("sess1.Value", sess1.Value, sessionId)
-		log.Println("sessioId", sessionId)
-		return
-	}
+	// sessionId := r.Context().Value("session_id")
+	// sess1, err := r.Cookie("session_id")
+	// if err != nil {
+	// 	log.Println("error biggy", err)
+	// 	return
+	// }
+	// if sess1.Value != sessionId {
+	// 	log.Println("sess1.Value", sess1.Value, sessionId)
+	// 	log.Println("sessioId", sessionId)
+	// 	return
+	// }
 
 	userID := r.Context().Value("user_uuid").(string)
 
@@ -50,12 +54,9 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("Likes handler called with ID: %s, Type: %s, Action: %s", 
-        r.FormValue("id"), 
-        r.FormValue("item_type"), 
-        r.FormValue("type"))
+	
 	// Process the like/dislike based on item type
-	err = dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
+	err := dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
 	if err != nil {
 
 		http.Error(w, "Failed to process like/dislike", http.StatusInternalServerError)
