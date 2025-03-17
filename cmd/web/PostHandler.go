@@ -187,7 +187,7 @@ type CategoryFilter struct {
     Categories []string `json:"categories"`
 }
 
-func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) {
+func PostsByFilters(w http.ResponseWriter, r *http.Request) {
     if r.Method != http.MethodPost {
         http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
         return
@@ -211,6 +211,7 @@ func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) 
         http.Error(w, "Failed to fetch filtered posts", http.StatusInternalServerError)
         return
     }
+	fmt.Println(posts)
 
     // Respond with the filtered posts as JSON
     w.Header().Set("Content-Type", "application/json")

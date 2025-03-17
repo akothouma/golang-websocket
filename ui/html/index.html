@@ -63,7 +63,7 @@
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            width: 3rem;
+            min-width: 3rem;
             height: 3rem;
             border-radius: 50%;
             overflow: hidden;
@@ -144,7 +144,7 @@
         nav .create{
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 0.5rem;
         }
         
         
@@ -159,11 +159,11 @@
             column-gap: 2rem;
 
             position: relative;
-            display: grid;
-            grid-template-columns: 18vw auto 20vw;
+            /* display: grid;
+            grid-template-columns: 18vw auto 20vw; */
            
-            /* display: flex;
-            justify-content: center; */
+            display: flex;
+            justify-content: center;
         }
         
         /* ==================== LEFT ==================== */
@@ -171,10 +171,7 @@
         main .container .left{
             height: max-content;
             margin-top: 1rem;
-            /* width: 18vw; */
-            /* position: sticky; */
-            /* overflow: auto; */
-            top: var(--sticky-top-left);
+            width: 18vw;
         }
         
         main .container .left .profile{
@@ -321,7 +318,7 @@
         }
         .middle{
             height: 180vh;
-            /* width: calc(100% - 38vw); */
+            width: calc(100% - 38vw);
             overflow: auto;
         }
         
@@ -390,7 +387,7 @@
         main .container .right{
             margin-top: 1rem;
             height: max-content;  
-            /* width: 20vw; */
+            width: 20vw;
         }
 
         .interaction-buttons{
@@ -436,37 +433,44 @@
             font-size: 1.4rem;
             height: max-content;           
         }
+        nav .uil{
+            font-size: 1.5rem;
+            display: none;
+        }
 
-        @media (max-width: 1176px) {
-            main .container {
-                /* grid-template-columns: auto; */
-            }
+        
+        @media (max-width: 1176px) { 
+            nav .uil{
+                display: block;
+            } 
 
-            .left, 
-            .right{
-                width: 5rem;
-            }
-            .res,
             .search-bar{
                 display: none;
             }
 
-            .left:hover .res{
-                display: block;
+            .left,
+            .right{
+                display: none;
+                position: absolute;                
+                min-width: 15rem;
+                margin-top: 2rem;
+                background: var(--color-light);
+                z-index: 2
             }
-            
-            .right:hover .res {
-                display: block;
-            }
+            .left{
+                left: 0;
+            }   
+            .right{
+                right: 0;
+            }        
 
-            .left:hover,
-            .right:hover {
-                width: 10rem;
-                background: rgba(0, 0, 0, 0.5); 
-                z-index: 1000;
-            }
 
-           
+            .middle{
+                position: absolute;
+                width: auto;
+                z-index: 1;
+                margin-top: 2rem;
+            }           
         }
 
 
@@ -476,15 +480,18 @@
 
   <!--========================== NAV BAR ==========================-->
     <nav>
+
         <div class="container">
-            <h2 class="log">
+            <i class="uil uil-bars"></i>
+
+            <h2 class="logo">
                 Forum
             </h2>
+
             <div class="search-bar">
                 <i class="uil uil-search"></i>
                 <input type="search" placeholder="Not functional yet">
             </div>
-
             
             <div class="create">
                 {{if .UserName}}
@@ -494,8 +501,9 @@
                 <a href="/register" class="btn btn-primary" >Register</a>
                 {{end}}
             </div>
-            
+            <i class="uil uil-clipboard-alt mobRight"></i>            
         </div>
+        
     </nav>
   <!--========================== END OF NAV BAR ==========================-->
 
@@ -514,7 +522,7 @@
                          <!-- {{.Initial}} -->
                           {{.Initial}}
                     </div>
-                    <div class="handle res">
+                    <div class="handle">
                         <h4>{{.UserName}}</h4>
                         <p class="text-muted">
                             <!-- @d_akoth -->
@@ -529,7 +537,7 @@
                          <!-- {{.Initial}} -->
                           G
                     </div>
-                    <div class="handle res">
+                    <div class="handle">
                         <h4>GUest Mode</h4>
                         <p class="text-muted">
                             Please login or create an account
@@ -568,7 +576,7 @@
                         </div> 
                         
                         <!------------------- CREATE POST ------------------->
-                        <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post res">
+                        <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
                             
     
                             <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
@@ -835,7 +843,7 @@
 
                 <div class="categories">
                     <div class="heading">
-                        <i class="uil uil-clipboard-alt"></i><h4 class="res"> Filter by categories</h4>
+                        <h4 class="res"> Filter by categories</h4>
                     </div>
 
                     <!---------------------- Categories ---------------------->
@@ -861,30 +869,16 @@
 </body>
 <script>
 
-    function handleResize() {
-        if (window.innerWidth < 1176) {
-            
-            
-        } else {
-            
-            
-        }
-    }
-
-    
-    handleResize();
-
-    
-    window.addEventListener("resize", handleResize);
-
-
-
-
-
-    document.getElementById("media").addEventListener("change", function () {
-        let fileName = this.files.length ? this.files[0].name : "No file selected";
-        document.getElementById("file-name").textContent = fileName;
+    document.querySelector(".uil-bars").addEventListener("click", function() {
+        let leftElement = document.querySelector(".left"); 
+        leftElement.style.display = leftElement.style.display === "block" ? "none" : "block";
     });
+
+    document.querySelector(".uil-clipboard-alt").addEventListener("click", function() {
+        let rightElement = document.querySelector(".right");
+        rightElement.style.display = rightElement.style.display === "block" ? "none" : "block";
+    });   
+    
 
     document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll(".uil-comment-alt-dots").forEach(icon => {
@@ -1090,6 +1084,11 @@
                     console.error('Request failed:', error);
                 }
             });
+        });
+
+        document.getElementById("media").addEventListener("change", function () {
+            let fileName = this.files.length ? this.files[0].name : "No file selected";
+            document.getElementById("file-name").textContent = fileName;
         });
 
 </script>
