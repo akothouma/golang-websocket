@@ -887,6 +887,7 @@
     });
 
     document.addEventListener("DOMContentLoaded", function () {
+        //Handle comment and reply buttons
         document.querySelectorAll(".uil-comment-alt-dots").forEach(icon => {
             icon.addEventListener("click", function () {
                 let commentId = this.id; 
@@ -911,11 +912,6 @@
             });
         });
 
-        document.querySelectorAll('input[name="filteredcategories"]').forEach(btn =>{
-            btn.addEventListener("click", filterByCategories);
-        });
-        
-    });
 
     // Handle sidebar navigation
     document.querySelector('.sidebar a:nth-child(1)').addEventListener('click', function() {
@@ -929,6 +925,55 @@
     document.querySelector('.sidebar a:nth-child(3)').addEventListener('click', function() {
         window.location.href = '/liked_posts';
     })
+
+      // Apply active class to current page
+      const currentPath = window.location.pathname;
+    const sidebarItems = document.querySelectorAll('.sidebar .menu-item');
+    
+    sidebarItems.forEach(item => item.classList.remove('active'));
+    
+    if (currentPath === '/allposts' || currentPath === '/') {
+        sidebarItems[0].classList.add('active');
+    } else if (currentPath === '/my_posts') {
+        sidebarItems[1].classList.add('active');
+    } else if (currentPath === '/liked_posts') {
+        sidebarItems[2].classList.add('active');
+    }
+
+        // Handle category filtering
+        document.querySelectorAll('input[name="filteredcategories"]').forEach(btn => {
+        btn.addEventListener("click", filterByCategories);
+    });
+});
+
+// Category filtering function
+async function filterByCategories() {
+    const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
+    const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+    try {
+        const response = await fetch("/filtered_posts", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ categories: selectedCategories }),
+        });
+
+        const data = await response.json();
+
+        document.querySelectorAll(".feed").forEach(feed => {
+            if (data.length === 0) {
+                feed.style.display = "block";
+            } else {
+                feed.style.display = data.includes(feed.id) ? "block" : "none";
+            }
+        });
+    } catch (error) {
+        console.error("Error filtering:", error);
+    }
+}
+
 
     // Handle post creation form submission
     document.getElementById('createPostForm').addEventListener('submit', async (e) => {
