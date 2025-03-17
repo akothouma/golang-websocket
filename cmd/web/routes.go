@@ -18,6 +18,8 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
 	// mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	mux.Handle("/", http.HandlerFunc(models.RenderPostsPage))
+	mux.HandleFunc("/my_posts", models.RenderMyPostsPage)
+	mux.HandleFunc("/liked_posts", models.RenderLikedPostsPage)
 	
 	
 

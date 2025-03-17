@@ -917,6 +917,18 @@
         
     });
 
+    // Handle sidebar navigation
+    document.querySelector('.sidebar a:nth-child(1)').addEventListener('click', function() {
+        window.location.href = '/allposts';
+    });
+
+    document.querySelector('.sidebar a:nth-child(2)').addEventListener('click', function() {
+        window.location.href = '/my_posts';
+    });
+
+    document.querySelector('.sidebar a:nth-child(3)').addEventListener('click', function() {
+        window.location.href = '/liked_posts';
+    })
 
     // Handle post creation form submission
     document.getElementById('createPostForm').addEventListener('submit', async (e) => {
