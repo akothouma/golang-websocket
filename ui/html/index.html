@@ -877,11 +877,6 @@
 
     
     window.addEventListener("resize", handleResize);
-
-
-
-
-
     document.getElementById("media").addEventListener("change", function () {
         let fileName = this.files.length ? this.files[0].name : "No file selected";
         document.getElementById("file-name").textContent = fileName;

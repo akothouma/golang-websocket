@@ -49,6 +49,11 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid like type", http.StatusBadRequest)
 		return
 	}
+
+	log.Printf("Likes handler called with ID: %s, Type: %s, Action: %s", 
+        r.FormValue("id"), 
+        r.FormValue("item_type"), 
+        r.FormValue("type"))
 	// Process the like/dislike based on item type
 	err = dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
 	if err != nil {
