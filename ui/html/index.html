@@ -989,7 +989,7 @@
             
             const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
 
-            console.log("Categories Sent:", selectedCategories); 
+            console.log("Categories Sent:", selectedCategories, selectedCategories.length); 
 
             try {
                 const response = await fetch("/filtered_posts", {
@@ -1002,22 +1002,29 @@
 
                 const data = await response.json();
                 console.log("Filtered Data:", data);
-
-                document.querySelectorAll(".feed").forEach(feed => {                   
-
-                    if (data.length == 0){
-                        feed.style.display = "block"
-                    }else{
-                        if (data.includes(feed.id )){
-                            feed.style.display = "block"
-                        }else{
-                            feed.style.display = "none"
-                        }
-                    }
-                })
+                if (selectedCategories.length === 0){
+                    data[0] = "all"
+                }
+                filter(data)
             } catch (error) {
                 console.error("Error filtering:", error);
             }
+        }
+
+        function filter(data) {
+
+            document.querySelectorAll(".feed").forEach(feed => {                   
+
+                if (data[0] === "all"){
+                    feed.style.display = "block"
+                }else{
+                    if (data.includes(feed.id )){
+                        feed.style.display = "block"
+                    }else{
+                        feed.style.display = "none"
+                    }
+                }
+            })
         }
 
 
