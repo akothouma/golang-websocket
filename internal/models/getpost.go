@@ -173,11 +173,11 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 
     // Query to get posts liked by the user
 	query := `
-    SELECT p.id, p.title, p.content, p.created_at, p.user_uuid, u.username, p.media, p.content_type
+    SELECT p.post_id, p.title, p.content, p.created_at, p.user_uuid, u.username, p.media, p.content_type
     FROM posts p
-    JOIN post_likes pl ON p.id = pl.post_id
+    JOIN post_likes pl ON p.post_id = pl.post_id
     JOIN users u ON p.user_uuid = u.user_uuid
-    WHERE pl.user_uuid = ? AND pl.type = 'like'
+    WHERE pl.user_id = ? AND pl.type = 'like'
     ORDER BY p.created_at DESC
 `
 

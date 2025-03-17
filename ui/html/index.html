@@ -1027,15 +1027,16 @@ async function filterByCategories() {
                                 window.location.reload()
                             }
                         } else if (response.status === 401) {
+                            alert('Please log in to like/dislike posts')
                             window.location.href = '/login';
                         } else {
                             const errorText = await response.text();
-                            console.error('Error:', errorText);
-                            alert('Failed to process like/dislike');                            
+                            console.error('Error:', response.status, errorText);
+                            alert(`Failed to process like/dislike: ${errorText}`);                           
                         }
                     } catch (error) {
                         console.error('Request failed:', error);
-                        alert('Failed to process request');
+                        alert('Network error:Failed to process request');
                     }
                 });
             });
