@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -134,67 +135,43 @@ func AllPosts() ([]Post, error) {
 	}
 	return posts, nil
 }
-
 func FilterCategories(categories []string) ([]string, error) {
-	// posts := []Post{}
-	data := []string{}
-
-	for _, categoryID := range categories {
-		id := ""
-
-		query := `SELECT p.post_id
-		FROM posts p 
-		JOIN post_categories pc ON pc.post_id = p.post_id		
-		WHERE pc.category_id = ?`
-
-		err := DB.QueryRow(query, categoryID).Scan(&id)
-		if err != nil {
-			if err == sql.ErrNoRows{
-				// fmt.Println("FilterCategories Err:", err)
-				continue
-			}else{
-				return nil, err
-			}			
-		}
-
-		data = append(data, id)
-
-
-		// query := `SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at 
-		// FROM posts p 
-		// JOIN post_categories pc ON pc.post_id = p.post_id		
-		// WHERE pc.category_id = ?`
-
-		// var p Post
-		// err := DB.QueryRow(query, categoryID).Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
-		// if err != nil {
-		// 	fmt.Println("FilterCategories Err:", err)
-		// 	return nil, err
-		// }
-		// p.Initial = string(p.UserName[0])
-
-		// p.MediaString = MediaToBase64(p.Media)
-
-		// p.Comments, err = GetAllCommentsForPost(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// p.Categories, err = Post_Categories(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// posts = append(posts, p)
-
-	}
-	// return posts, nil
-	return data, nil
+    data := []string{}
+    
+    // Build query to find posts with ANY of the selected categories
+    query := `
+        SELECT DISTINCT p.post_id
+        FROM posts p 
+        JOIN post_categories pc ON pc.post_id = p.post_id
+        WHERE pc.category_id IN (`
+    
+    // Create parameter placeholders
+    params := make([]interface{}, len(categories))
+    placeholders := make([]string, len(categories))
+    for i, category := range categories {
+        placeholders[i] = "?"
+        params[i] = category
+    }
+    
+    query += fmt.Sprintf("%s)", strings.Join(placeholders, ","))
+    
+    // Execute query
+    rows, err := DB.Query(query, params...)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+    
+    // Collect all matching post IDs
+    for rows.Next() {
+        var postID string
+        if err := rows.Scan(&postID); err != nil {
+            return nil, err
+        }
+        data = append(data, postID)
+    }
+    
+    return data, nil
 }
 
 func MediaToBase64(media []byte) string {

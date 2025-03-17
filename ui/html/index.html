@@ -542,22 +542,23 @@
                 {{ if .UserName}}
                 <!------------- SIDEBAR ------------->
                 <div class="sidebar">
-                    <a class="menu-item active">
+                    <!-- <a class="menu-item active"> -->
+                        <a href="/allposts" class="menu-item {{if eq .ViewType "all"}}active{{end}}">
                         <span>
                             <i class="uil uil-home"></i>                            
                         </span>
                         <h3 class="res">Home</h3>
                     </a>
 
-                    <a class="menu-item">
+                    <a href="/my_posts" class="menu-item {{if eq .ViewType "mine"}}active{{end}}">
                         <span><i class="uil uil-pen"></i></span>  
                         <h3 class="res">My Posts</h3>  
                     </a>
-
-                    <a class="menu-item">                     
-                        <span><i class="uil uil-thumbs-up"></i></span>
-                        <h3 class="res">Liked Posts</h3>
-                    </a>
+             
+    <a href="/liked_posts" class="menu-item {{if eq .ViewType "liked"}}active{{end}}">                     
+        <span><i class="uil uil-thumbs-up"></i></span>
+        <h3 class="res">Liked Posts</h3>
+    </a>
                 </div>
                 <!-------------END OF  SIDEBAR ------------->
                 
