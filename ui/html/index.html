@@ -868,6 +868,12 @@
   <!----------------------- END OF MAIN ----------------------->
 </body>
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
+    });
+
 
     document.querySelector(".uil-bars").addEventListener("click", function() {
         let leftElement = document.querySelector(".left"); 
