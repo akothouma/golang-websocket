@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // LikeHandler handles likes/dislikes for both posts and comments
@@ -62,6 +65,15 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to process like/dislike", http.StatusInternalServerError)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("liked/disliked created successfully"))
+
+	//Get updated likes and dislikes
+	likes, dislikes, err := models.PostLikesDislikes(itemID)
+	if err != nil {
+        http.Error(w, "Failed to get updated counts", http.StatusInternalServerError)
+        return
+    }
+  // Return JSON response with updated counts
+  w.Header().Set("Content-Type", "application/json")
+  w.WriteHeader(http.StatusOK)
+  fmt.Fprintf(w, `{"success": true, "likes": %d, "dislikes": %d}`, likes, dislikes)
 }
