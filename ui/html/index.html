@@ -439,14 +439,34 @@
 
         @media (max-width: 1176px) {
             main .container {
-                grid-template-columns: auto;
+                /* grid-template-columns: auto; */
             }
 
             .left, 
-            .right,
-            .search-bar {
+            .right{
+                width: 5rem;
+            }
+            .res,
+            .search-bar{
                 display: none;
             }
+
+            .left:hover .res{
+                display: block;
+            }
+            
+            .right:hover .res {
+                display: block;
+            }
+
+            .left:hover,
+            .right:hover {
+                width: 10rem;
+                background: rgba(0, 0, 0, 0.5); 
+                z-index: 1000;
+            }
+
+           
         }
 
 
@@ -494,7 +514,7 @@
                          <!-- {{.Initial}} -->
                           {{.Initial}}
                     </div>
-                    <div class="handle">
+                    <div class="handle res">
                         <h4>{{.UserName}}</h4>
                         <p class="text-muted">
                             <!-- @d_akoth -->
@@ -509,7 +529,7 @@
                          <!-- {{.Initial}} -->
                           G
                     </div>
-                    <div class="handle">
+                    <div class="handle res">
                         <h4>GUest Mode</h4>
                         <p class="text-muted">
                             Please login or create an account
@@ -526,51 +546,56 @@
                         <span>
                             <i class="uil uil-home"></i>                            
                         </span>
-                        <h3>Home</h3>
+                        <h3 class="res">Home</h3>
                     </a>
 
                     <a class="menu-item">
                         <span><i class="uil uil-pen"></i></span>  
-                        <h3>My Posts</h3>  
+                        <h3 class="res">My Posts</h3>  
                     </a>
 
                     <a class="menu-item">                     
                         <span><i class="uil uil-thumbs-up"></i></span>
-                        <h3>Liked Posts</h3>
+                        <h3 class="res">Liked Posts</h3>
                     </a>
                 </div>
                 <!-------------END OF  SIDEBAR ------------->
                 
                 <div class="sidebar">
-                    
-                    <!------------------- CREATE POST ------------------->
-                    <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
-                        <h2>create Post</h2>
-        
-                        <h4>Title</h4>
-                        <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
-                        <h4>Content</h4>
-                        <div>
-                            <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
-                        </div>
+                    <div class="create-post"> 
+                        <div class="heading">
+                            <i class="uil uil-plus-circle"></i><h2 class="res">create Post</h2>                              
+                        </div> 
                         
-                        <label for="media"><i class="uil uil-image-plus"></i> </label>
-                        <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
-                        <span id="file-name">No file selected</span>   
-                        
-                        
-                        <h3>Choose the Categories:</h3>
-                        <div class="category-group"> 
-                            {{range .Categories}}
-                            <div class="category-option">                
-                                <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
-                                <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                        <!------------------- CREATE POST ------------------->
+                        <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post res">
+                            
+    
+                            <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
+                            <h4>Content</h4>
+                            <div>
+                                <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
                             </div>
-                            {{end}}                                                
-                        </div>
-                        <input type="submit" value="Post" class="btn btn-primary">
-                    </form>
-                    <!------------------- END OF CREATE POST ------------------->
+                            
+                            <label for="media"><i class="uil uil-image-plus"></i> </label>
+                            <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
+                            <span id="file-name">No file selected</span>   
+                            
+                            
+                            <h3>Choose the Categories:</h3>
+                            <div class="category-group"> 
+                                {{range .Categories}}
+                                <div class="category-option">                
+                                    <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                                    <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                                </div>
+                                {{end}}                                                
+                            </div>
+                            <input type="submit" value="Post" class="btn btn-primary">
+                        </form>
+                        <!------------------- END OF CREATE POST ------------------->
+                    </div>
+                    
                 </div>
                 {{end}}
             </div>
@@ -810,11 +835,11 @@
 
                 <div class="categories">
                     <div class="heading">
-                        <h4> Filter by categories</h4><i class="uil uil-clipboard-alt"></i>
+                        <i class="uil uil-clipboard-alt"></i><h4 class="res"> Filter by categories</h4>
                     </div>
 
                     <!---------------------- Categories ---------------------->
-                    <form action="/filtered_posts" method="POST" id="filterposts">
+                    <form action="/filtered_posts" method="POST" id="filterposts" class="res">
                     <div class="category-group">  
                         {{range .Categories}}
                         <div class="category-option">                
@@ -886,7 +911,7 @@
             });
         });
 
-        document.querySelectorAll('input[type="checkbox"]').forEach(btn =>{
+        document.querySelectorAll('input[name="filteredcategories"]').forEach(btn =>{
             btn.addEventListener("click", filterByCategories);
         });
         
