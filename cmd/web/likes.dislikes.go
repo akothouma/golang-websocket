@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
+	"encoding/json"
 
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
@@ -18,19 +18,6 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		ErrorHandler(w, http.StatusMethodNotAllowed)
 		return
 	}
-
-	// Check user authentication
-	// sessionId := r.Context().Value("session_id")
-	// sess1, err := r.Cookie("session_id")
-	// if err != nil {
-	// 	log.Println("error biggy", err)
-	// 	return
-	// }
-	// if sess1.Value != sessionId {
-	// 	log.Println("sess1.Value", sess1.Value, sessionId)
-	// 	log.Println("sessioId", sessionId)
-	// 	return
-	// }
 
 	userID := r.Context().Value("user_uuid").(string)
 
@@ -57,23 +44,35 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	
 	// Process the like/dislike based on item type
 	err := dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
 	if err != nil {
-
 		http.Error(w, "Failed to process like/dislike", http.StatusInternalServerError)
 		return
 	}
 
-	//Get updated likes and dislikes
+	// Get updated likes and dislikes counts
 	likes, dislikes, err := models.PostLikesDislikes(itemID)
 	if err != nil {
-        http.Error(w, "Failed to get updated counts", http.StatusInternalServerError)
-        return
-    }
-  // Return JSON response with updated counts
-  w.Header().Set("Content-Type", "application/json")
-  w.WriteHeader(http.StatusOK)
-  fmt.Fprintf(w, `{"success": true, "likes": %d, "dislikes": %d}`, likes, dislikes)
+		http.Error(w, "Failed to get updated counts", http.StatusInternalServerError)
+		return
+	}
+
+	// Return success response with updated counts
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	response := map[string]interface{}{
+		"success":  true,
+		"likes":    likes,
+		"dislikes": dislikes,
+	}
+	
+	// Convert the response map to JSON
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		http.Error(w, "Failed to create response", http.StatusInternalServerError)
+		return
+	}
+	
+	w.Write(jsonResponse)
 }

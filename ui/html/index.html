@@ -995,52 +995,113 @@ async function filterByCategories() {
 
         // Handle like/dislike form submissions
         // Like/dislike handler for both posts and comments
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.like-form').forEach(form => {
-                form.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    const formData = new URLSearchParams();
-                    formData.append('id', event.target.querySelector('input[name="id"]').value);
-                    formData.append('item_type', event.target.querySelector('input[name="item_type"]').value);
-                    formData.append('type', event.submitter.value);
-                    
-
-                    try {
-                        const response = await fetch('/likes', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: formData
-                        });
-
-                        if (response.ok) {
-                            //error handling for easy debugging of the code
-                            const itemType = event.target.querySelector('input[name="item_type"]').value;
-                            const itemId = event.target.querySelector('input[name="id"]').value;
-                            const countSpan = document.getElementById(`${event.submitter.value}-count-${itemType}-${itemId}`);
-
-                            if (countSpan) {
-                                const currentCount = parseInt(countSpan.textContent);
-                                // countSpan.textContent = currentCount + 1;
-                                window.location.reload()
-                            }
-                        } else if (response.status === 401) {
-                            alert('Please log in to like/dislike posts')
-                            window.location.href = '/login';
-                        } else {
-                            const errorText = await response.text();
-                            console.error('Error:', response.status, errorText);
-                            alert(`Failed to process like/dislike: ${errorText}`);                           
-                        }
-                    } catch (error) {
-                        console.error('Request failed:', error);
-                        alert('Network error:Failed to process request');
+        document.addEventListener('DOMContentLoaded', function() {
+    // Find all like/dislike forms
+    const likeForms = document.querySelectorAll('form.like-form');
+    
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // Prevent the default form submission
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const itemId = formData.get('id');
+            const itemType = formData.get('item_type');
+            const actionType = formData.get('type'); // 'like' or 'dislike'
+            
+            // Reference to the buttons that contain the counts
+            const likeButton = this.querySelector('button[value="like"]');
+            const dislikeButton = this.querySelector('button[value="dislike"]');
+            const likeCountElement = likeButton.querySelector('.like');
+            const dislikeCountElement = dislikeButton.querySelector('.dislike');
+            
+            // Send AJAX request
+            fetch('/likes', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else if (response.status === 401) {
+                    throw new Error('Please log in to like/dislike posts');
+                } else {
+                    throw new Error('Failed to process like/dislike');
+                }
+            })
+            .then(data => {
+                if (data.success) {
+                    // Update the UI with new counts without page refresh
+                    if (data.likes !== undefined) {
+                        likeCountElement.textContent = data.likes;
                     }
-                });
+                    if (data.dislikes !== undefined) {
+                        dislikeCountElement.textContent = data.dislikes;
+                    }
+                    
+                    // Optional: Add visual feedback (highlight the button briefly)
+                    const clickedButton = actionType === 'like' ? likeButton : dislikeButton;
+                    clickedButton.classList.add('active-reaction');
+                    setTimeout(() => {
+                        clickedButton.classList.remove('active-reaction');
+                    }, 500);
+                }
+            })
+            .catch(error => {
+                alert(error.message);
+                if (error.message === 'Please log in to like/dislike posts') {
+                    window.location.href = '/login';
+                }
+                console.error('Error:', error);
             });
         });
+    });
+});
+// document.querySelectorAll('.like-form').forEach(form => 
+        //         form.addEventListener('submit', async (event) => {
+        //             event.preventDefault();
+
+        //             const formData = new URLSearchParams();
+        //             formData.append('id', event.target.querySelector('input[name="id"]').value);
+        //             formData.append('item_type', event.target.querySelector('input[name="item_type"]').value);
+        //             formData.append('type', event.submitter.value);
+                    
+
+        //             try {
+        //                 const response = await fetch('/likes', {
+        //                     method: 'POST',
+        //                     headers: {
+        //                         'Content-Type': 'application/x-www-form-urlencoded',
+        //                     },
+        //                     body: formData
+        //                 });
+
+        //                 if (response.ok) {
+        //                     //error handling for easy debugging of the code
+        //                     const itemType = event.target.querySelector('input[name="item_type"]').value;
+        //                     const itemId = event.target.querySelector('input[name="id"]').value;
+        //                     const countSpan = document.getElementById(`${event.submitter.value}-count-${itemType}-${itemId}`);
+
+        //                     if (countSpan) {
+        //                         const currentCount = parseInt(countSpan.textContent);
+        //                         // countSpan.textContent = currentCount + 1;
+        //                         window.location.reload()
+        //                     }
+        //                 } else if (response.status === 401) {
+        //                     alert('Please log in to like/dislike posts')
+        //                     window.location.href = '/login';
+        //                 } else {
+        //                     const errorText = await response.text();
+        //                     console.error('Error:', response.status, errorText);
+        //                     alert(`Failed to process like/dislike: ${errorText}`);                           
+        //                 }
+        //             } catch (error) {
+        //                 console.error('Request failed:', error);
+        //                 alert('Network error:Failed to process request');
+        //             }
+        //         });
+        //     });
+        // });
 
         //filter posts by categories
         async function filterByCategories() {
