@@ -2,7 +2,6 @@ package models
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -183,7 +182,7 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 
     rows, err := DB.Query(query, userUUID)
     if err != nil {
-        http.Error(w, "Failed to fetch liked posts 1", http.StatusInternalServerError)
+        http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
         fmt.Println(err)
         return
     }
@@ -194,7 +193,7 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 		var p Post
 		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
 		if err != nil {
-            http.Error(w, "Failed to fetch liked posts 2", http.StatusInternalServerError)
+            http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
 			return
 		}
 
@@ -204,19 +203,19 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 
 		p.Comments, err = GetAllCommentsForPost(p.PostId)
 		if err != nil {
-            http.Error(w, "Failed to fetch liked posts 3", http.StatusInternalServerError)
+            http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
 			return
 		}
 
 		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
 		if err != nil {
-            http.Error(w, "Failed to fetch liked posts 4", http.StatusInternalServerError)
+            http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
 			return
 		}
 
 		p.Categories, err = Post_Categories(p.PostId)
 		if err != nil {
-            http.Error(w, "Failed to fetch liked posts 5", http.StatusInternalServerError)
+            http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
 			return
 		}
 
@@ -270,7 +269,7 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
 
     // Query to get posts created by the user
     query := `
-        SELECT p.id, p.title, p.content, p.created_at, p.user_uuid, u.username, p.media, p.content_type
+        SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at
         FROM posts p
         JOIN users u ON p.user_uuid = u.user_uuid
         WHERE p.user_uuid = ?
@@ -286,54 +285,62 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
 
     var myPosts []Post
     for rows.Next() {
-        var post Post
-        var userName string
-        
-        err := rows.Scan(&post.PostId, &post.Title, &post.Content, &post.CreatedAt, &post.UserId, &userName, &post.Media, &post.ContentType)
-        if err != nil {
-            continue
-        }
+		var p Post
+		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
+		if err != nil {
+            http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
+			return
+		}
 
-        post.UserName = userName
-        post.Initial = string(userName[0])
+		p.Initial = string(p.UserName[0])
 
-        // Get likes and dislikes count
-        post.Likes, post.Dislikes, _ = PostLikesDislikes(post.PostId)
+		p.MediaString = MediaToBase64(p.Media)
 
-        // Get comments for each post
-        post.Comments, _ = GetAllCommentsForPost(post.PostId)
-        post.CommentsLenght = len(post.Comments)
+		p.Comments, err = GetAllCommentsForPost(p.PostId)
+		if err != nil {
+            http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
+			return
+		}
 
-        // Get categories for post
-        post.Categories, _ = Post_Categories(post.PostId)
+		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
+		if err != nil {
+            http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
+			return
+		}
 
-        // Convert media to base64 if present
-        if post.Media != nil {
-            post.MediaString = base64.StdEncoding.EncodeToString(post.Media)
-        }
+		p.Categories, err = Post_Categories(p.PostId)
+		if err != nil {
+            http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
+			return
+		}
 
-        myPosts = append(myPosts, post)
-    }
-
+		myPosts = append(myPosts, p)
+	}
     var categories []postCategory
-    categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
-    if err == nil {
-        defer categoryRows.Close()
-        for categoryRows.Next() {
-            var cat postCategory
-            if err := categoryRows.Scan(&cat.ID, &cat.Name); err != nil {
-                continue
-            }
-            categories = append(categories, cat)
-        }
-    }
+	categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
+	if err != nil {
+		http.Error(w, "Failed to load categories", http.StatusInternalServerError)
+		return
+	}
+	defer categoryRows.Close()
+
+	for categoryRows.Next() {
+		var cat postCategory
+		if err := categoryRows.Scan(&cat.ID, &cat.Name); err != nil {
+			continue
+		}
+		categories = append(categories, cat)
+	}
 
     data := make(map[string]interface{})
+
+	
     data["UserName"] = username
     data["Initial"] = string(username[0])
-    data["Posts"] = myPosts
-    data["Categories"] = categories
-    data["ViewType"] = "mine"
+	
+
+	data["Posts"] = myPosts
+	data["Categories"] = categories
 
     RenderTemplates(w, "index.html", data)
 }
