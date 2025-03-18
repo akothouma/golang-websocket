@@ -73,7 +73,7 @@ func InitializeDB() (*sql.DB, error) {
 		post_id TEXT,
 		type TEXT CHECK(type IN ('like', 'dislike')),
 		FOREIGN KEY (user_id) REFERENCES users(user_uuid),
-		FOREIGN KEY (post_id) REFERENCES posts(id)
+		FOREIGN KEY (post_id) REFERENCES posts(post_id)
 	);
 
 	CREATE TABLE IF NOT EXISTS comment_likes(
