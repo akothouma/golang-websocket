@@ -135,6 +135,24 @@ func AllPosts() ([]Post, error) {
 	return posts, nil
 }
 
+
+func CheckUserReaction(userID string, postID string) (string, error) {
+	var reaction string
+
+	query := `SELECT type FROM post_likes WHERE user_id = ? AND post_id = ?`
+	err := DB.QueryRow(query, userID, postID).Scan(&reaction)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "neither", nil // User has not reacted
+		}
+		return "", err
+	}
+
+	return reaction, nil
+}
+
+
 func FilterCategories(categories []string) ([]string, error) {
 	// posts := []Post{}
 	data := []string{}
