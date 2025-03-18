@@ -800,6 +800,7 @@
                                                 <div class="interaction-buttons">
                                                     <input type="hidden" name="id" value="{{.ID}}">
                                                     <input type="hidden" name="item_type" value="comment">
+                                                    <input type="hidden" name="item_type" value="post">
                                                     <button type="submit" name="type" value="like" class="reactions">
                                                         <i class="uil uil-thumbs-up"></i>
                                                         <h6 id="" class="like">{{.Likes}}</h6>                                    
@@ -942,52 +943,105 @@
 
         // Handle like/dislike form submissions
         // Like/dislike handler for both posts and comments
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.like-form').forEach(form => {
-                form.addEventListener('submit', async (event) => {
-                    event.preventDefault();
-
-                    const formData = new URLSearchParams();
-                    formData.append('id', event.target.querySelector('input[name="id"]').value);
-                    formData.append('item_type', event.target.querySelector('input[name="item_type"]').value);
-                    formData.append('type', event.submitter.value);
-                    
-
-                    try {
-                        const response = await fetch('/likes', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                            },
-                            body: formData
-                        });
-
-                        if (response.ok) {
-                            //error handling for easy debugging of the code
-                            const itemType = event.target.querySelector('input[name="item_type"]').value;
-                            const itemId = event.target.querySelector('input[name="id"]').value;
-                            const countSpan = document.getElementById(`${event.submitter.value}-count-${itemType}-${itemId}`);
-
-                            if (countSpan) {
-                                const currentCount = parseInt(countSpan.textContent);
-                                // countSpan.textContent = currentCount + 1;
-                                window.location.reload()
-                            }
-                        } else if (response.status === 401) {
-                            window.location.href = '/login';
-                        } else {
-                            const errorText = await response.text();
-                            console.error('Error:', errorText);
-                            alert('Failed to process like/dislike');                            
-                        }
-                    } catch (error) {
-                        console.error('Request failed:', error);
-                        alert('Failed to process request');
+       // Like/dislike handler for both posts and comments
+document.addEventListener('DOMContentLoaded', function() {
+    // Find all like/dislike forms
+    const likeForms = document.querySelectorAll('form.like-form');
+    
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // Prevent the default form submission
+            e.preventDefault();
+            
+            // Create a new FormData object from the form
+            const formData = new FormData(this);
+            
+            // Add the clicked button's value explicitly
+            // In modern browsers, we can use e.submitter to get the clicked button
+            if (e.submitter) {
+                formData.set('type', e.submitter.value);
+            } else {
+                // Fallback for older browsers - try to determine which button was clicked
+                const clickedButton = document.activeElement;
+                if (clickedButton && clickedButton.getAttribute('value')) {
+                    formData.set('type', clickedButton.getAttribute('value'));
+                }
+            }
+            
+            // Log the form data to confirm
+            console.log('Form data being sent:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            const itemId = formData.get('id');
+            const itemType = formData.get('item_type');
+            const actionType = formData.get('type'); // 'like' or 'dislike'
+            
+            // Reference to the buttons that contain the counts
+            const likeButton = this.querySelector('button[value="like"]');
+            const dislikeButton = this.querySelector('button[value="dislike"]');
+            const likeCountElement = likeButton.querySelector('.like');
+            const dislikeCountElement = dislikeButton.querySelector('.dislike');
+            
+            // Send AJAX request
+            fetch('/likes', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // First check if the response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    // It's JSON, so parse it
+                    return response.json().then(data => {
+                        return { status: response.status, data, isJson: true };
+                    });
+                } else {
+                    // Not JSON, get text instead
+                    return response.text().then(text => {
+                        return { status: response.status, text, isJson: false };
+                    });
+                }
+            })
+            .then(result => {
+                console.log('Response:', result);
+                
+                if (result.status === 200 && result.isJson) {
+                    // Success with JSON data
+                    const data = result.data;
+                    // Update the UI with new counts
+                    if (data.likes !== undefined) {
+                        likeCountElement.textContent = data.likes;
                     }
-                });
+                    if (data.dislikes !== undefined) {
+                        dislikeCountElement.textContent = data.dislikes;
+                    }
+                    
+                    const clickedButton = actionType === 'like' ? likeButton : dislikeButton;
+                    clickedButton.classList.add('active-reaction');
+                    setTimeout(() => {
+                        clickedButton.classList.remove('active-reaction');
+                    }, 500);
+                } else if (result.status === 401) {
+                    alert('Please log in to like/dislike posts');
+                    window.location.href = '/login';
+                } else {
+                    // Handle other error cases
+                    const errorMessage = result.isJson && result.data.error 
+                        ? result.data.error 
+                        : 'Failed to process like/dislike';
+                    console.error('Error response:', result.isJson ? result.data : result.text);
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Network or parsing error:', error);
+                alert('An error occurred while processing your request');
             });
         });
-
+    });
+});
         //filter posts by categories
         async function filterByCategories() {
             const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
