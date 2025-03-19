@@ -18,8 +18,12 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
 	// mux.Handle("/allposts", http.HandlerFunc(dep.AllPostsHandler))
 	mux.Handle("/", http.HandlerFunc(models.RenderPostsPage))
-	
-	
+	mux.HandleFunc("/my_posts", models.RenderMyPostsPage)
+	mux.HandleFunc("/liked_posts", models.RenderLikedPostsPage)
+	mux.Handle("/upload-profile", dep.AuthMiddleware(http.HandlerFunc(UploadProfilePictureHandler)))
+	mux.Handle("/profile", dep.AuthMiddleware(http.HandlerFunc(models.RenderProfile)))
+
+
 
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
@@ -27,7 +31,7 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
 	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
 	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(handlers.AddReplyHandler)))
-	mux.Handle("/filtered_posts",http.HandlerFunc(PostsByFilters))
+	mux.Handle("/filtered_posts", http.HandlerFunc(PostsByFilters))
 
 	mux.Handle("/likes", dep.AuthMiddleware(http.HandlerFunc(dep.LikeHandler)))
 

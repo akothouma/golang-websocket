@@ -26,7 +26,8 @@ func InitializeDB() (*sql.DB, error) {
         email TEXT UNIQUE NOT NULL,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        image_path TEXT,
+        profile_picture BLOB,
+		content_type TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 		
@@ -73,7 +74,7 @@ func InitializeDB() (*sql.DB, error) {
 		post_id TEXT,
 		type TEXT CHECK(type IN ('like', 'dislike')),
 		FOREIGN KEY (user_id) REFERENCES users(user_uuid),
-		FOREIGN KEY (post_id) REFERENCES posts(id)
+		FOREIGN KEY (post_id) REFERENCES posts(post_id)
 	);
 
 	CREATE TABLE IF NOT EXISTS comment_likes(

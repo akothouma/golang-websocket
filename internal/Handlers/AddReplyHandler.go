@@ -10,6 +10,7 @@ import (
 )
 
 func AddReplyHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Error biggy")
 	if r.Method != http.MethodPost {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
 		return
@@ -18,7 +19,6 @@ func AddReplyHandler(w http.ResponseWriter, r *http.Request) {
 	sessionId := r.Context().Value("session_id")
 	sess1, err := r.Cookie("session_id")
 	if err != nil {
-		log.Println("error biggy", err)
 		return
 	}
 	if sess1.Value != sessionId {

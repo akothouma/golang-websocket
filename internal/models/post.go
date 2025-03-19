@@ -41,7 +41,8 @@ type Post struct {
 	UserName       string         `json:"UserName"`
 	Initial        string         `json:"Initial"`
 	Categories     []postCategory `json:"Categories"`
-	CreatedAt      time.Time      `json:"CreatedAt"`
+	CreatedAt      time.Time       `json:"-"`
+	FormattedDate  string         `json:"CreatedAt"`
 }
 
 // type LikeData struct {
@@ -111,6 +112,9 @@ func AllPosts() ([]Post, error) {
 			return nil, err
 		}
 
+		
+		// Store formatted date separately
+		p.FormattedDate = p.CreatedAt.Format("2006-01-02 15:04:05")
 		p.Initial = string(p.UserName[0])
 
 		p.MediaString = MediaToBase64(p.Media)
@@ -135,6 +139,24 @@ func AllPosts() ([]Post, error) {
 	return posts, nil
 }
 
+
+func CheckUserReaction(userID string, postID string) (string, error) {
+	var reaction string
+
+	query := `SELECT type FROM post_likes WHERE user_id = ? AND post_id = ?`
+	err := DB.QueryRow(query, userID, postID).Scan(&reaction)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "neither", nil // User has not reacted
+		}
+		return "", err
+	}
+
+	return reaction, nil
+}
+
+
 func FilterCategories(categories []string) ([]string, error) {
 	// posts := []Post{}
 	data := []string{}
@@ -147,7 +169,7 @@ func FilterCategories(categories []string) ([]string, error) {
 		JOIN post_categories pc ON pc.post_id = p.post_id		
 		WHERE pc.category_id = ?`
 
-		err := DB.QueryRow(query, categoryID).Scan(&id)
+		rows, err := DB.Query(query, categoryID)
 		if err != nil {
 			if err == sql.ErrNoRows{
 				// fmt.Println("FilterCategories Err:", err)
@@ -156,41 +178,13 @@ func FilterCategories(categories []string) ([]string, error) {
 				return nil, err
 			}			
 		}
-
-		data = append(data, id)
-
-
-		// query := `SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at 
-		// FROM posts p 
-		// JOIN post_categories pc ON pc.post_id = p.post_id		
-		// WHERE pc.category_id = ?`
-
-		// var p Post
-		// err := DB.QueryRow(query, categoryID).Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
-		// if err != nil {
-		// 	fmt.Println("FilterCategories Err:", err)
-		// 	return nil, err
-		// }
-		// p.Initial = string(p.UserName[0])
-
-		// p.MediaString = MediaToBase64(p.Media)
-
-		// p.Comments, err = GetAllCommentsForPost(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// p.Categories, err = Post_Categories(p.PostId)
-		// if err != nil {
-		// 	return nil, err
-		// }
-
-		// posts = append(posts, p)
+		for rows.Next(){
+			err = rows.Scan(&id)
+			if err != nil{
+				return nil, err
+			}
+			data = append(data, id)
+		}
 
 	}
 	// return posts, nil
