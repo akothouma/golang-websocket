@@ -47,6 +47,82 @@
             background: var(--color-light);
             overflow-x: hidden;
         }
+        .profile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 200px;
+    margin: auto;
+}
+
+.profile-photo {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ddd;
+    cursor: pointer;
+    position: relative;
+}
+
+.profile-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.initials {
+    font-size: 28px;
+    font-weight: bold;
+    color: #555;
+}
+
+.upload-form {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.upload-label {
+    cursor: pointer;
+    font-size: 14px;
+    color: #3498db;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.upload-label i {
+    font-size: 18px;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.upload-form button {
+    margin-top: 5px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.upload-form button:hover {
+    background-color: #2980b9;
+}
+
         
         /* GENERAL STYLES */
         .container{
@@ -515,36 +591,46 @@
             <div class="left">
 
                 <!------------ PROFILE ------------>
-                {{ if .UserName}}
-                <a class="profile">
+                {{ if .UserName }}
+                <div class="profile-card">
+                    <!-- Profile Photo Section -->
                     <div class="profile-photo">
-                        <!-- <img src="./images/profile-1.jpg"> -->
-                         <!-- {{.Initial}} -->
-                          {{.Initial}}
+                        {{ if .ProfilePicture }}
+                        <img src="data:{{ .ContentType }};base64,{{ .ProfilePicture }}" alt="Profile Picture">
+                        {{ else }}
+                        <div class="initials">{{ .Initial }}</div>
+                        {{ end }}
                     </div>
+                
+                    <!-- User Info Section -->
                     <div class="handle">
-                        <h4>{{.UserName}}</h4>
-                        <p class="text-muted">
-                            <!-- @d_akoth -->
-                        </p>
+                        <h4>{{ .UserName }}</h4>
+                        <p class="text-muted">Upload your profile picture</p>
                     </div>
-                </a>
+                
+                    <!-- Profile Picture Upload Form -->
+                    <form action="/upload-profile" method="POST" enctype="multipart/form-data" class="upload-form" id="profile-upload-form">
 
-                {{else}}
-                <a class="profile">
+                        <label for="profile-upload" class="upload-label">
+                            <i class="uil uil-camera"></i> Change Photo
+                        </label>
+                        <input type="file" id="profile-upload" name="profile_picture" accept="image/*">
+                        <button type="submit">Upload</button>
+                    </form>
+                </div>
+                {{ else }}
+                <div class="profile-card">
                     <div class="profile-photo">
-                        <!-- <img src="./images/profile-1.jpg"> -->
-                         <!-- {{.Initial}} -->
-                          G
+                        <div class="initials">G</div>
                     </div>
                     <div class="handle">
-                        <h4>GUest Mode</h4>
-                        <p class="text-muted">
-                            Please login or create an account
-                        </p>
+                        <h4>Guest Mode</h4>
+                        <p class="text-muted">Please login or create an account</p>
                     </div>
-                </a>
-                {{end}}
+                </div>
+                {{ end }}
+                
+            
             <!------------ END OF PROFILE ------------>
 
                 {{ if .UserName}}
@@ -870,6 +956,16 @@
   <!----------------------- END OF MAIN ----------------------->
 </body>
 <script>
+//profile 
+document.getElementById('profile-upload').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('profile-upload');
+    if (!fileInput.files.length===0) {
+      e.preventDefault()
+        alert('please select a file first')
+    }
+});
+
+
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
             checkbox.checked = false;

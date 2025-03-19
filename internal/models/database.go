@@ -26,7 +26,8 @@ func InitializeDB() (*sql.DB, error) {
         email TEXT UNIQUE NOT NULL,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        image_path TEXT,
+        profile_picture BLOB,
+		content_type TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 		
