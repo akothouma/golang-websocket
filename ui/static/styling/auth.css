@@ -1,22 +1,23 @@
 body{
     background-color: hsl(252,30%, 95%);
     background-image: url();
+    font-family: "Poppins", sans-serif;
 }
 h1{
     width:100%;
     text-align: center;   
-    color:hsl(252,75%, 60%);
+    color:hsl(0, 0%, 4%);
 
 }
 .overall{
-    position: fixed;
-    inset:0px;
+    /* position: fixed; */
+    /* inset:0px; */
     width:30%;
     height: 50%;
-    margin:auto;
+    margin:0 auto;
     max-width:100vw;
-    max-height:100dvh; 
-    background-color: white;
+    /* max-height:100dvh;  */
+    background-color: #ffffff;
     border-radius:15px;
     box-shadow: 5px 5px 12px 12px rgba(0, 0, 255, 0.2);
     padding:40px
@@ -24,30 +25,29 @@ h1{
 }
 .emailUsername{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     width: 100%;
     gap:10px;  
+ 
 }
-#Username{
-    margin-right: 15px;
-}
-#email{
-    margin-left: 15px;
+form{
+    margin: 100px auto;
 }
 #password,#email{
     position: relative;
-    margin-top: 10px;
+    margin: 10px;
     padding: 20px;
     background-color: transparent;
     border: 1px solid hsl(252,75%, 60%);;
     border-radius:50px;
-    margin: 15px;
+    /* margin: 15px; */
     font-size: 16px;
 }
 .passButton{
     display: flex;
     flex-direction: column;
     width:100%;
+    margin: 10px auto;
      
 }
 button{
@@ -62,8 +62,9 @@ button{
 }
    
 .emailUsername input{
-    width:50%;
+    width:auto;
     padding: 20px;
+    margin: 10px;
     border-radius:50px;
     background-color: transparent;
     border: 1px solid hsl(252,75%, 60%);
@@ -95,3 +96,22 @@ p{
     color:hsl(252,75%, 60%);
   }
 
+@media (max-width: 768px) {
+    form{
+        margin: 0 auto;
+    }
+    .emailUsername {
+        flex-direction: column;
+    }
+    .emailUsername input{
+        display: flex;
+        flex-direction: column;
+        width: auto;
+    }
+    .overall {
+        flex-direction: column;
+        padding: auto;
+        /* width: auto; */
+    }
+    
+}
