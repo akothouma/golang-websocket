@@ -41,7 +41,8 @@ type Post struct {
 	UserName       string         `json:"UserName"`
 	Initial        string         `json:"Initial"`
 	Categories     []postCategory `json:"Categories"`
-	CreatedAt      time.Time      `json:"CreatedAt"`
+	CreatedAt      time.Time       `json:"-"`
+	FormattedDate  string         `json:"CreatedAt"`
 }
 
 // type LikeData struct {
@@ -111,6 +112,9 @@ func AllPosts() ([]Post, error) {
 			return nil, err
 		}
 
+		
+		// Store formatted date separately
+		p.FormattedDate = p.CreatedAt.Format("2006-01-02 15:04:05")
 		p.Initial = string(p.UserName[0])
 
 		p.MediaString = MediaToBase64(p.Media)

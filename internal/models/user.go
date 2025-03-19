@@ -16,6 +16,7 @@ type User struct {
 	Username string
 	Password string
 	ProfilePicture string // 🔹 This stores the Base64-encoded image
+	ContentType string
 	// forum    database.ForumModel
 }
 

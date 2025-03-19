@@ -11,7 +11,7 @@ import (
 // var database *models.ForumModel
 var DB *sql.DB
 
-var f *ForumModel
+// var f *ForumModel
 
 func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	// if r.Method == http.MethodGet {
@@ -42,46 +42,67 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 
 	// username := ""
 
-// Check if the user is logged in
-username, err := LogedInUser(r)
-if err != nil {
-    fmt.Println("Error retrieving logged-in user:", err)
-    http.Error(w, "User not logged in", http.StatusUnauthorized)
-    return
-}
+	// Check if the user is logged in
+	username, _ := LogedInUser(r)
+	// Get user details
+	f := &ForumModel{DB: DB}
+	user, err := f.GetUserByUsername(username)
+	if err == nil && user != nil {
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType
+		} else if len(username) > 0 {
+			data["Initial"] = string(username[0])
+		}
+	}
 
-// Ensure username is not empty
-if username == "" {
-    http.Error(w, "Invalid session or user not found", http.StatusUnauthorized)
-    return
-}
-
-// Initialize data map
-data["UserName"] = username
-data["Initial"] = string(username[0])
-
-f := &ForumModel{DB: DB}
-
-// Fetch user details from the database
-user, err := f.GetUserByUsername(username)
-if err != nil {
-    fmt.Println("Error fetching user details:", err)
-    http.Error(w, "Failed to retrieve user details", http.StatusInternalServerError)
-    return
-}
-
-//Check if `user` is `nil` before accessing properties
-if user == nil {
-    data["ProfilePicture"] = "" // Default empty profile picture
-} else {
-    data["ProfilePicture"] = user.ProfilePicture
-}
-
-
+	// Add debugging information
+	fmt.Printf("Rendering homepage - User logged in: %v, Username: %s\n", err == nil, username)
+	data["UserName"] = username 
 	data["Posts"] = posts
 	data["Categories"] = categories
 
 	// fmt.Println("categories:", categories)
+
+	RenderTemplates(w, "index.html", data)
+}
+
+func RenderProfile(w http.ResponseWriter, r *http.Request) {
+	data := make(map[string]interface{})
+	f := &ForumModel{DB: DB}
+	username, err := LogedInUser(r)
+	if err != nil {
+		// User not logged in, set as guest
+		RenderTemplates(w, "index.html", data)
+		return
+	}
+
+	// Fetch user details from the database
+	user, err := f.GetUserByUsername(username)
+	if err != nil {
+		fmt.Println("Error fetching user details:", err)
+		http.Error(w, "Failed to retrieve user details", http.StatusInternalServerError)
+		return
+	}
+
+	// Populate all required template fields
+	data["UserName"] = username
+
+	// If user exists, add their details
+	if user != nil {
+		// Add profile picture if it exists
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType // Make sure this field exists in your User struct
+		} else {
+			// Set initial for avatar if no profile pic
+			if len(username) > 0 {
+				data["Initial"] = string(username[0])
+			} else {
+				data["Initial"] = "U"
+			}
+		}
+	}
 
 	RenderTemplates(w, "index.html", data)
 }

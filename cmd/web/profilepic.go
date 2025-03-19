@@ -10,7 +10,7 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 func UploadProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
-    fmt.Println("📌UploadProfilePictureHandler executed!")
+    fmt.Println("UploadProfilePictureHandler executed!")
     
     // Check request method
     if r.Method != "POST" {

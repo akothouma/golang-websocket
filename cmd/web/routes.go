@@ -21,6 +21,8 @@ func (dep *Dependencies) Routes() *http.ServeMux {
 	mux.HandleFunc("/my_posts", models.RenderMyPostsPage)
 	mux.HandleFunc("/liked_posts", models.RenderLikedPostsPage)
 	mux.Handle("/upload-profile", dep.AuthMiddleware(http.HandlerFunc(UploadProfilePictureHandler)))
+	mux.Handle("/profile", dep.AuthMiddleware(http.HandlerFunc(models.RenderProfile)))
+
 
 
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
