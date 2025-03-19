@@ -1,0 +1,97 @@
+body{
+    background-color: hsl(252,30%, 95%);
+    background-image: url();
+}
+h1{
+    width:100%;
+    text-align: center;   
+    color:hsl(252,75%, 60%);
+
+}
+.overall{
+    position: fixed;
+    inset:0px;
+    width:30%;
+    height: 50%;
+    margin:auto;
+    max-width:100vw;
+    max-height:100dvh; 
+    background-color: white;
+    border-radius:15px;
+    box-shadow: 5px 5px 12px 12px rgba(0, 0, 255, 0.2);
+    padding:40px
+       
+}
+.emailUsername{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap:10px;  
+}
+#Username{
+    margin-right: 15px;
+}
+#email{
+    margin-left: 15px;
+}
+#password,#email{
+    position: relative;
+    margin-top: 10px;
+    padding: 20px;
+    background-color: transparent;
+    border: 1px solid hsl(252,75%, 60%);;
+    border-radius:50px;
+    margin: 15px;
+    font-size: 16px;
+}
+.passButton{
+    display: flex;
+    flex-direction: column;
+    width:100%;
+     
+}
+button{
+    padding: 20px;
+    background-color: hsl(252,75%, 60%);;
+    color: white;
+    margin: 15px;
+    font-weight: 800;
+    font-size: 18px;
+    border-radius:50px;
+    box-shadow: 5px 5px 5px 5px rgba(0, 0, 255, 0.2);
+}
+   
+.emailUsername input{
+    width:50%;
+    padding: 20px;
+    border-radius:50px;
+    background-color: transparent;
+    border: 1px solid hsl(252,75%, 60%);
+    font-size: 16px;
+    
+
+}
+.terms{
+    display: flex;
+    flex-direction: row;
+    
+}
+.terms input{
+    margin-left: 15px;
+    color:hsl(252,75%, 60%);
+}
+p{
+    width:100%;
+    text-align: center;   
+    color:hsl(252,75%, 60%);
+}
+
+::placeholder {
+    color:hsl(252,75%, 60%);
+    opacity: 0.5; /* Firefox */
+  }
+  
+  ::-ms-input-placeholder { /* Edge 12 -18 */
+    color:hsl(252,75%, 60%);
+  }
+
