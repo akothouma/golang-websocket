@@ -111,7 +111,7 @@ p{
     .overall {
         flex-direction: column;
         padding: auto;
-        width: auto;
+        /* width: auto; */
     }
     
 }
