@@ -39,12 +39,13 @@ func UploadProfilePictureHandler(w http.ResponseWriter, r *http.Request) {
         // More specific error handling
         if strings.Contains(err.Error(), "no such file") {
             fmt.Println("No file was uploaded or field name mismatch")
-            http.Error(w, "Please select a file to upload", http.StatusBadRequest)
-        } else {
-            http.Error(w, "File upload error", http.StatusBadRequest)
+            http.Redirect(w, r, "/", http.StatusSeeOther) // Redirect without an error
+            return
         }
-        return
-    }
+            fmt.Println("Error retrieving file:", err)
+            http.Error(w, "File upload error", http.StatusBadRequest)
+            return
+        }
     defer file.Close()
     
     fmt.Println("File received:", header.Filename, "Size:", header.Size)
