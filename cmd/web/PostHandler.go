@@ -1,8 +1,8 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
-	"html/template"
 	"io"
 	"log"
 	"net/http"
@@ -82,11 +82,11 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		userId := r.Context().Value("user_uuid").(string)
 
 		post := models.Post{
-			PostId:      postId,
-			UserId:      userId,
-			Category:    categories,
-			Title:       title,
-			PostContent: postContent,
+			PostId:   postId,
+			UserId:   userId,
+			Category: categories,
+			Title:    title,
+			Content:  postContent,
 		}
 
 		// Handle file upload
@@ -126,7 +126,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			post.ContentType = getContentType(ext)
 		}
 
-		if err := dep.Forum.CreatePost(&post); err != nil {
+		if err := models.CreatePost(&post); err != nil {
 			log.Println("Error while quering post db: ", err)
 			return
 		}
@@ -183,41 +183,38 @@ func getContentType(ext string) string {
 	return contentTypes[ext]
 }
 
-func (dep *Dependencies) PostsByFilters(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	FilteredTemplate, err := template.ParseFiles("./ui/html/posts.html")
-	if err != nil {
-		http.Error(w, "Failed to parse file", http.StatusInternalServerError)
-		return
-	}
-
-	if err := r.ParseForm(); err != nil {
-		fmt.Println("Error parsing form values", err)
-		return
-	}
-	//var data interface{}
-	categories := r.Form["categories"]
-	// if len(categories) == 0 {
-	// 	data = models.RenderPostsPage()
-
-	// }else {
-
-	fmt.Println("categoriesfilter", categories)
-	posts, err := dep.Forum.FilterCategories(categories)
-	if err != nil {
-		fmt.Println(err)
-		http.Error(w, "Failed to get all posts", http.StatusInternalServerError)
-		return
-	}
-			
-	// data=map[string]interface{}{
-	// 	"Posts":posts,
-	// }
-	fmt.Println(posts)
-	FilteredTemplate.ExecuteTemplate(w, "posts.html", posts)
-	// w.WriteHeader(http.StatusOK)
+type CategoryFilter struct {
+    Categories []string `json:"categories"`
 }
+
+func PostsByFilters(w http.ResponseWriter, r *http.Request) {
+    if r.Method != http.MethodPost {
+        http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+        return
+    }
+
+    var filter CategoryFilter
+
+    // Decode the JSON body
+    decoder := json.NewDecoder(r.Body)
+    if err := decoder.Decode(&filter); err != nil {
+        http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+        fmt.Println("Error decoding JSON:", err)
+        return
+    }
+
+    fmt.Println("Received Categories:", filter.Categories)
+
+    // Call your filtering function with the extracted categories
+    posts, err := models.FilterCategories(filter.Categories)
+    if err != nil {
+        http.Error(w, "Failed to fetch filtered posts", http.StatusInternalServerError)
+        return
+    }
+	fmt.Println(posts)
+
+    // Respond with the filtered posts as JSON
+    w.Header().Set("Content-Type", "application/json")
+    json.NewEncoder(w).Encode(posts)
+}
+

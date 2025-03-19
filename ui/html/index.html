@@ -13,7 +13,7 @@
             --color-white: hsl(252, 30%, 100%);
             --color-light: hsl(252,30%, 95%);
             --color-gray: hsl(252,15%, 65%);
-            --color-primary: hsl(252,75%, 60%);
+            --color-primary: #6b4ce6;
             --color-secondary: hsl(252,100%, 90%);
             --color-success: hsl(120,95%, 65%);
             --color-danger: hsl(0, 95%, 65%);
@@ -63,29 +63,13 @@
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            width: 3rem;
+            min-width: 3rem;
             height: 3rem;
             border-radius: 50%;
             overflow: hidden;
             background-color: #48cae4;
             font-size: 3.5vh;
-            color: white; 
-        }
-        
-        .pic{
-            background-color: #48cae4;
-            border-radius: 50%;
-            height: 2.5rem;
-            overflow: hidden;
-            font-size: 2rem;
-            color: white;
-            text-transform: uppercase;
-            aspect-ratio: 1/1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            
+            color: var(--color-white); 
         }
         
         img{
@@ -94,6 +78,7 @@
         }
         
         .btn{
+            margin-top: 1rem;
             display: inline-block;
             padding: var(--btn-padding);
             font-weight: 500;
@@ -109,7 +94,7 @@
         
         .btn-primary{
             background: var(--color-primary);
-            color: white;
+            color: var(--color-white);
         }
         
         .text-bold{
@@ -123,7 +108,7 @@
         /* ========= NAVBAR ========= */
         nav{
             width: 100%;
-            background: white;
+            background: var(--color-white);
             padding: 0.7rem 0;
             position: fixed;
             top: 0;
@@ -159,7 +144,7 @@
         nav .create{
             display: flex;
             align-items: center;
-            gap: 2rem;
+            gap: 0.5rem;
         }
         
         
@@ -171,19 +156,22 @@
         }
         
         main .container{
-            display: grid;
-            grid-template-columns: 18vw auto 20vw;
             column-gap: 2rem;
+
             position: relative;
+            /* display: grid;
+            grid-template-columns: 18vw auto 20vw; */
+           
+            display: flex;
+            justify-content: center;
         }
         
         /* ==================== LEFT ==================== */
         
         main .container .left{
             height: max-content;
-            position: sticky;
-            overflow-y: auto;
-            top: var(--sticky-top-left);
+            margin-top: 1rem;
+            width: 18vw;
         }
         
         main .container .left .profile{
@@ -295,6 +283,11 @@
             margin-left: 0rem;
         }
         
+        .uil:hover{
+            color: var(--color-primary);
+            cursor: pointer;
+        }
+
         .create-post div{
             display: flex;    
         }
@@ -322,6 +315,11 @@
             border-radius: var(--card-border-radius);
             height: 5rem;
             color: var(--color-dark);
+        }
+        .middle{
+            height: 180vh;
+            width: calc(100% - 38vw);
+            overflow: auto;
         }
         
         .middle .feeds .feed{
@@ -387,17 +385,11 @@
         }
         
         main .container .right{
-            height: max-content;
-            position: sticky;
-            top: var(--sticky-top-right);
-            bottom: 0;
+            margin-top: 1rem;
+            height: max-content;  
+            width: 20vw;
         }
-        
-        main .container .right {
-            height: max-content;
-            position: sticky;
-            top: var(--sticky-top-right);
-        }
+
         .interaction-buttons{
             display: flex;
         }
@@ -441,6 +433,46 @@
             font-size: 1.4rem;
             height: max-content;           
         }
+        nav .uil{
+            font-size: 1.5rem;
+            display: none;
+        }
+
+        
+        @media (max-width: 1176px) { 
+            nav .uil{
+                display: block;
+            } 
+
+            .search-bar{
+                display: none;
+            }
+
+            .left,
+            .right{
+                display: none;
+                position: absolute;                
+                min-width: 15rem;
+                margin-top: 2rem;
+                background: var(--color-light);
+                z-index: 2
+            }
+            .left{
+                left: 0;
+            }   
+            .right{
+                right: 0;
+            }        
+
+
+            .middle{
+                position: absolute;
+                width: auto;
+                z-index: 1;
+                margin-top: 2rem;
+            }           
+        }
+
 
         </style>
 </head>
@@ -448,102 +480,133 @@
 
   <!--========================== NAV BAR ==========================-->
     <nav>
+
         <div class="container">
-            <h2 class="log">
+            <i class="uil uil-bars"></i>
+
+            <h2 class="logo">
                 Forum
             </h2>
+
             <div class="search-bar">
                 <i class="uil uil-search"></i>
                 <input type="search" placeholder="Not functional yet">
             </div>
-
+            
             <div class="create">
-              
-              <!--====================== LEFT ======================-->
-                <label class="btn btn-primary" >Login</label>
-                <label class="btn btn-primary" >Register</label>
+                {{if .UserName}}
+                <a href="/logout" class="btn btn-primary" >Logout</a>                
+                {{else}}
+                <a href="/login" class="btn btn-primary" >Login</a>
+                <a href="/register" class="btn btn-primary" >Register</a>
+                {{end}}
             </div>
+            <i class="uil uil-clipboard-alt mobRight"></i>            
         </div>
+        
     </nav>
   <!--========================== END OF NAV BAR ==========================-->
 
     <!----------------------- MAIN ----------------------->
     <main>
         <div class="container">
+            
             <!--====================== LEFT ======================-->
             <div class="left">
 
                 <!------------ PROFILE ------------>
+                {{ if .UserName}}
                 <a class="profile">
                     <div class="profile-photo">
                         <!-- <img src="./images/profile-1.jpg"> -->
                          <!-- {{.Initial}} -->
-                          D
+                          {{.Initial}}
                     </div>
                     <div class="handle">
-                        <h4>Diana Akoth</h4>
+                        <h4>{{.UserName}}</h4>
                         <p class="text-muted">
-                            @d_akoth
+                            <!-- @d_akoth -->
                         </p>
                     </div>
                 </a>
+
+                {{else}}
+                <a class="profile">
+                    <div class="profile-photo">
+                        <!-- <img src="./images/profile-1.jpg"> -->
+                         <!-- {{.Initial}} -->
+                          G
+                    </div>
+                    <div class="handle">
+                        <h4>GUest Mode</h4>
+                        <p class="text-muted">
+                            Please login or create an account
+                        </p>
+                    </div>
+                </a>
+                {{end}}
             <!------------ END OF PROFILE ------------>
 
-
+                {{ if .UserName}}
                 <!------------- SIDEBAR ------------->
                 <div class="sidebar">
                     <a class="menu-item active">
                         <span>
                             <i class="uil uil-home"></i>                            
                         </span>
-                        <h3>Home</h3>
+                        <h3 class="res">Home</h3>
                     </a>
 
                     <a class="menu-item">
                         <span><i class="uil uil-pen"></i></span>  
-                        <h3>My Posts</h3>  
+                        <h3 class="res">My Posts</h3>  
                     </a>
 
                     <a class="menu-item">                     
                         <span><i class="uil uil-thumbs-up"></i></span>
-                        <h3>Liked Posts</h3>
+                        <h3 class="res">Liked Posts</h3>
                     </a>
                 </div>
                 <!-------------END OF  SIDEBAR ------------->
-
+                
                 <div class="sidebar">
-                    
-                    <!------------------- CREATE POST ------------------->
-                    <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
-                        <h2>create Post</h2>
-        
-                        <h4>Title</h4>
-                        <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
-                        <h4>Content</h4>
-                        <div>
-                            <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
-                        </div>
+                    <div class="create-post"> 
+                        <div class="heading">
+                            <i class="uil uil-plus-circle"></i><h2 class="res">create Post</h2>                              
+                        </div> 
                         
-                        <label for="media"><i class="uil uil-image-plus"></i> </label>
-                        <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
-                        <span id="file-name">No file selected</span>   
-                        
-                        
-                        <h3>Choose the Categories:</h3>
-                        <div class="category-group"> 
-                            {{range .Categories}}
-                            <div class="category-option">                
-                                <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
-                                <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                        <!------------------- CREATE POST ------------------->
+                        <form action="/post" method="POST" id="createPostForm" enctype="multipart/form-data" class="create-post">
+                            
+    
+                            <input type="text" name="post_title" placeholder="Enter title of your post" id="create-post">
+                            <h4>Content</h4>
+                            <div>
+                                <textarea  name="post_content" placeholder="what's on your mind" id="create-post"></textarea>
                             </div>
-                            {{end}}                                                
-                        </div>
-                        <input type="submit" value="Post" class="btn btn-primary">
-                    </form>
-                    <!------------------- END OF CREATE POST ------------------->
+                            
+                            <label for="media"><i class="uil uil-image-plus"></i> </label>
+                            <input type="file" id="media" name="media" accept=".jpg,.jpeg,.png,.gif,.mp4,.mov,.webm" hidden>
+                            <span id="file-name">No file selected</span>   
+                            
+                            
+                            <h3>Choose the Categories:</h3>
+                            <div class="category-group"> 
+                                {{range .Categories}}
+                                <div class="category-option">                
+                                    <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                                    <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
+                                </div>
+                                {{end}}                                                
+                            </div>
+                            <input type="submit" value="Post" class="btn btn-primary">
+                        </form>
+                        <!------------------- END OF CREATE POST ------------------->
+                    </div>
+                    
                 </div>
-
-        </div>
+                {{end}}
+            </div>
 
             <!--====================== END OF LEFT ======================-->
 
@@ -558,7 +621,7 @@
                 <div class="feeds">
                     {{range .Posts}}
                     <!---------------------- FEED 1 ---------------------->
-                    <div class="feed">
+                    <div class="feed" id="{{.PostId}}">
 
                         <!--======= user  =======-->
                         <div class="head">                            
@@ -569,7 +632,7 @@
                                 </div>
 
                                 <div class="info">
-                                    <h3>{{.Username}}</h3>
+                                    <h3>{{.UserName}}</h3>
                                     <small> {{.CreatedAt}}</small>
                                 </div>                                
                             </div>
@@ -587,11 +650,11 @@
                         </div>
                         <!--======= END OF POST CONTENT  =======-->
 
-                        {{if .Media}}
+                        {{if .MediaString}}
                         <!--======= POST IMAGE  =======-->
                         <div class="photo">
                             {{if or (eq .ContentType "image/jpeg") (eq .ContentType "image/png") (eq .ContentType "image/gif")}}
-                            <img src="data:{{.ContentType}};base64,{{.Media}}" alt="Post image" class="post-media">
+                            <img src="data:{{.ContentType}};base64,{{.MediaString}}" alt="Post image" class="post-media">
                             {{end}}
                         </div>
                         <!--======= END OF POST IMAGE  =======-->
@@ -602,7 +665,7 @@
                             <!------------ LIKES AND DISLIKES ------------>
                             <form class="like-form" action="/likes" method="POST">
                                 <div class="interaction-buttons">
-                                    <input type="hidden" name="id" value="{{.ID}}">
+                                    <input type="hidden" name="id" value="{{.PostId}}">
                                     <input type="hidden" name="item_type" value="post">
                                     <button type="submit" name="type" value="like" class="reactions">
                                         <i class="uil uil-thumbs-up"></i>
@@ -619,7 +682,7 @@
 
                             <!--======= comment button =======-->
                             <div class="comment">
-                                <span><i class="uil uil-comment-alt-dots"></i></span>
+                                <span><i class="uil uil-comment-alt-dots" id="{{.PostId}}"></i></span>
                                 <span>{{.CommentsLenght}}</span>
                             </div>
                             <!--======= END OF comment button =======-->
@@ -627,40 +690,45 @@
                             
                         <!------------ END OF LIKES AND DISLIKES ------------>
 
-                        <!----------------- Comment Form ----------------->
-                        <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
-                            <input type="hidden" name="post_id" value="{{.ID}}">
-                            <input type="text" name="content" placeholder="Add a comment...">    
-                            <input type="submit" value="Comment" class="btn btn-primary">
-                        </form>
-                        <!----------------- END OF Comment Form ----------------->
+                       
 
-                        <div class="comments" >
+                        <div class="comments" style="display: none;" id="post-{{.PostId}}">
+                            <p>Post ID {{.PostId}}</p>
+                             <!----------------- Comment Form ----------------->
+                            <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
+                                <input type="hidden" name="post_id" value="{{.PostId}}">
+                                <input type="text" name="content" placeholder="Add a comment...">    
+                                <input type="submit" value="Comment" class="btn btn-primary" >
+                            </form>
+                            <!----------------- END OF Comment Form ----------------->
 
                             {{range .Comments}}
                             <div class="comment_card">
-                                <div class="head">
-                                    <!--======= user  =======-->
+
+                                <!--============== user Profile ==============-->
+                                <div class="head">                                    
                                     <div class="user">
                                         <div class="profile-photo">
                                             <!-- <img src="images/profile-10.jpg"> -->
-                                            <p>{{.CommentInitial}}</p>
+                                            <p>{{.Initial}}</p>
                                         </div>
         
                                         <div class="info">
-                                            <h3>{{.CommentUsername}}</h3>
+                                            <h3>{{.UserName}}</h3>
                                             <small>Dubai, 15minute ago</small>
                                         </div>                                
-                                    </div>                                    
-                                    <!--======= END OF user  =======-->
-                                    
+                                    </div>
                                 </div>
+                                <!--============== End Of user Profile  ==============-->
+
+
 
                                 <!--======= comment CONTENT  =======-->
                                 <div class="feed-content">
                                     <p>{{.Content}}</p>
                                 </div>
                                 <!--======= END OF comment CONTENT  =======-->
+
 
 
                                 <div class="action-button">
@@ -681,71 +749,83 @@
                                             </button>                                                                                                
                                         </div>
                                     </form>
-                                    <!-- <span><h6>Reply</h6></span>                                      -->
+                                    <span><h6 class="uil reply-btn" id="{{.ID}}">Reply {{.RepliesLenght}}</h6></span>
+                                    
                                 </div>
 
-                                <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
-                                    <input type="hidden" name="parent_comment_id" value="{{.ID}}">
-                                    <input type="text" name="content" placeholder="Add a reply...">
-                                    <input type="submit" value="Reply" class="btn btn-primary">
-                                </form>
+                                
 
-                                {{range .Replies}}
-                                <div class="comment_card">
-                                    <div class="head">
-                                        <!--======= user  =======-->
-                                        <div class="user">
-                                            <div class="profile-photo">
-                                                <!-- <img src="images/profile-10.jpg"> -->
-                                                <p>{{.ReplyInitial}}</p>
-                                            </div>
-            
-                                            <div class="info">
-                                                <h3>{{.ReplyUsername}}</h3>
-                                                <small>Dubai, 15minute ago</small>
-                                            </div>                                
-                                        </div>                                    
-                                        <!--======= END OF user  =======-->
-                                        
-                                    </div>
+                                <div id="reply-{{.ID}}" style="display: none;">
+                                    <p>Comment ID {{.ID}}</p>
 
-                                    <!--======= comment CONTENT  =======-->
-                                    <div class="feed-content">
-                                        <p>{{.Content}}</p>
-                                    </div>
-                                    <!--======= END OF comment CONTENT  =======-->
-
-
-                                    <div class="action-button">
-
-                                        <!------------ LIKES AND DISLIKES ------------>
-
-                                        <form class="like-form" action="/likes" method="POST">
-                                            <div class="interaction-buttons">
-                                                <input type="hidden" name="id" value="{{.ID}}">
-                                                <input type="hidden" name="item_type" value="comment">
-                                                <button type="submit" name="type" value="like" class="reactions">
-                                                    <i class="uil uil-thumbs-up"></i>
-                                                    <h6 id="" class="like">{{.Likes}}</h6>                                    
-                                                </button>
-                                                
-                                                <button type="submit" name="type" value="dislike" class="reactions">
-                                                    <i class="uil uil-thumbs-down"></i>
-                                                    <h6 class="dislike">{{.Dislikes}}</h6>
-                                                </button>                                                                                                
-                                            </div>
-                                        </form>
-                                        <!-- <span><h6>Reply</h6></span>                                      -->
-                                    </div>
-
-                                    <!-- <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
+                                    <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
                                         <input type="hidden" name="parent_comment_id" value="{{.ID}}">
-                                        <input type="text" name="content" placeholder="Add a comment...">
+                                        <input type="text" name="content" placeholder="Add a reply...">
                                         <input type="submit" value="Reply" class="btn btn-primary">
-                                    </form> -->
+                                    </form>
+
+
+                                    {{range .Replies}}
+                                    <div class="comment_card">
+
+                                        <!--============== user Profile ==============-->
+                                        <div class="head">                                        
+                                            <div class="user">
+                                                <div class="profile-photo">
+                                                    <!-- <img src="images/profile-10.jpg"> -->
+                                                    <p>{{.Initial}}</p>
+                                                </div>
+                
+                                                <div class="info">
+                                                    <h3>{{.UserName}}</h3>
+                                                    <small>Dubai, 15minute ago</small>
+                                                </div>                                
+                                            </div>                                   
+                                        </div>
+                                        <!--============== End OF user Profile ==============-->
+                                        
+
+                                        <!--======= comment CONTENT  =======-->
+                                        <div class="feed-content">
+                                            <p>{{.Content}}</p>
+                                        </div>
+                                        <!--======= END OF comment CONTENT  =======-->
+
+
+                                        <div class="action-button">
+
+                                            <!------------ LIKES AND DISLIKES ------------>
+
+                                            <form class="like-form" action="/likes" method="POST">
+                                                <div class="interaction-buttons">
+                                                    <input type="hidden" name="id" value="{{.ID}}">
+                                                    <input type="hidden" name="item_type" value="comment">
+                                                    <button type="submit" name="type" value="like" class="reactions">
+                                                        <i class="uil uil-thumbs-up"></i>
+                                                        <h6 id="" class="like">{{.Likes}}</h6>                                    
+                                                    </button>
+                                                    
+                                                    <button type="submit" name="type" value="dislike" class="reactions">
+                                                        <i class="uil uil-thumbs-down"></i>
+                                                        <h6 class="dislike">{{.Dislikes}}</h6>
+                                                    </button>                                                                                                
+                                                </div>
+                                            </form>
+                                            <span><h6 class="uil reply-btn" id="{{.ID}}">Reply {{.RepliesLenght}}</h6></span>
+                                        </div>
+
+                                        <!-- <form action="/add_reply" method="POST" class="reply-form" id="comments-{{.ID}}">
+                                            <input type="hidden" name="parent_comment_id" value="{{.ID}}">
+                                            <input type="text" name="content" placeholder="Add a comment...">
+                                            <input type="submit" value="Reply" class="btn btn-primary">
+                                        </form> -->
+
+                                    </div>
+                                    {{end}}
 
                                 </div>
-                                {{end}}
+
+                                
 
                             </div>
                             {{end}}
@@ -763,18 +843,20 @@
 
                 <div class="categories">
                     <div class="heading">
-                        <h4> Filter by categories</h4><i class="uil uil-clipboard-alt"></i>
+                        <h4 class="res"> Filter by categories</h4>
                     </div>
 
                     <!---------------------- Categories ---------------------->
+                    <form action="/filtered_posts" method="POST" id="filterposts" class="res">
                     <div class="category-group">  
                         {{range .Categories}}
                         <div class="category-option">                
-                            <input type="checkbox" id="cat-{{.ID}}" name="categories" value="{{.Name}}">
+                            <input type="checkbox" id="cat-{{.ID}}" name="filteredcategories" value="{{.Name}}">
                             <label for="cat-{{.ID}}"><h5>{{.Name}}</h5></label>
                         </div>
                         {{end}}                                               
                     </div>
+                    </form>
                     <!---------------------- END OF Categories ---------------------->
                 </div>
 
@@ -786,10 +868,55 @@
   <!----------------------- END OF MAIN ----------------------->
 </body>
 <script>
-    document.getElementById("media").addEventListener("change", function () {
-        let fileName = this.files.length ? this.files[0].name : "No file selected";
-        document.getElementById("file-name").textContent = fileName;
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.checked = false;
+        });
     });
+
+
+    document.querySelector(".uil-bars").addEventListener("click", function() {
+        let leftElement = document.querySelector(".left"); 
+        leftElement.style.display = leftElement.style.display === "block" ? "none" : "block";
+    });
+
+    document.querySelector(".uil-clipboard-alt").addEventListener("click", function() {
+        let rightElement = document.querySelector(".right");
+        rightElement.style.display = rightElement.style.display === "block" ? "none" : "block";
+    });   
+    
+
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".uil-comment-alt-dots").forEach(icon => {
+            icon.addEventListener("click", function () {
+                let commentId = this.id; 
+                let commentElement = document.getElementById("post-" + commentId);
+                console.log("Comment btn clicked and ID = ", commentId)
+                
+                if (commentElement) {
+                    commentElement.style.display = commentElement.style.display === "block" ? "none" : "block";
+                }
+            });
+        });
+
+        document.querySelectorAll(".reply-btn").forEach(btn => {
+            btn.addEventListener("click", function () {                
+                let replyId = this.id; 
+                let replyElement = document.getElementById("reply-" + replyId);
+                console.log("reply btn clicked and ID = ", replyId)
+                
+                if (replyElement) {
+                    replyElement.style.display = replyElement.style.display === "block" ? "none" : "block";
+                }
+            });
+        });
+
+        document.querySelectorAll('input[name="filteredcategories"]').forEach(btn =>{
+            btn.addEventListener("click", filterByCategories);
+        });
+        
+    });
+
 
     // Handle post creation form submission
     document.getElementById('createPostForm').addEventListener('submit', async (e) => {
@@ -824,6 +951,7 @@
                     formData.append('id', event.target.querySelector('input[name="id"]').value);
                     formData.append('item_type', event.target.querySelector('input[name="item_type"]').value);
                     formData.append('type', event.submitter.value);
+                    
 
                     try {
                         const response = await fetch('/likes', {
@@ -850,7 +978,7 @@
                         } else {
                             const errorText = await response.text();
                             console.error('Error:', errorText);
-                            alert('Failed to process like/dislike');
+                            alert('Failed to process like/dislike');                            
                         }
                     } catch (error) {
                         console.error('Request failed:', error);
@@ -859,6 +987,55 @@
                 });
             });
         });
+
+        //filter posts by categories
+        async function filterByCategories() {
+            const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
+            
+            
+            const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
+
+            console.log("Categories Sent:", selectedCategories, selectedCategories.length); 
+
+            try {
+                const response = await fetch("/filtered_posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ categories: selectedCategories }),
+                });
+
+                const data = await response.json();
+                console.log("Filtered Data:", data);
+                if (selectedCategories.length === 0){
+                    data[0] = "all"
+                }
+                filter(data)
+            } catch (error) {
+                console.error("Error filtering:", error);
+            }
+        }
+
+        function filter(data) {
+
+            document.querySelectorAll(".feed").forEach(feed => {                   
+
+                if (data[0] === "all"){
+                    feed.style.display = "block"
+                }else{
+                    if (data.includes(feed.id )){
+                        feed.style.display = "block"
+                    }else{
+                        feed.style.display = "none"
+                    }
+                }
+            })
+        }
+
+
+        
+
 
         // Handle comment form submissions
         document.querySelectorAll('.comment-form').forEach(form => {
@@ -920,6 +1097,11 @@
                     console.error('Request failed:', error);
                 }
             });
+        });
+
+        document.getElementById("media").addEventListener("change", function () {
+            let fileName = this.files.length ? this.files[0].name : "No file selected";
+            document.getElementById("file-name").textContent = fileName;
         });
 
 </script>

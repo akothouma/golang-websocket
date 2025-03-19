@@ -27,13 +27,16 @@ func GetAllRepliesForCommentHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid comment ID", http.StatusBadRequest)
 		return
 	}
+	var comment models.Comment
+	comment.ID = commentID
 
-	replies, err := models.GetAllRepliesForComment(commentID)
+
+	err = comment.GetAllRepliesForComment()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to retrieve replies: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(replies)
+	json.NewEncoder(w).Encode(comment.Replies)
 }

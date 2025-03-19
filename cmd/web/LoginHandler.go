@@ -58,5 +58,5 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	dep.CreateSession(w, r, user.UserID)
 
-	http.Redirect(w, r, "/allposts", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

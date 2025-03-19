@@ -85,7 +85,7 @@
     <div class="post">
         <h2>{{.Title}}</h2>
         <p>{{.Content}}</p>
-        <p><small>by {{.Username}}</small></p>
+        <p><small>by {{.UserName}}</small></p>
         <!-- Display categories -->
         <div class="categories">
             Categories:
@@ -96,14 +96,14 @@
         <!-- {{if .Media}}
         <img src="data:image/JPG;base64,{{.Media}}" alt="Post Media">
         {{end}} -->
-        {{if .Media}}
+        {{if .MediaString}}
         <div class="media-container">
             {{if or (eq .ContentType "image/jpeg") (eq .ContentType "image/png") (eq .ContentType "image/gif")}}
-            <img src="data:{{.ContentType}};base64,{{.Media}}" alt="Post image" class="post-media">
+            <img src="data:{{.ContentType}};base64,{{.MediaString}}" alt="Post image" class="post-media">
             {{else if or (eq .ContentType "video/mp4") (eq .ContentType "video/quicktime") (eq .ContentType
             "video/webm")}}
             <video controls class="post-media">
-                <source src="data:{{.ContentType}};base64,{{.Media}}" type="{{.ContentType}}">
+                <source src="data:{{.ContentType}};base64,{{.MediaString}}" type="{{.ContentType}}">
                 Your browser does not support the video tag.
             </video>
             {{end}}
@@ -184,6 +184,8 @@
                 // window.location.reload();
             }
         });
+
+        
         //filterposts
         document.getElementById('filteredposts').addEventListener('submit', async (e) => {
             e.preventDefault()
