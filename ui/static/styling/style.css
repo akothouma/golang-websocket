@@ -549,7 +549,9 @@ nav .uil {
     nav .uil {
         display: block;
     }
-
+    .container{
+        margin: 0;
+    }
     .search-bar {
         display: none;
     }
