@@ -158,7 +158,7 @@ func (postCategories *postCategory) AllCategories(id string) error {
 			SELECT c.id, c.name 
 			FROM categories c 
 			JOIN post_categories pc ON c.name = pc.category_id 
-			WHERE pc.post_id = ?`, id)
+			WHERE pc.postId = ?`, id)
 	if err != nil {
 		return fmt.Errorf("Failed to fetch post categories, %w", err)
 	}
@@ -181,7 +181,7 @@ func Post_Categories(id string) ([]postCategory, error) {
 			SELECT c.id, c.name 
 			FROM categories c 
 			JOIN post_categories pc ON c.name = pc.category_id 
-			WHERE pc.post_id = ?`, id)
+			WHERE pc.postId = ?`, id)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch post categories %w", err)
 	}
