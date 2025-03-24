@@ -100,48 +100,21 @@ func FindPostById(id string) (*Post, error) {
 func AllPosts() ([]Post, error) {
 	query := "SELECT * FROM posts"
 	rows, err := DB.Query(query)
-	posts := []Post{}
 	if err != nil {
 		return nil, err
 	}
-	for rows.Next() {
-		var p Post
-		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
-		if err != nil {
-			return nil, err
-		}
-
-		p.Initial = string(p.UserName[0])
-
-		p.MediaString = MediaToBase64(p.Media)
-
-		p.Comments, err = GetAllCommentsForPost(p.PostId)
-		if err != nil {
-			return nil, err
-		}
-
-		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
-		if err != nil {
-			return nil, err
-		}
-
-		p.Categories, err = Post_Categories(p.PostId)
-		if err != nil {
-			return nil, err
-		}
-
-		posts = append(posts, p)
+	posts, err := PostsRows(rows)
+	if err != nil {
+		return nil, err
 	}
 	return posts, nil
 }
-
 
 func CheckUserReaction(userID string, postID string) (string, error) {
 	var reaction string
 
 	query := `SELECT type FROM post_likes WHERE user_id = ? AND post_id = ?`
 	err := DB.QueryRow(query, userID, postID).Scan(&reaction)
-
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return "neither", nil // User has not reacted
@@ -151,7 +124,6 @@ func CheckUserReaction(userID string, postID string) (string, error) {
 
 	return reaction, nil
 }
-
 
 func FilterCategories(categories []string) ([]string, error) {
 	// posts := []Post{}
@@ -167,16 +139,16 @@ func FilterCategories(categories []string) ([]string, error) {
 
 		rows, err := DB.Query(query, categoryID)
 		if err != nil {
-			if err == sql.ErrNoRows{
+			if err == sql.ErrNoRows {
 				// fmt.Println("FilterCategories Err:", err)
 				continue
-			}else{
+			} else {
 				return nil, err
-			}			
+			}
 		}
-		for rows.Next(){
+		for rows.Next() {
 			err = rows.Scan(&id)
-			if err != nil{
+			if err != nil {
 				return nil, err
 			}
 			data = append(data, id)
@@ -193,4 +165,39 @@ func MediaToBase64(media []byte) string {
 		mediaBase64 = base64.StdEncoding.EncodeToString(media)
 	}
 	return mediaBase64
+}
+
+func PostsRows(rows *sql.Rows) ([]Post, error) {
+	var posts []Post
+	for rows.Next() {
+		var p Post
+		err := rows.Scan(&p.ID, &p.PostId, &p.UserId, &p.UserName, &p.Title, &p.Content, &p.Media, &p.ContentType, &p.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+
+		p.Initial = string(p.UserName[0])
+
+		p.MediaString = MediaToBase64(p.Media)
+
+		p.Comments, err = GetAllCommentsForPost(p.PostId)
+		if err != nil {
+			return nil, err
+		}
+
+		p.CommentsLenght = len(p.Comments)
+
+		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
+		if err != nil {
+			return nil, err
+		}
+
+		p.Categories, err = Post_Categories(p.PostId)
+		if err != nil {
+			return nil, err
+		}
+
+		posts = append(posts, p)
+	}
+	return posts, nil
 }
