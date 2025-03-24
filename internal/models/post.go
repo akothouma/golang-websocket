@@ -70,7 +70,7 @@ func CreatePost(p *Post) error {
 
 	for _, categoryNames := range p.Category {
 		_, err = DB.Exec(`
-            INSERT INTO post_categories (postId, category_id)
+            INSERT INTO post_categories (post_id, category_id)
             VALUES (?, ?)`,
 			p.PostId, categoryNames,
 		)
