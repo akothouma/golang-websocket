@@ -48,7 +48,7 @@ func InitializeDB() (*sql.DB, error) {
 		content TEXT NOT NULL, 
 		media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
-		postcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid),
 		FOREIGN KEY (username) REFERENCES users(username)
 		);
