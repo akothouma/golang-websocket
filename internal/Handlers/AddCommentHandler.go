@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
@@ -32,6 +33,8 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("commentHere", userID)
 
 	content := r.FormValue("content")
+	content = strings.TrimSpace(content)
+	userID = strings.TrimSpace(userID)
 
 	fmt.Println("post id:", postID, "\nuser id", userID, "\ncontent", content)
 
