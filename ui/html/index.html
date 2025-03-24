@@ -1252,7 +1252,7 @@
     //profile 
     document.getElementById('profile-upload').addEventListener('change', function() {        
         let fileName = this.files.length ? this.files[0].name : "No file selected";
-        document.getElementById("profile_pic").textContent = fileName;
+        document.getElementById("profile_pic").textContent = "Change Photo to "+fileName;
     });
 
     document.getElementById("media").addEventListener("change", function () {
