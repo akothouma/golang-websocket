@@ -94,9 +94,9 @@ func InitializeDB() (*sql.DB, error) {
 		
 		CREATE TABLE IF NOT EXISTS post_categories(
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-		postId TEXT NOT NULL,
+		post_id TEXT NOT NULL,
 		category_id TEXT,
-		FOREIGN KEY (postId) REFERENCES posts(post_id),
+		FOREIGN KEY (post_id) REFERENCES posts(post_id),
 		FOREIGN KEY (category_id) REFERENCES categories(name)
 		);
 		
