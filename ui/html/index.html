@@ -48,16 +48,15 @@
             overflow-x: hidden;
         }
         .profile-card {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: white;
-    padding: 1rem;
-    border-radius: 15px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    /* width: 330px; */
-    margin: auto;
-}
+            display: flex;
+            flex-direction: column;
+            align-items: center;    
+            background: white;
+            padding: 1rem;
+            border-radius: var(--card-border-radius);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            margin: auto;
+        }
 
 .profile-photo img {
     width: 100%;
@@ -265,6 +264,7 @@ input[type="file"] {
             margin-top: 1rem;
             background: var(--color-white);
             border-radius: var(--card-border-radius);
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
         }
         
         .left .sidebar .menu-item{
@@ -423,7 +423,7 @@ input[type="file"] {
             justify-content: space-between;
         }
         
-        .middle .feed .user{
+        .user{
             display: flex;
             gap: 1rem;
         }
@@ -595,6 +595,7 @@ input[type="file"] {
                 {{ if .UserName }}
                 <div class="profile-card">
                     <!-- Profile Photo Section -->
+                    
                     <div class="profile-photo">
                         {{ if .ProfilePicture }}
                         <img src="data:{{ .ContentType }};base64,{{ .ProfilePicture }}" alt="Profile Picture">
@@ -603,13 +604,16 @@ input[type="file"] {
                         {{ end }}
                     </div>
 
-                    {{if not .ProfilePicture}}
-                    <p class="text-muted">Upload your profile picture</p>                        
-                    {{end}}                
                     <!-- User Info Section -->
                     <div class="handle">
                         <h4>{{ .UserName }}</h4>
                     </div>
+                
+
+                    {{if not .ProfilePicture}}
+                    <p class="text-muted">Upload your profile picture</p>                        
+                    {{end}}       
+                    
                 
                     <!-- Profile Picture Upload Form -->
                     <form action="/upload-profile" method="POST" enctype="multipart/form-data" class="upload-form" id="profile-upload-form">
@@ -889,7 +893,6 @@ input[type="file"] {
                                                 <div class="interaction-buttons">
                                                     <input type="hidden" name="id" value="{{.ID}}">
                                                     <input type="hidden" name="item_type" value="comment">
-                                                    <input type="hidden" name="item_type" value="post">
                                                     <button type="submit" name="type" value="like" class="reactions">
                                                         <i class="uil uil-thumbs-up"></i>
                                                         <h6 id="" class="like">{{.Likes}}</h6>                                    
@@ -901,6 +904,7 @@ input[type="file"] {
                                                     </button>                                                                                                
                                                 </div>
                                             </form>
+                                            
                                             <span><h6 class="uil reply-btn" id="{{.ID}}">Reply {{.RepliesLenght}}</h6></span>
                                         </div>
 
@@ -1038,10 +1042,8 @@ input[type="file"] {
        // Like/dislike handler for both posts and comments
     document.addEventListener('DOMContentLoaded', function() {
         // Find all like/dislike forms
-        const likeForms = document.querySelectorAll('form.like-form');
-    
-        likeForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
+        const likeForms = document.querySelectorAll('form.like-form').forEach(form => {
+            form.addEventListener('submit', async function(e) {
                 // Prevent the default form submission
                 e.preventDefault();
                 
@@ -1134,7 +1136,8 @@ input[type="file"] {
             });
         });
     });
-        //filter posts by categories
+        
+    //filter posts by categories
     async function filterByCategories() {
         const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
         
