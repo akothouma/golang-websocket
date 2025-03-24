@@ -26,7 +26,8 @@ func InitializeDB() (*sql.DB, error) {
         email TEXT UNIQUE NOT NULL,
         username TEXT UNIQUE NOT NULL,
         password TEXT NOT NULL,
-        image_path TEXT,
+        profile_picture BLOB,
+		content_type TEXT,
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 		
@@ -47,7 +48,7 @@ func InitializeDB() (*sql.DB, error) {
 		content TEXT NOT NULL, 
 		media BLOB, --binary data - video, image and GIFs
 		content_type TEXT, --content type tracking(text, image, gif)
-		created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+		postcreated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY (user_uuid) REFERENCES users(user_uuid),
 		FOREIGN KEY (username) REFERENCES users(username)
 		);

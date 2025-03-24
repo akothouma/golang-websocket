@@ -2,7 +2,6 @@ package models
 
 import (
 	"html/template"
-	"log"
 	"net/http"
 )
 
@@ -16,9 +15,12 @@ func InitTemplates(templateDir string) {
 // function to render the html templates pages (used for the likes and dislike form)
 // prone to change if there exists a better one
 func RenderTemplates(w http.ResponseWriter, fileName string, data interface{}) {
-	if err := templates.ExecuteTemplate(w, fileName, data); err != nil {
-		ErrorHandler(w, http.StatusInternalServerError)
-		log.Println("Templates failed to execute:", err)
-		return
-	}
+	templates.ExecuteTemplate(w, fileName, data)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// 	http.Error(w,"internal server error",http.StatusInternalServerError)
+	// 	log.Println("Templates failed to execute:", err)
+	// 	return
+	// }
 }

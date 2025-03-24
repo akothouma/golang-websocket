@@ -15,6 +15,8 @@ type User struct {
 	Email    string
 	Username string
 	Password string
+	ProfilePicture string // 🔹 This stores the Base64-encoded image
+	ContentType string
 	// forum    database.ForumModel
 }
 
@@ -66,18 +68,24 @@ func (f *ForumModel) GetUserByID(userID int) (*User, error) {
 	}
 	return &user, nil
 }
-
 func (f *ForumModel) GetUserByUsername(username string) (*User, error) {
-	query := "SELECT id, email, username, password FROM users WHERE username = ?"
+	query := "SELECT id, email, username, password, profile_picture FROM users WHERE username = ?"
 	row := f.DB.QueryRow(query, username)
+
 	user := User{}
-	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password)
+	var profilePic []byte
+
+	err := row.Scan(&user.ID, &user.Email, &user.Username, &user.Password, &profilePic)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return nil, nil
 		}
-		log.Printf("Failed to get user by username: %v", err)
-		return nil, fmt.Errorf("failed to get user by username: %w", err)
+		fmt.Println(" Failed to get user by username:", err)
+		return nil, err
 	}
+
+	// Convert image BLOB to Base64
+	user.ProfilePicture = MediaToBase64(profilePic)
 	return &user, nil
 }
+

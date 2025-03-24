@@ -1,0 +1,8 @@
+{{ define "content"}}
+{{ range . }}
+{{ template "post" . }}
+{{ else }}
+<p>No posts available.</p>
+{{ end }}
+{{ end }}
+{{ template "base" . }}

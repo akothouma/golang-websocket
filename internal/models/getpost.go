@@ -33,27 +33,77 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	posts, err := AllPosts()
-	if err != nil{
+	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	
 	data := make(map[string]interface{})
 
-	username := ""
+	// username := ""
 
-	if username, err = LogedInUser(r); err != nil {
-		fmt.Println(err)
-	} else {
-		data["UserName"] = username
-		data["Initial"] = string(username[0])
+	// Check if the user is logged in
+	username, _ := LogedInUser(r)
+	// Get user details
+	f := &ForumModel{DB: DB}
+	user, err := f.GetUserByUsername(username)
+	if err == nil && user != nil {
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType
+		} else if len(username) > 0 {
+			data["Initial"] = string(username[0])
+		}
 	}
 
+	// Add debugging information
+	fmt.Printf("Rendering homepage - User logged in: %v, Username: %s\n", err == nil, username)
+	data["UserName"] = username 
+	data["ViewType"] = "all"
 	data["Posts"] = posts
 	data["Categories"] = categories
 
 	// fmt.Println("categories:", categories)
+
+	RenderTemplates(w, "index.html", data)
+}
+
+func RenderProfile(w http.ResponseWriter, r *http.Request) {
+	data := make(map[string]interface{})
+	f := &ForumModel{DB: DB}
+	username, err := LogedInUser(r)
+	if err != nil {
+		// User not logged in, set as guest
+		RenderTemplates(w, "index.html", data)
+		return
+	}
+
+	// Fetch user details from the database
+	user, err := f.GetUserByUsername(username)
+	if err != nil {
+		fmt.Println("Error fetching user details:", err)
+		http.Error(w, "Failed to retrieve user details", http.StatusInternalServerError)
+		return
+	}
+
+	// Populate all required template fields
+	data["UserName"] = username
+
+	// If user exists, add their details
+	if user != nil {
+		// Add profile picture if it exists
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType // Make sure this field exists in your User struct
+		} else {
+			// Set initial for avatar if no profile pic
+			if len(username) > 0 {
+				data["Initial"] = string(username[0])
+			} else {
+				data["Initial"] = "U"
+			}
+		}
+	}
 
 	RenderTemplates(w, "index.html", data)
 }
@@ -127,15 +177,13 @@ func (postCategories *postCategory) AllCategories(id string) error {
 	return nil
 }
 
-
-func Post_Categories(id string)([]postCategory, error){
-
+func Post_Categories(id string) ([]postCategory, error) {
 	categoryRows, err := DB.Query(`
 			SELECT c.id, c.name 
 			FROM categories c 
 			JOIN post_categories pc ON c.name = pc.category_id 
 			WHERE pc.post_id = ?`, id)
-	if err != nil {		
+	if err != nil {
 		return nil, fmt.Errorf("Failed to fetch post categories %w", err)
 	}
 	defer categoryRows.Close()
@@ -147,30 +195,30 @@ func Post_Categories(id string)([]postCategory, error){
 			continue
 		}
 		postCategories = append(postCategories, postCategory{
-			ID:  catID,
+			ID:   catID,
 			Name: catName,
 		})
 	}
 
 	return postCategories, nil
-
 }
+
 func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
-    username, err := LogedInUser(r)
-    if err != nil {
-        http.Redirect(w, r, "/login", http.StatusSeeOther)
-        return
-    }
+	username, err := LogedInUser(r)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-    // Get user UUID from username
-    var userUUID string
-    err = DB.QueryRow("SELECT user_uuid FROM users WHERE username = ?", username).Scan(&userUUID)
-    if err != nil {
-        http.Error(w, "Failed to get user information", http.StatusInternalServerError)
-        return
-    }
+	// Get user UUID from username
+	var userUUID string
+	err = DB.QueryRow("SELECT user_uuid FROM users WHERE username = ?", username).Scan(&userUUID)
+	if err != nil {
+		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
+		return
+	}
 
-    // Query to get posts liked by the user
+	// Query to get posts liked by the user
 	query := `
     SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at
     FROM posts p
@@ -180,13 +228,13 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
     ORDER BY p.created_at DESC
 `
 
-    rows, err := DB.Query(query, userUUID)
-    if err != nil {
-        http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
-        fmt.Println(err)
-        return
-    }
-    defer rows.Close()
+	rows, err := DB.Query(query, userUUID)
+	if err != nil {
+		http.Error(w, "Failed to fetch liked posts", http.StatusInternalServerError)
+		fmt.Println(err)
+		return
+	}
+	defer rows.Close()
 
     likedPosts, err := PostsRows(rows)
     if err != nil {
@@ -210,38 +258,34 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, cat)
 	}
 
-    data := make(map[string]interface{})
+	data := make(map[string]interface{})
 
-	
-    data["UserName"] = username
-    data["Initial"] = string(username[0])
-	
-
+	data["UserName"] = username
+	data["Initial"] = string(username[0])
+	data["ViewType"] = "liked"
 	data["Posts"] = likedPosts
 	data["Categories"] = categories
 
-    RenderTemplates(w, "index.html", data)
+	RenderTemplates(w, "index.html", data)
 }
 
-// Add this function to getpost.go
-
 func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
-    username, err := LogedInUser(r)
-    if err != nil {
-        http.Redirect(w, r, "/login", http.StatusSeeOther)
-        return
-    }
+	username, err := LogedInUser(r)
+	if err != nil {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
 
-    // Get user UUID from username
-    var userUUID string
-    err = DB.QueryRow("SELECT user_uuid FROM users WHERE username = ?", username).Scan(&userUUID)
-    if err != nil {
-        http.Error(w, "Failed to get user information", http.StatusInternalServerError)
-        return
-    }
+	// Get user UUID from username
+	var userUUID string
+	err = DB.QueryRow("SELECT user_uuid FROM users WHERE username = ?", username).Scan(&userUUID)
+	if err != nil {
+		http.Error(w, "Failed to get user information", http.StatusInternalServerError)
+		return
+	}
 
-    // Query to get posts created by the user
-    query := `
+	// Query to get posts created by the user
+	query := `
         SELECT p.id, p.post_id, p.user_uuid, p.username, p.title, p.content, p.media, p.content_type, p.created_at
         FROM posts p
         JOIN users u ON p.user_uuid = u.user_uuid
@@ -249,12 +293,12 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
         ORDER BY p.created_at DESC
     `
 
-    rows, err := DB.Query(query, userUUID)
-    if err != nil {
-        http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
-        return
-    }
-    defer rows.Close()
+	rows, err := DB.Query(query, userUUID)
+	if err != nil {
+		http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
+		return
+	}
+	defer rows.Close()
 
     myPosts, err := PostsRows(rows)
     if err != nil {
@@ -278,15 +322,13 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, cat)
 	}
 
-    data := make(map[string]interface{})
+	data := make(map[string]interface{})
 
-	
-    data["UserName"] = username
-    data["Initial"] = string(username[0])
-	
-
+	data["UserName"] = username
+	data["Initial"] = string(username[0])
+	data["ViewType"] = "mine"
 	data["Posts"] = myPosts
 	data["Categories"] = categories
 
-    RenderTemplates(w, "index.html", data)
+	RenderTemplates(w, "index.html", data)
 }

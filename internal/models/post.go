@@ -41,7 +41,8 @@ type Post struct {
 	UserName       string         `json:"UserName"`
 	Initial        string         `json:"Initial"`
 	Categories     []postCategory `json:"Categories"`
-	CreatedAt      time.Time      `json:"CreatedAt"`
+	CreatedAt      time.Time       `json:"-"`
+	FormattedDate  string         `json:"CreatedAt"`
 }
 
 // type LikeData struct {

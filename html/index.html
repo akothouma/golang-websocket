@@ -11,7 +11,7 @@
 
         :root{
             --color-white: hsl(252, 30%, 100%);
-            --color-light: hsl(255, 31%, 95%);
+            --color-light: hsl(252,30%, 95%);
             --color-gray: hsl(252,15%, 65%);
             --color-primary: #6b4ce6;
             --color-secondary: hsl(252,100%, 90%);
@@ -55,8 +55,21 @@
     padding: 1rem;
     border-radius: 15px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    /* width: 330px; */
+    width: 330px;
     margin: auto;
+}
+
+.profile-photo {
+    width: 300px;
+    height: 120px;
+    border-radius: 5%;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #48cae4;
+    cursor: pointer;
+    position: relative;
 }
 
 .profile-photo img {
@@ -121,31 +134,18 @@ input[type="file"] {
             font-family: "Poppins",sans-serif;
         }
         
-        .profile-photo{
+        /* .profile-photo{
             display: flex;
             align-items: center;
             justify-content: center;
             text-transform: uppercase;
-            min-width: 4rem;
-            min-height: 4rem;
+            min-width: 3rem;
+            height: 3rem;
             border-radius: 50%;
             overflow: hidden;
             background-color: #48cae4;
             font-size: 3.5vh;
             color: var(--color-white); 
-        }
-
-        /* .profile-photo {
-            min-width: 3rem;
-            height: 120px;
-            border-radius: 5%;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #48cae4;
-            cursor: pointer;
-            position: relative;
         } */
         
         img{
@@ -277,7 +277,6 @@ input[type="file"] {
         .left .sidebar .menu-item h3, .left .sidebar .menu-item span{
             padding-top: 2rem;
             padding-bottom: 2rem;
-            color: var(--color-gray);
         }
         
         .left .sidebar .menu-item:hover{
@@ -308,11 +307,11 @@ input[type="file"] {
             font-size: 1rem;
         }
         
-        .left .sidebar .active{
+        .left .search-bar .active{
             background: var(--color-light);
         }
         
-        .left .sidebar .active i, .left .sidebar .active h3{
+        .left .search-bar .active i, .left .sidebar .active h3{
             color: var(--color-primary);
         }
         
@@ -599,13 +598,11 @@ input[type="file"] {
                         {{ if .ProfilePicture }}
                         <img src="data:{{ .ContentType }};base64,{{ .ProfilePicture }}" alt="Profile Picture">
                         {{ else }}
-                        <div class="initials">{{ .Initial }}</div>                        
+                        <div class="initials">{{ .Initial }}</div>
+                        <p class="text-muted">Upload your profile picture</p>
                         {{ end }}
                     </div>
-
-                    {{if not .ProfilePicture}}
-                    <p class="text-muted">Upload your profile picture</p>                        
-                    {{end}}                
+                
                     <!-- User Info Section -->
                     <div class="handle">
                         <h4>{{ .UserName }}</h4>
@@ -640,21 +637,21 @@ input[type="file"] {
                 <!------------- SIDEBAR ------------->
                 <div class="sidebar">
                     <!-- <a class="menu-item active"> -->
-                        <a href="/allposts" class="menu-item {{if eq .ViewType "all"}} active{{end}}">
+                        <a href="/allposts" class="menu-item {{if eq .ViewType "all"}}active{{end}}">
                         <span>
                             <i class="uil uil-home"></i>                            
                         </span>
-                        <h3>Home</h3>
+                        <h3 class="res">Home</h3>
                     </a>
 
-                    <a href="/my_posts" class="menu-item {{if eq .ViewType "mine"}} active{{end}}">
+                    <a href="/my_posts" class="menu-item {{if eq .ViewType "mine"}}active{{end}}">
                         <span><i class="uil uil-pen"></i></span>  
-                        <h3>My Posts</h3>  
+                        <h3 class="res">My Posts</h3>  
                     </a>
             
-                    <a href="/liked_posts" class="menu-item {{if eq .ViewType "liked"}} active{{end}}">                     
+                    <a href="/liked_posts" class="menu-item {{if eq .ViewType "liked"}}active{{end}}">                     
                         <span><i class="uil uil-thumbs-up"></i></span>
-                        <h3 >Liked Posts</h3>
+                        <h3 class="res">Liked Posts</h3>
                     </a>
                 </div>
                 <!-------------END OF  SIDEBAR ------------->
@@ -662,7 +659,7 @@ input[type="file"] {
                 <div class="sidebar">
                     <div class="create-post"> 
                         <div class="heading">
-                            <i class="uil uil-plus-circle"></i><h2>create Post</h2>                              
+                            <i class="uil uil-plus-circle"></i><h2 class="res">create Post</h2>                              
                         </div> 
                         
                         <!------------------- CREATE POST ------------------->
@@ -694,7 +691,7 @@ input[type="file"] {
                         <!------------------- END OF CREATE POST ------------------->
                     </div>
                     
-                </div>               
+                </div>
                 {{end}}
             </div>
 
@@ -718,7 +715,7 @@ input[type="file"] {
                             <div class="user">
                                 <div class="profile-photo">
                                     <!-- <img src="images/profile-10.jpg"> -->
-                                    <div class="initials">{{ .Initial }}</div>
+                                    <p>{{.Initial}}</p>
                                 </div>
 
                                 <div class="info">
@@ -782,7 +779,8 @@ input[type="file"] {
 
                        
 
-                        <div class="comments" style="display: none;" id="post-{{.PostId}}">                    
+                        <div class="comments" style="display: none;" id="post-{{.PostId}}">
+                            <p>Post ID {{.PostId}}</p>
                              <!----------------- Comment Form ----------------->
                             <form action="/add_comment" method="POST" class="comment-form" id="comments-{{.ID}}">
                                 <input type="hidden" name="post_id" value="{{.PostId}}">
@@ -799,7 +797,7 @@ input[type="file"] {
                                     <div class="user">
                                         <div class="profile-photo">
                                             <!-- <img src="images/profile-10.jpg"> -->
-                                            <div class="initials">{{ .Initial }}</div>
+                                            <p>{{.Initial}}</p>
                                         </div>
         
                                         <div class="info">
@@ -862,7 +860,7 @@ input[type="file"] {
                                             <div class="user">
                                                 <div class="profile-photo">
                                                     <!-- <img src="images/profile-10.jpg"> -->
-                                                    <div class="initials">{{ .Initial }}</div>
+                                                    <p>{{.Initial}}</p>
                                                 </div>
                 
                                                 <div class="info">
@@ -933,11 +931,11 @@ input[type="file"] {
 
                 <div class="categories">
                     <div class="heading">
-                        <h4> Filter by categories</h4>
+                        <h4 class="res"> Filter by categories</h4>
                     </div>
 
                     <!---------------------- Categories ---------------------->
-                    <form action="/filtered_posts" method="POST" id="filterposts">
+                    <form action="/filtered_posts" method="POST" id="filterposts" class="res">
                     <div class="category-group">  
                         {{range .Categories}}
                         <div class="category-option">                
@@ -958,6 +956,15 @@ input[type="file"] {
   <!----------------------- END OF MAIN ----------------------->
 </body>
 <script>
+//profile 
+document.getElementById('profile-upload').addEventListener('submit', function(e) {
+    const fileInput = document.getElementById('profile-upload');
+    if (!fileInput.files.length===0) {
+      e.preventDefault()
+        alert('please select a file first')
+    }
+});
+
 
     document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
@@ -984,8 +991,6 @@ input[type="file"] {
                 let commentElement = document.getElementById("post-" + commentId);
                 console.log("Comment btn clicked and ID = ", commentId)
                 
-                console.log("Post", commentId, "clicked")
-
                 if (commentElement) {
                     commentElement.style.display = commentElement.style.display === "block" ? "none" : "block";
                 }
@@ -1036,228 +1041,219 @@ input[type="file"] {
         // Handle like/dislike form submissions
         // Like/dislike handler for both posts and comments
        // Like/dislike handler for both posts and comments
-    document.addEventListener('DOMContentLoaded', function() {
-        // Find all like/dislike forms
-        const likeForms = document.querySelectorAll('form.like-form');
+       document.addEventListener('DOMContentLoaded', function() {
+    // Find all like/dislike forms
+    const likeForms = document.querySelectorAll('form.like-form');
     
-        likeForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                // Prevent the default form submission
-                e.preventDefault();
-                
-                // Create a new FormData object from the form
-                const formData = new FormData(this);
-                
-                // Add the clicked button's value explicitly
-                // In modern browsers, we can use e.submitter to get the clicked button
-                if (e.submitter) {
-                    formData.set('type', e.submitter.value);
+    likeForms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            // Prevent the default form submission
+            e.preventDefault();
+            
+            // Create a new FormData object from the form
+            const formData = new FormData(this);
+            
+            // Add the clicked button's value explicitly
+            // In modern browsers, we can use e.submitter to get the clicked button
+            if (e.submitter) {
+                formData.set('type', e.submitter.value);
+            } else {
+                // Fallback for older browsers - try to determine which button was clicked
+                const clickedButton = document.activeElement;
+                if (clickedButton && clickedButton.getAttribute('value')) {
+                    formData.set('type', clickedButton.getAttribute('value'));
+                }
+            }
+            
+            // Log the form data to confirm
+            console.log('Form data being sent:');
+            for (let pair of formData.entries()) {
+                console.log(pair[0] + ': ' + pair[1]);
+            }
+            
+            const itemId = formData.get('id');
+            const itemType = formData.get('item_type');
+            const actionType = formData.get('type'); // 'like' or 'dislike'
+            
+            // Reference to the buttons that contain the counts
+            const likeButton = this.querySelector('button[value="like"]');
+            const dislikeButton = this.querySelector('button[value="dislike"]');
+            const likeCountElement = likeButton.querySelector('.like');
+            const dislikeCountElement = dislikeButton.querySelector('.dislike');
+            
+            // Send AJAX request
+            fetch('/likes', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                // First check if the response is JSON
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    // It's JSON, so parse it
+                    return response.json().then(data => {
+                        return { status: response.status, data, isJson: true };
+                    });
                 } else {
-                    // Fallback for older browsers - try to determine which button was clicked
-                    const clickedButton = document.activeElement;
-                    if (clickedButton && clickedButton.getAttribute('value')) {
-                        formData.set('type', clickedButton.getAttribute('value'));
-                    }
+                    // Not JSON, get text instead
+                    return response.text().then(text => {
+                        return { status: response.status, text, isJson: false };
+                    });
                 }
+            })
+            .then(result => {
+                console.log('Response:', result);
                 
-                // Log the form data to confirm
-                console.log('Form data being sent:');
-                for (let pair of formData.entries()) {
-                    console.log(pair[0] + ': ' + pair[1]);
-                }
-                
-                const itemId = formData.get('id');
-                const itemType = formData.get('item_type');
-                const actionType = formData.get('type'); // 'like' or 'dislike'
-                
-                // Reference to the buttons that contain the counts
-                const likeButton = this.querySelector('button[value="like"]');
-                const dislikeButton = this.querySelector('button[value="dislike"]');
-                const likeCountElement = likeButton.querySelector('.like');
-                const dislikeCountElement = dislikeButton.querySelector('.dislike');
-                
-                // Send AJAX request
-                fetch('/likes', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    // First check if the response is JSON
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        // It's JSON, so parse it
-                        return response.json().then(data => {
-                            return { status: response.status, data, isJson: true };
-                        });
-                    } else {
-                        // Not JSON, get text instead
-                        return response.text().then(text => {
-                            return { status: response.status, text, isJson: false };
-                        });
+                if (result.status === 200 && result.isJson) {
+                    // Success with JSON data
+                    const data = result.data;
+                    // Update the UI with new counts
+                    if (data.likes !== undefined) {
+                        likeCountElement.textContent = data.likes;
                     }
-                })
-                .then(result => {
-                    console.log('Response:', result);
+                    if (data.dislikes !== undefined) {
+                        dislikeCountElement.textContent = data.dislikes;
+                    }
                     
-                    if (result.status === 200 && result.isJson) {
-                        // Success with JSON data
-                        const data = result.data;
-                        // Update the UI with new counts
-                        if (data.likes !== undefined) {
-                            likeCountElement.textContent = data.likes;
-                        }
-                        if (data.dislikes !== undefined) {
-                            dislikeCountElement.textContent = data.dislikes;
-                        }
-                        
-                        const clickedButton = actionType === 'like' ? likeButton : dislikeButton;
-                        clickedButton.classList.add('active-reaction');
-                        setTimeout(() => {
-                            clickedButton.classList.remove('active-reaction');
-                        }, 500);
-                    } else if (result.status === 401) {
-                        alert('Please log in to like/dislike posts');
-                        window.location.href = '/login';
-                    } else {
-                        // Handle other error cases
-                        const errorMessage = result.isJson && result.data.error 
-                            ? result.data.error 
-                            : 'Failed to process like/dislike';
-                        console.error('Error response:', result.isJson ? result.data : result.text);
-                        alert(errorMessage);
-                    }
-                })
-                .catch(error => {
-                    console.error('Network or parsing error:', error);
-                    alert('An error occurred while processing your request');
-                });
+                    const clickedButton = actionType === 'like' ? likeButton : dislikeButton;
+                    clickedButton.classList.add('active-reaction');
+                    setTimeout(() => {
+                        clickedButton.classList.remove('active-reaction');
+                    }, 500);
+                } else if (result.status === 401) {
+                    alert('Please log in to like/dislike posts');
+                    window.location.href = '/login';
+                } else {
+                    // Handle other error cases
+                    const errorMessage = result.isJson && result.data.error 
+                        ? result.data.error 
+                        : 'Failed to process like/dislike';
+                    console.error('Error response:', result.isJson ? result.data : result.text);
+                    alert(errorMessage);
+                }
+            })
+            .catch(error => {
+                console.error('Network or parsing error:', error);
+                alert('An error occurred while processing your request');
             });
         });
     });
+});
         //filter posts by categories
-    async function filterByCategories() {
-        const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
-        
-        
-        const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
+        async function filterByCategories() {
+            const checkboxes = document.querySelectorAll('input[name="filteredcategories"]:checked');
+            
+            
+            const selectedCategories = Array.from(checkboxes).map(checkbox => checkbox.value);
 
-        console.log("Categories Sent:", selectedCategories, selectedCategories.length); 
+            console.log("Categories Sent:", selectedCategories, selectedCategories.length); 
 
-        try {
-            const response = await fetch("/filtered_posts", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ categories: selectedCategories }),
-            });
+            try {
+                const response = await fetch("/filtered_posts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ categories: selectedCategories }),
+                });
 
-            const data = await response.json();
-            console.log("Filtered Data:", data);
-            if (selectedCategories.length === 0){
-                data[0] = "all"
+                const data = await response.json();
+                console.log("Filtered Data:", data);
+                if (selectedCategories.length === 0){
+                    data[0] = "all"
+                }
+                filter(data)
+            } catch (error) {
+                console.error("Error filtering:", error);
             }
-            filter(data)
-        } catch (error) {
-            console.error("Error filtering:", error);
         }
-    }
 
-    function filter(data) {
+        function filter(data) {
 
-        document.querySelectorAll(".feed").forEach(feed => {                   
+            document.querySelectorAll(".feed").forEach(feed => {                   
 
-            if (data[0] === "all"){
-                feed.style.display = "block"
-            }else{
-                if (data.includes(feed.id )){
+                if (data[0] === "all"){
                     feed.style.display = "block"
                 }else{
-                    feed.style.display = "none"
+                    if (data.includes(feed.id )){
+                        feed.style.display = "block"
+                    }else{
+                        feed.style.display = "none"
+                    }
                 }
-            }
-        })
-    }
-
-
-    
-
-
-    // Handle comment form submissions
-    document.querySelectorAll('.comment-form').forEach(form => {
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const formData = new URLSearchParams(new FormData(event.target));
-
-            try {
-                const response = await fetch('/add_comment', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-
-                if (response.ok) {
-                    alert('Comment created successfully');
-                    window.location.reload();
-                } else if (response.status === 401) {
-                    alert('Failed to comment: user not logged in.');
-                    window.location.href = '/login';
-                } else {
-                    alert('Failed to comment.');
-                }
-            } catch (error) {
-                console.error('Request failed:', error);
-            }
-        });
-    });
-
-    // Handle reply form submissions
-    document.querySelectorAll('.reply-form').forEach(form => {
-        form.addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const formData = new URLSearchParams(new FormData(event.target));
-
-            try {
-                const response = await fetch('/add_reply', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: formData
-                });
-
-                if (response.ok) {
-                    alert('Comment created successfully');
-                    window.location.reload();
-                } else if (response.status === 401) {
-                    alert('Failed to comment: user not logged in.');
-                    window.location.href = '/login';
-                } else {
-                    alert('Failed to comment.');
-                }
-            } catch (error) {
-                console.error('Request failed:', error);
-            }
-        });
-    });
-
-    //profile 
-    document.getElementById('profile-upload').addEventListener('submit', function(e) {
-        const fileInput = document.getElementById('profile-upload');
-        if (!fileInput.files.length===0) {
-        e.preventDefault()
-            alert('please select a file first')
+            })
         }
-    });
 
-    document.getElementById("media").addEventListener("change", function () {
-        let fileName = this.files.length ? this.files[0].name : "No file selected";
-        document.getElementById("file-name").textContent = fileName;
-    });
+
+        
+
+
+        // Handle comment form submissions
+        document.querySelectorAll('.comment-form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new URLSearchParams(new FormData(event.target));
+
+                try {
+                    const response = await fetch('/add_comment', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        alert('Comment created successfully');
+                        window.location.reload();
+                    } else if (response.status === 401) {
+                        alert('Failed to comment: user not logged in.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Failed to comment.');
+                    }
+                } catch (error) {
+                    console.error('Request failed:', error);
+                }
+            });
+        });
+
+        // Handle comment form submissions
+        document.querySelectorAll('.reply-form').forEach(form => {
+            form.addEventListener('submit', async (event) => {
+                event.preventDefault();
+
+                const formData = new URLSearchParams(new FormData(event.target));
+
+                try {
+                    const response = await fetch('/add_reply', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        alert('Comment created successfully');
+                        window.location.reload();
+                    } else if (response.status === 401) {
+                        alert('Failed to comment: user not logged in.');
+                        window.location.href = '/login';
+                    } else {
+                        alert('Failed to comment.');
+                    }
+                } catch (error) {
+                    console.error('Request failed:', error);
+                }
+            });
+        });
+
+        document.getElementById("media").addEventListener("change", function () {
+            let fileName = this.files.length ? this.files[0].name : "No file selected";
+            document.getElementById("file-name").textContent = fileName;
+        });
 
 </script>
 </html>
