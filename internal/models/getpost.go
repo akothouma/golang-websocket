@@ -204,10 +204,20 @@ func Post_Categories(id string) ([]postCategory, error) {
 }
 
 func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
-	username, err := LogedInUser(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+	data := make(map[string]interface{})
+
+	// Check if the user is logged in
+	username, _ := LogedInUser(r)
+	// Get user details
+	f := &ForumModel{DB: DB}
+	user, err := f.GetUserByUsername(username)
+	if err == nil && user != nil {
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType
+		} else if len(username) > 0 {
+			data["Initial"] = string(username[0])
+		}
 	}
 
 	// Get user UUID from username
@@ -258,8 +268,6 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, cat)
 	}
 
-	data := make(map[string]interface{})
-
 	data["UserName"] = username
 	data["Initial"] = string(username[0])
 	data["ViewType"] = "liked"
@@ -270,10 +278,21 @@ func RenderLikedPostsPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
-	username, err := LogedInUser(r)
-	if err != nil {
-		http.Redirect(w, r, "/login", http.StatusSeeOther)
-		return
+	
+	data := make(map[string]interface{})
+
+	// Check if the user is logged in
+	username, _ := LogedInUser(r)
+	// Get user details
+	f := &ForumModel{DB: DB}
+	user, err := f.GetUserByUsername(username)
+	if err == nil && user != nil {
+		if user.ProfilePicture != "" {
+			data["ProfilePicture"] = user.ProfilePicture
+			data["ContentType"] = user.ContentType
+		} else if len(username) > 0 {
+			data["Initial"] = string(username[0])
+		}
 	}
 
 	// Get user UUID from username
@@ -302,7 +321,7 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
 
     myPosts, err := PostsRows(rows)
     if err != nil {
-        http.Error(w, "Failed to fetch your posts "+err.Error(), http.StatusInternalServerError)
+        http.Error(w, "Failed to fetch your posts PostRows"+err.Error(), http.StatusInternalServerError)
         fmt.Println(err)
         return
     }
@@ -321,8 +340,7 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
 		}
 		categories = append(categories, cat)
 	}
-
-	data := make(map[string]interface{})
+	
 
 	data["UserName"] = username
 	data["Initial"] = string(username[0])
