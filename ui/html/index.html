@@ -620,7 +620,7 @@
                     <form action="/upload-profile" method="POST" enctype="multipart/form-data" class="upload-form" id="profile-upload-form">
 
                         <label for="profile-upload" class="upload-label">
-                            <i class="uil uil-camera"></i> Change Photo
+                            <i class="uil uil-camera" id="profile_pic">Change Photo</i> 
                         </label>
                         <input type="file" id="profile-upload" name="profile_picture" accept="image/*">
                         <button type="submit">Upload</button>
@@ -936,7 +936,7 @@
             <!--====================== RIGHT ======================-->
             <div class="right">
 
-                <div class="categories">
+                <div class="categories" style="box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.281);">
                     <div class="heading">
                         <h4> Filter by categories</h4>
                     </div>
@@ -1250,12 +1250,9 @@
     });
 
     //profile 
-    document.getElementById('profile-upload').addEventListener('submit', function(e) {
-        const fileInput = document.getElementById('profile-upload');
-        if (!fileInput.files.length===0) {
-        e.preventDefault()
-            alert('please select a file first')
-        }
+    document.getElementById('profile-upload').addEventListener('change', function() {        
+        let fileName = this.files.length ? this.files[0].name : "No file selected";
+        document.getElementById("profile_pic").textContent = fileName;
     });
 
     document.getElementById("media").addEventListener("change", function () {
