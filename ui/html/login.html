@@ -7,17 +7,48 @@
     <link rel="stylesheet" href="/styling/auth.css">
 </head>
 <body>
-    <form action="/login" method="POST">
+    <form id="loginForm" action="/login" method="POST">
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <div class="overall">
         <h1>Login</h1>
-        <p>Enter correct credentials to login</p>
+        <p id="error-message">Enter valid credentials to login</p>
         <div class="passButton">
         <input type="email" id="email" name="email" placeholder="email"><br><br>
         <input type="password" id="password" name="password" required placeholder="password"><br><br>
         <button type="submit">Login</button>
         <p>Don't have an account? <a href="/register">Register here</a>.</p>
     </div>
+    <script>
+         document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("loginForm")
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault()
+
+                // document.querySelector("error-message").style.display="none"
+
+                const formData = new FormData(event.target)               
+                try {
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    if (!response.ok) {
+                        const errorData = await response.json()
+                        showError(errorData.error || "Login failed")
+                        return
+                    }
+                    window.location.href = '/allposts'
+                } catch (error) {
+                    showError("Network error.Please try again")
+                }
+            })
+        })
+        function showError(message) {
+            document.getElementById("error-message").textContent = message
+            document.getElementById("error-message").style.color = 'red'
+        }
+    </script>
+    </script>
     </body>
     </div>
     </form>
