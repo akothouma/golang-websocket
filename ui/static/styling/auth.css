@@ -36,7 +36,7 @@ h1{
     margin: 15px;
     font-size: 16px;
 }
-#password,#email{
+#password,#confirmPassword,#email{
     position: relative;
     margin-top: 10px;
     padding: 20px;
@@ -87,7 +87,7 @@ button{
     margin-left: 15px;
     color:hsl(252,75%, 60%);
 }
-p{
+#error-message{
     width:100%;
     text-align: center;   
     color:hsl(252,75%, 60%);
@@ -101,4 +101,3 @@ p{
   ::-ms-input-placeholder { /* Edge 12 -18 */
     color:hsl(252,75%, 60%);
   }
-
