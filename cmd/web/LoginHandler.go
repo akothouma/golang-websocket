@@ -19,7 +19,7 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
-		dep.ClientError(w, http.StatusMethodNotAllowed)
+		dep.ClientError(w,http.StatusText(http.StatusMethodNotAllowed),http.StatusMethodNotAllowed)
 		return
 	}
 
@@ -29,7 +29,7 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := r.ParseForm(); err != nil {
-		dep.ClientError(w, http.StatusBadRequest)
+		dep.ClientError(w, http.StatusText(http.StatusInternalServerError),http.StatusInternalServerError)
 		return
 	}
 
@@ -37,7 +37,7 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	password := r.FormValue("password")
 
 	if email == "" || password == "" {
-		dep.ClientError(w, http.StatusBadRequest)
+		dep.ClientError(w, http.StatusText(http.StatusBadRequest),http.StatusBadRequest)
 		return
 	}
 
@@ -48,12 +48,12 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if user == nil {
-		dep.ClientError(w, http.StatusUnauthorized)
+		dep.ClientError(w, http.StatusText(http.StatusUnauthorized),http.StatusUnauthorized)
 		return
 	}
 
 	if !user.CheckPassword(password) {
-		dep.ClientError(w, http.StatusUnauthorized)
+		dep.ClientError(w, http.StatusText(http.StatusUnauthorized),http.StatusUnauthorized)
 		return
 	}
 	dep.CreateSession(w, r, user.UserID)
