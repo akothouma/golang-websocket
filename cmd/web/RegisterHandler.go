@@ -36,7 +36,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		}
 	var regReq RegisterRequest
 		if r.Method != http.MethodPost {
-			dep.ClientError(w, http.StatusText(http.StatusMethodNotAllowed),http.StatusMethodNotAllowed)
+			dep.ClientError(w,http.StatusMethodNotAllowed)
 			return
 		}
 		if !dep.ValidateCSRFToken(regReq.Csrf) {
@@ -51,7 +51,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 
 		if err:=json.NewDecoder(r.Body).Decode(&regReq);err!=nil{
-			dep.ClientError(w,http.StatusText(http.StatusBadRequest),http.StatusBadRequest)
+			dep.ClientError(w,http.StatusBadRequest)
 		}
 
 		userUuid := uuid.New().String()
@@ -67,7 +67,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		if !tac{
-            dep.ClientError(w,"Accept terms and conditions",http.StatusBadRequest)
+            dep.ClientError(w,http.StatusBadRequest)
 			return
 		}
 
@@ -87,7 +87,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		if userByEmail != nil {
-			dep.ClientError(w, "Invalid credentials",http.StatusBadRequest)
+			dep.ClientError(w, http.StatusBadRequest)
 			return
 		}
 
@@ -98,7 +98,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 			return
 		}
 		if userByUsername != nil {
-			dep.ClientError(w,"Invalid credentials", http.StatusBadRequest)
+			dep.ClientError(w, http.StatusBadRequest)
 			return
 		}
 
