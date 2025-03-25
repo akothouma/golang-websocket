@@ -188,7 +188,7 @@ func PostsRows(rows *sql.Rows) ([]Post, error) {
 
 		p.CommentsLenght = len(p.Comments)
 
-		p.Likes, p.Dislikes, err = PostLikesDislikes(p.PostId)
+		p.Likes, p.Dislikes, err = PostCommentLikesDislikes("post" ,p.PostId)
 		if err != nil {
 			return nil, err
 		}

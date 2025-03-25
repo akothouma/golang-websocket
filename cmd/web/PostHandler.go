@@ -81,6 +81,14 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		title := r.FormValue("post_title")
 		userId := r.Context().Value("user_uuid").(string)
 
+		title = strings.TrimSpace(title)
+		postContent =strings.TrimSpace(postContent)
+
+		if title == "" || postContent == "" {
+			http.Error(w, "Missing required fields", http.StatusBadRequest)
+			return
+		}
+
 		post := models.Post{
 			PostId:   postId,
 			UserId:   userId,

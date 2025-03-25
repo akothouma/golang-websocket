@@ -53,3 +53,35 @@ func (f *ForumModel) checkItemExists(itemType, itemID string) (bool, error) {
 	err := f.DB.QueryRow(query, itemID).Scan(&exists)
 	return exists, err
 }
+
+func PostCommentLikesDislikes(itemType, id string) (int, int, error) {
+	var tableName, idColumn string
+
+	// Validate and set table name
+	switch itemType {
+	case "post":
+		tableName = "post_likes"
+		idColumn = "post_id"
+	case "comment":
+		tableName = "comment_likes"
+		idColumn = "comment_id"
+	default:
+		return 0, 0, fmt.Errorf("invalid item type: %s", itemType)
+	}
+
+	var likes, dislikes int
+
+	// Fetch likes count
+	err := DB.QueryRow("SELECT COUNT(*) FROM "+tableName+" WHERE "+idColumn+" = ? AND type = 'like'", id).Scan(&likes)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to fetch likes: %v", err)
+	}
+
+	// Fetch dislikes count
+	err = DB.QueryRow("SELECT COUNT(*) FROM "+tableName+" WHERE "+idColumn+" = ? AND type = 'dislike'", id).Scan(&dislikes)
+	if err != nil {
+		return 0, 0, fmt.Errorf("failed to fetch dislikes: %v", err)
+	}
+
+	return likes, dislikes, nil
+}

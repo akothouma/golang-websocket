@@ -77,9 +77,9 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get updated likes and dislikes counts
-	likes, dislikes, err := models.PostLikesDislikes(itemID)
+	likes, dislikes, err := models.PostCommentLikesDislikes(itemType, itemID)
 	if err != nil {
-		http.Error(w, "Failed to get updated counts", http.StatusInternalServerError)
+		http.Error(w, "Failed to get updated counts" + err.Error(), http.StatusInternalServerError)
 		return
 	}
 
