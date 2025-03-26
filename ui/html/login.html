@@ -26,11 +26,16 @@
 
                 // document.querySelector("error-message").style.display="none"
 
-                const formData = new FormData(event.target)               
                 try {
+                    const formData = {
+                        email:form.email.value,
+                        password:form.password.value,
+                        csrfToken:form.csrf_token.value
+                        
+                    }             
                     const response = await fetch('/login', {
                         method: 'POST',
-                        body: formData
+                        body: JSON.stringify(formData)
                     })
                     if (!response.ok) {
                         const errorData = await response.json()
