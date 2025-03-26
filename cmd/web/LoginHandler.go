@@ -1,11 +1,24 @@
 package main
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 )
+
 // /home/lakoth/forum-1/ui/html/login.html
+type LoginRequest struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
+	Csrf     string `json:"csrfToken"`
+}
+
+type ErrorResponseLogin struct {
+	Error string `json:"error"`
+}
+
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
+	var logReq LoginRequest
 	loginTemplate, err := template.ParseFiles("./ui/html/login.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
@@ -19,41 +32,51 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if r.Method != http.MethodPost {
-		dep.ClientError(w,http.StatusMethodNotAllowed)
-		return
-	}
-
-	if !dep.ValidateCSRFToken(r) {
-		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+		dep.ClientError(w, http.StatusMethodNotAllowed)
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
-		dep.ClientError(w,http.StatusInternalServerError)
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "Something went wrong.Try again later"})
+		return
+	}
+	if err := json.NewDecoder(r.Body).Decode(&logReq); err != nil {
+		dep.ClientError(w, http.StatusInternalServerError)
 		return
 	}
 
-	email := r.FormValue("email")
-	password := r.FormValue("password")
+	if !dep.ValidateCSRFToken(r, logReq.Csrf) {
+		http.Error(w, "Invalid CSRF token", http.StatusForbidden)
+		return
+	}
+	email := logReq.Email
+	password := logReq.Password
 
 	if email == "" || password == "" {
-		dep.ClientError(w,http.StatusBadRequest)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "All fields are required"})
 		return
 	}
 
 	user, err := dep.Forum.GetUserByEmail(email)
 	if err != nil {
 		dep.ServerError(w, err)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "You have to register first"})
 		return
+
 	}
 
 	if user == nil {
-		dep.ClientError(w,http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "You have to register first"})
 		return
 	}
 
 	if !user.CheckPassword(password) {
-		dep.ClientError(w,http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "Invalid email or password"})
 		return
 	}
 	dep.CreateSession(w, r, user.UserID)
