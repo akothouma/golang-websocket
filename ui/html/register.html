@@ -13,9 +13,9 @@
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
         <div class="overall">
             <h1>Create account</h1>
-           
+
             <!-- <div id="error-message" class="error-message">   -->
-                <p id="error-message">Enter your details to register</p>
+            <p id="error-message">Enter your details to register</p>
             <!-- </div> -->
             <div class="emailUsername">
                 <input type="email" id="email" name="email" required placeholder="Email">
@@ -23,7 +23,8 @@
             </div>
             <div class="passButton">
                 <input type="password" name="password" id="password" required placeholder="password">
-                <input type="password" name="confirmPassword" id="confirmPassword" required placeholder="confirm password">
+                <input type="password" name="confirmPassword" id="confirmPassword" required
+                    placeholder="confirm password">
                 <div>
                     <input type="checkbox" name="tac" id="tac" required>
                     <label for="tac">I accept the terms and conditions of use</label>
@@ -54,27 +55,32 @@
                 }
                 try {
 
-                    const formData={
-                        username:form.username.value,
-                        email:form.email.value,
-                        password:form.password.value,
-                        confirmPassword:form.confirmPassword.value,
-                        tac:form.tac.checked,
-                        csrfToken:form.csrf_token.value
+                    const formData = {
+                        username: form.username.value,
+                        email: form.email.value,
+                        password: form.password.value,
+                        confirmPassword: form.confirmPassword.value,
+                        tac: form.tac.checked,
+                        csrfToken: form.csrf_token.value
                     }
+
                     const response = await fetch('/register', {
                         method: 'POST',
-                        headers:{
-                        "Content-Type":"application/json"
-                        },    
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
                         body: JSON.stringify(formData)
                     });
                     if (!response.ok) {
                         const errorData = await response.json()
                         showError(errorData.error || "Registration failed")
                         return
+                    } 
+                    const successData = await response.json()
+                    if (successData.redirect) {
+                        showSuccess(successData.message)
+                        window.location.href = successData.redirect
                     }
-                    window.location.href = '/login'
                 } catch (error) {
                     showError("Network error.Please try again")
                 }
@@ -84,6 +90,12 @@
             document.getElementById("error-message").textContent = message
             document.getElementById("error-message").style.color = 'red'
         }
+
+        function showSuccess(message) {
+            document.getElementById("error-message").textContent = message
+            document.getElementById("error-message").style.color = 'green'
+        }
+        
     </script>
 </body>
 
