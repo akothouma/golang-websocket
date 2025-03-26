@@ -85,10 +85,10 @@ func (dep *Dependencies) CSRFMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (dep *Dependencies) ValidateCSRFToken(r *http.Request) bool {
+func (dep *Dependencies) ValidateCSRFToken(r *http.Request,formToken string) bool {
 	// ValidateCSRFToken checks if the CSRF token is valid
 	// Get the CSRF token from the form
-	formToken := r.FormValue("csrf_token")
+	
 	log.Printf("CSRF token from form: %s\n", formToken)
 	if formToken == "" {
 		return false
