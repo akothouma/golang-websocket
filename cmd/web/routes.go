@@ -29,8 +29,6 @@ func Routes() *http.ServeMux {
 		InfoLog:  infoLog,
 		Forum:    &models.ForumModel{DB: db},
 	}
-	
-
 
 	mux := http.NewServeMux()
 
@@ -44,11 +42,9 @@ func Routes() *http.ServeMux {
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
-	mux.Handle("/styling/", http.StripPrefix("/styling/", http.FileServer(http.Dir("./ui/static/styling"))))
 	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))
 	mux.Handle("/add_reply", dep.AuthMiddleware(http.HandlerFunc(handlers.AddReplyHandler)))
 	mux.Handle("/filtered_posts", http.HandlerFunc(handlers.PostsByFilters))
-
 	mux.Handle("/likes", dep.AuthMiddleware(http.HandlerFunc(dep.LikeHandler)))
 
 	return mux
