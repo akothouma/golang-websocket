@@ -14,6 +14,12 @@ var DB *sql.DB
 // var f *ForumModel
 
 func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/"{
+		RenderTemplates(w, "error.html", map[string]string{
+			"Code":"404 Page Not Found",
+		})
+		return
+	}
 	// if r.Method == http.MethodGet {
 
 	var categories []postCategory
@@ -57,53 +63,13 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Add debugging information
-	fmt.Printf("Rendering homepage - User logged in: %v, Username: %s\n", err == nil, username)
+	
 	data["UserName"] = username 
 	data["ViewType"] = "all"
 	data["Posts"] = posts
 	data["Categories"] = categories
 
 	// fmt.Println("categories:", categories)
-
-	RenderTemplates(w, "index.html", data)
-}
-
-func RenderProfile(w http.ResponseWriter, r *http.Request) {
-	data := make(map[string]interface{})
-	f := &ForumModel{DB: DB}
-	username, err := LogedInUser(r)
-	if err != nil {
-		// User not logged in, set as guest
-		RenderTemplates(w, "index.html", data)
-		return
-	}
-
-	// Fetch user details from the database
-	user, err := f.GetUserByUsername(username)
-	if err != nil {
-		fmt.Println("Error fetching user details:", err)
-		http.Error(w, "Failed to retrieve user details", http.StatusInternalServerError)
-		return
-	}
-
-	// Populate all required template fields
-	data["UserName"] = username
-
-	// If user exists, add their details
-	if user != nil {
-		// Add profile picture if it exists
-		if user.ProfilePicture != "" {
-			data["ProfilePicture"] = user.ProfilePicture
-			data["ContentType"] = user.ContentType // Make sure this field exists in your User struct
-		} else {
-			// Set initial for avatar if no profile pic
-			if len(username) > 0 {
-				data["Initial"] = string(username[0])
-			} else {
-				data["Initial"] = "U"
-			}
-		}
-	}
 
 	RenderTemplates(w, "index.html", data)
 }

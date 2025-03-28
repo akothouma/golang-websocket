@@ -99,7 +99,7 @@ func FindPostById(id string) (*Post, error) {
 }
 
 func AllPosts() ([]Post, error) {
-	query := "SELECT * FROM posts"
+	query := "SELECT * FROM posts p ORDER BY p.id DESC"
 	rows, err := DB.Query(query)
 	if err != nil {
 		return nil, err
@@ -113,7 +113,6 @@ func AllPosts() ([]Post, error) {
 
 func CheckUserReaction(userID string, postID string) (string, error) {
 	var reaction string
-
 	query := `SELECT type FROM post_likes WHERE user_id = ? AND post_id = ?`
 	err := DB.QueryRow(query, userID, postID).Scan(&reaction)
 	if err != nil {

@@ -4,11 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Error page</title>
-    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/styling/auth.css">
 </head>
-<body>
-    <h1>Error {{ .Code}}</h1>
-    <p> GO Back TO MAIN PAGE</p>
-    <a href="/">HOME PAGE</a>
+<body >
+    <div class="overall" style="height: fit-content;box-shadow: 5px 5px 12px 12px rgba(255, 0, 0, 0.37)">
+        <h1 style="color: red;">Error {{ .Code}}</h1>
+        <p style="text-align: center;"> GO Back TO MAIN PAGE</p>
+        <a href="/">HOME PAGE</a>
+    </div>
+    
 </body>
 </html>

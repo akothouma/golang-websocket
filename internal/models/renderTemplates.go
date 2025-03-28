@@ -17,10 +17,10 @@ func InitTemplates(templateDir string) {
 func RenderTemplates(w http.ResponseWriter, fileName string, data interface{}) {
 	templates.ExecuteTemplate(w, fileName, data)
 	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-	// 	http.Error(w,"internal server error",http.StatusInternalServerError)
+	// 	http.Error(w, "internal server error", http.StatusInternalServerError)
 	// 	log.Println("Templates failed to execute:", err)
 	// 	return
+	// }
+
 	// }
 }

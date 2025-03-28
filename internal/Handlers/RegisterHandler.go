@@ -1,12 +1,13 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 
 	"github.com/google/uuid"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 	"learn.zone01kisumu.ke/git/clomollo/forum/utils"
 )
 
@@ -23,33 +24,39 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
+type Dependencies struct {
+	ErrorLog  *log.Logger
+	InfoLog   *log.Logger
+	Forum     *models.ForumModel
+	Templates *template.Template
+}
+
 func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	var regReq RegisterRequest
 	registerTemp, err := template.ParseFiles("./ui/html/register.html")
 	if err == nil {
 		if r.Method == http.MethodGet {
-		csrfToken := r.Context().Value("csrf_token").(string)
+			csrfToken := r.Context().Value("csrf_token").(string)
 			registerTemp.ExecuteTemplate(w, "register.html", map[string]interface{}{
-				"CSRFToken":csrfToken ,
+				"CSRFToken": csrfToken,
 			})
-			fmt.Println("here",csrfToken)
 			return
 		}
 		if r.Method != http.MethodPost {
 			dep.ClientError(w, http.StatusMethodNotAllowed)
 			return
 		}
-		
+
 		if err := r.ParseForm(); err != nil {
-			dep.ClientError(w,http.StatusInternalServerError)
+			dep.ClientError(w, http.StatusInternalServerError)
 			return
 		}
-		
+
 		if err := json.NewDecoder(r.Body).Decode(&regReq); err != nil {
 			dep.ClientError(w, http.StatusBadRequest)
 		}
-		
-		if !dep.ValidateCSRFToken(r,regReq.Csrf) {
+
+		if !dep.ValidateCSRFToken(r, regReq.Csrf) {
 			json.NewEncoder(w).Encode(ErrorResponse{Error: "Invalid CSRF token"})
 			return
 		}
@@ -61,7 +68,6 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		confirmPassword := regReq.ConfirmPassword
 		tac := regReq.Tac
 
-		fmt.Println(userUuid, email, username, password)
 		if email == "" || username == "" || password == "" || confirmPassword == "" {
 			json.NewEncoder(w).Encode(ErrorResponse{Error: "All fields are required"})
 			return

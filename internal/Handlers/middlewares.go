@@ -1,8 +1,7 @@
-package main
+package handlers
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -17,7 +16,6 @@ func (dep *Dependencies) AuthMiddleware(next http.Handler) http.Handler {
 			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
-		fmt.Println("Session token:", cookie.Value)
 
 		session, err := dep.Forum.GetSession(cookie.Value)
 		if err != nil || session.ExpiresAt.Before(time.Now()) {
@@ -34,7 +32,6 @@ func (dep *Dependencies) AuthMiddleware(next http.Handler) http.Handler {
 		ctx := context.WithValue(r.Context(), "user_uuid", session.UserID)
 		ctx = context.WithValue(ctx, "session_id", session.ID)
 		next.ServeHTTP(w, r.WithContext(ctx))
-		
 	})
 }
 
@@ -85,10 +82,10 @@ func (dep *Dependencies) CSRFMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (dep *Dependencies) ValidateCSRFToken(r *http.Request,formToken string) bool {
+func (dep *Dependencies) ValidateCSRFToken(r *http.Request, formToken string) bool {
 	// ValidateCSRFToken checks if the CSRF token is valid
 	// Get the CSRF token from the form
-	
+
 	log.Printf("CSRF token from form: %s\n", formToken)
 	if formToken == "" {
 		return false

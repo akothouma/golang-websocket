@@ -14,7 +14,7 @@ type Session struct {
 	// Forum *database.ForumModel
 }
 
-func (f *ForumModel) CreateSession(userID string) (string, error) {
+func (f *ForumModel)  CreateSession(userID string) (string, error) {
 	querry := `DELETE FROM Sessions WHERE user_uuid=?`
 	_, err := f.DB.Exec(querry, userID)
 	if err != nil {

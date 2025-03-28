@@ -10,7 +10,7 @@
 
             if (response.ok) {
                 alert('Post created successfully!');
-                window.location.href = '/allposts';
+                window.location.href = '/';
             } else if (response.status === 401) {
                 alert('Failed to create post: user not logged in.');
             } else {

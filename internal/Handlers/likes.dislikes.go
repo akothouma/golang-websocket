@@ -1,8 +1,7 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -66,7 +65,6 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("likes handler executed")
 	// Process the like/dislike based on item type
 	err := dep.Forum.ProcessLike(itemType, itemID, userID, likeType)
 	if err != nil {
@@ -79,7 +77,7 @@ func (dep *Dependencies) LikeHandler(w http.ResponseWriter, r *http.Request) {
 	// Get updated likes and dislikes counts
 	likes, dislikes, err := models.PostCommentLikesDislikes(itemType, itemID)
 	if err != nil {
-		http.Error(w, "Failed to get updated counts" + err.Error(), http.StatusInternalServerError)
+		http.Error(w, "Failed to get updated counts"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

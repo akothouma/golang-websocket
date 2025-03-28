@@ -24,19 +24,17 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if sess1.Value != sessionId {
 		log.Println("sess1.Value", sess1.Value, sessionId)
-		log.Println("sessioId", sessionId)
+		log.Println("sessionId", sessionId)
 		return
 	}
 
 	postID := r.FormValue("post_id")
 	userID := r.Context().Value("user_uuid").(string)
-	fmt.Println("commentHere", userID)
+
 
 	content := r.FormValue("content")
 	content = strings.TrimSpace(content)
 	userID = strings.TrimSpace(userID)
-
-	fmt.Println("post id:", postID, "\nuser id", userID, "\ncontent", content)
 
 	if userID == "" || content == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)

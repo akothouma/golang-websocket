@@ -1,4 +1,4 @@
-package main
+package handlers
 
 import (
 	"encoding/json"
@@ -69,7 +69,6 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 
 		// Increase the maximum memory allocated for form parsing
 		if err := r.ParseMultipartForm(MaxFileSize); err != nil {
-			fmt.Println(err)
 			http.Error(w, "File too large", http.StatusBadRequest)
 			return
 		}
@@ -207,11 +206,9 @@ func PostsByFilters(w http.ResponseWriter, r *http.Request) {
     decoder := json.NewDecoder(r.Body)
     if err := decoder.Decode(&filter); err != nil {
         http.Error(w, "Invalid JSON format", http.StatusBadRequest)
-        fmt.Println("Error decoding JSON:", err)
         return
     }
 
-    fmt.Println("Received Categories:", filter.Categories)
 
     // Call your filtering function with the extracted categories
     posts, err := models.FilterCategories(filter.Categories)
