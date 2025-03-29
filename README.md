@@ -1,155 +1,200 @@
-Company Information
-Company name
+# Web Forum Project Documentation
 
-*
-web3 kisumu
-Tell us in a few words what you are building.
+## Overview
 
-*
-A decentralized banking system for lending, borrowing, transaction, wallet management,  merry go round  and asset lock and control platform built on Ethereum blockchain that enables direct lending between lenders and borrowers without traditional financial intermediaries. 
-What is the problem you are solving?
+This project is a web-based forum that enables communication between users through posts and comments. It allows user authentication, post categorization, interaction via likes/dislikes, and filtering functionalities. The back-end is built using Go, with SQLite as the database, and the project is containerized using Docker.
 
-*
-ending, borrowing, and other financial activities without geographical restrictions or the need for traditional banking infrastructure.
-What is the product that you are building to solve this problem?
+## Features
 
-*
-banking system
-Have you formed a legal entity i.e have you already incorporated a company
+1. ### User Authentication
 
-*
-No
-Website URL
 
-*
-https://peemonk.onrender.com/
-Company Twitter URL
 
-DecoBank
-Company GitHub URL
+- Users can register and log in to the forum.
 
-https://github.com/VictorPaulArony/p2p-money-market
-Founder #1
-How many co-founders do you have?
+- Registration requires:
 
-*
-1
-First Name
+    - A unique email (duplicate emails return an error).
 
-*
-Victor
-Last Name
+    - A username.
 
-*
-Arony
-Role (e.g., CEO, CTO)
+    - A password (bonus: encrypted storage using bcrypt).
 
-*
-CEO
-Are you technical? Can you write code?
+- Login session management with cookies (session expiration included).
 
-*
-Yes
-Email
+- Each user can only have one active session at a time.
 
-*
-victorpaularony@gmail.com
-Telegram handle
+- Users can upload profile pictures.
 
-https://t.me/victorpaularony
-Personal LinkedIn URL
+2. ### Posts and Comments
 
-https://linkedin.com/in/victor-arony-896b93241
-Personal Twitter URL
 
-Team
-When and how did the founders meet? Have you worked together in the past? (Write N/A if single founder)
 
-*
-N/A
-What is the equity breakdown between each founder? If equity is not equally divided, clarify why. If too early state N/A
+- Only registered users can create posts and comments.
 
-*
-N/A
-Do you have a female co-founder?
+- Posts can be categorized (customizable categories).
 
-*
-No
-Project
-What stage is your project at?
+- Users can attach media (images, videos, GIFs) to posts.
 
-*
-MVP
-Primary category
+- All users (registered or not) can view posts and comments.
 
-DeFi
-When did you start working on this idea?
+3. ### Likes and Dislikes
 
-*
-2024
-What is your unfair advantage in solving this problem?
+- Only registered users can like/dislike posts and comments.
 
-*
-Explain why your founding team is uniquely positioned to solve this problem over an equally qualified team.
+- Like/dislike counts are visible to all users.
 
- DecoBank lies in leveraging cutting-edge blockchain technology and smart contracts to provide unparalleled transparency, security, and efficiency, thereby disrupting traditional banking models and offering a unique value proposition of decentralized, accessible, and cost-effective financial services.
-What are current and adjacent competitors? What is your competitive advantage?
+4. ### Filtering Mechanism
 
-*
-DecoBank's competitive advantage lies in its unique blend of decentralized lending and borrowing services with potential integration of traditional banking security, offering users a hybrid model that combines the efficiency of DeFi with the trust of traditional finance.
-How will it capture value? Describe your business model and relevant revenue streams.
+    Users can filter displayed posts by:
 
-*
-DecoBank will capture value through a business model that generates revenue streams from transaction fees on lending and borrowing activities, interest earned on locked assets, and premium services for advanced wallet management and asset security features.
-Tell us more about your traction, e.g. initial users, community or waitlist (if applicable).
+    - Categories (subforums based on topics).
 
-DecoBank has a growing waitlist and an engaged community of early adopters.
-Fundraising & Financials
-Tell us about your fundraising history.
+    - Created posts (for logged-in users only).
 
-*
-How much have you raised to date. Include previous investors (incl. grants) and valuations raised at. (N/A if no capital raised)
+    - Liked posts (for logged-in users only).
 
-N/A
-Please indicate your revenue to date (if applicable).
+## Technology Stack
 
-Technology & Blockchain Relevance
-Will your project be built on a blockchain?
+- #### Backend: Go (Golang)
 
-*
-Yes
-Which of the following blockchain/s are you building on currently?
+- #### Database: SQLite
 
-*
-Ethereum
-Lisk
-Sui
-Do you plan to have your own token?
+- #### Authentication: Sessions and cookies
 
-*
-Yes
-What is the reason for choosing this / these blockchains?
+- #### Containerization: Docker
 
-There growing rate in the market 
-Application / Expectations
-If you have been referred by one of the Lisk or CV VC mentors/advisors/partners/team, please fill in the name here.
+- #### Security: Password hashing with bcrypt (bonus feature)
 
-Santiago
-Which region in Africa are most of your team based in?
+## Database Schema
 
-*
-Kenya
-Documentation
-Upload your pitch deck
+### Tables
 
-Drop files here or browse
-Product demo URL
 
-https://peemonk.onrender.com/
-Additional technical documentation URL (e.g., Whitepaper)
 
-https://github.com/VictorPaulArony/p2p-money-market
-I consent to my data being shared with CV Labs, CV VC, Lisk and other relevant third parties.
+- users (id, email, username, password, session_uuid, session_expiry, -profile_picture, content_type)
 
-*
-Yes
+- posts (id, user_id, title, content, category, media, content_type, created_at)
+
+- comments (id, post_id, user_id, content, created_at)
+
+- likes (id, user_id, post_id, comment_id, type)
+
+## Example Queries
+
+- ### Create Table:
+
+
+    ```
+    CREATE TABLE users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        email TEXT UNIQUE NOT NULL,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL,
+        session_uuid TEXT,
+        session_expiry DATETIME,
+        profile_picture BLOB,
+        content_type TEXT
+    );
+    ```
+
+- ### Insert Data:
+
+    ```
+    INSERT INTO users (email, username, password) VALUES ('user@example.com', 'username', 'hashed_password');
+    ```
+
+- ### Select Data:
+
+    ```
+    SELECT * FROM posts WHERE category = 'Technology';
+    ```
+
+
+## API Endpoints
+
+### User Authentication
+
+- POST /register – User registration.
+
+- POST /login – User login.
+
+- GET /logout – End user session.
+
+- POST /upload-profile – Upload user profile picture.
+
+### Posts & Comments
+
+- GET /posts – Retrieve all posts.
+
+- POST /posts – Create a new post (authenticated users only).
+
+- GET /posts/{id} – Retrieve a specific post.
+
+- POST /posts/{id}/comment – Add a comment to a post.
+
+- GET /comments/{id}/replies – Retrieve all replies for a comment.
+
+### Likes & Dislikes
+
+- POST /posts/{id}/like – Like a post.
+
+- POST /posts/{id}/dislike – Dislike a post.
+
+### Filtering
+
+- GET /posts?category=Tech – Filter posts by category.
+
+- GET /user/posts – Get posts created by the logged-in user.
+
+- GET /user/liked – Get posts liked by the logged-in user.
+
+## Error Handling
+
+- 400 Bad Request: Invalid input or missing parameters.
+
+- 401 Unauthorized: User not logged in.
+
+- 403 Forbidden: User does not have permission.
+
+- 404 Not Found: Resource does not exist.
+
+- 500 Internal Server Error: Unexpected server failure.
+
+## Deployment & Docker Setup
+
+### Dockerfile
+```
+FROM golang:1.18
+WORKDIR /app
+COPY . .
+RUN go build -o forum
+CMD ["./forum"]
+EXPOSE 8080
+```
+## Running the Project
+
+**1. Build Docker Image:**
+    
+```
+docker build -t forum-app .
+```
+
+**2. Run the Container:**
+```
+docker run -p 8080:8080 forum-app
+```
+**3. Testing**
+
+- Unit tests are implemented for critical functions.
+
+- Use httptest for handler testing.
+
+- Run tests with:
+    ```
+    go test ./...
+    ```
+## Conclusion
+
+This forum project demonstrates core web development concepts such as authentication, database interactions, and API design. It is built with Go, uses SQLite for storage, and follows best practices in handling errors and security.
+
