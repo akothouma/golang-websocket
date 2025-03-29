@@ -22,8 +22,9 @@ type Comment struct {
 	Initial         string    `json:"initial"`
 }
 
+
 // AddComment adds a new comment (post or reply)
-func AddComment(postID, UserUuiD string, content string) (int64, error) {
+var AddComment = func(postID, UserUuiD string, content string) (int64, error) {
 	// query to get the user name
 	var username string
 	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", UserUuiD).Scan(&username)
@@ -45,7 +46,7 @@ func AddComment(postID, UserUuiD string, content string) (int64, error) {
 }
 
 // AddReply adds a new comment (post or reply)
-func AddReply(parentCommentID, UserUuiD string, content string) (int64, error) {
+var AddReply = func (parentCommentID, UserUuiD string, content string) (int64, error) {
 	// query to get the user name
 	var username string
 	err := DB.QueryRow("SELECT username FROM users WHERE user_uuid = ?", UserUuiD).Scan(&username)
@@ -67,7 +68,7 @@ func AddReply(parentCommentID, UserUuiD string, content string) (int64, error) {
 }
 
 // GetAllCommentsForPost retrieves all top-level comments for a post
-func GetAllCommentsForPost(postID string) ([]Comment, error) {
+var GetAllCommentsForPost = func(postID string) ([]Comment, error) {
 	query := `SELECT id, post_id, username, user_uuid, content, created_at 
 			  FROM comments WHERE post_id = ? AND parent_comment_id IS NULL ORDER BY created_at DESC`
 
