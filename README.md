@@ -18,7 +18,7 @@ This project is a web-based forum that enables communication between users throu
 
     - A username.
 
-    - A password (bonus: encrypted storage using bcrypt).
+    - A password (encrypted using bcrypt).
 
 - Login session management with cookies (session expiration included).
 
@@ -64,7 +64,7 @@ This project is a web-based forum that enables communication between users throu
 
 - #### Containerization: Docker
 
-- #### Security: Password hashing with bcrypt (bonus feature)
+- #### Security: Password hashing with bcrypt 
 
 ## Database Schema
 
@@ -137,25 +137,23 @@ This project is a web-based forum that enables communication between users throu
 
 ### Likes & Dislikes
 
-- POST /posts/{id}/like – Like a post.
+- POST /likes – Like a post.(formData)
 
-- POST /posts/{id}/dislike – Dislike a post.
+- POST /likes – Dislike a post.(formData)
 
 ### Filtering
 
-- GET /posts?category=Tech – Filter posts by category.
+- POST /filtered_posts – Filter posts by category.
 
-- GET /user/posts – Get posts created by the logged-in user.
+- GET /my_posts – Get posts created by the logged-in user.
 
-- GET /user/liked – Get posts liked by the logged-in user.
+- GET /liked_posts – Get posts liked by the logged-in user.
 
 ## Error Handling
 
 - 400 Bad Request: Invalid input or missing parameters.
 
 - 401 Unauthorized: User not logged in.
-
-- 403 Forbidden: User does not have permission.
 
 - 404 Not Found: Resource does not exist.
 
