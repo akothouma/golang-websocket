@@ -26,28 +26,29 @@ func (m *Message) MessageToDatabase() error {
 	}
 	return nil
 }
-func (m *Message) MessageHistory(user1,user2 uuid.UUID)([]Message,error){
-	query:= `SELECT * FROM Messages 
+
+func (m *Message) MessageHistory(user1, user2 uuid.UUID) ([]Message, error) {
+	query := `SELECT * FROM Messages 
 	WHERE (sender=? AND receiver=?)
 	OR(sender=? AND receiver=?)
 	ORDER_BY timestamp ASC
 	LIMIT 10 OFFSET 0`
 
-	messageRows,err:=DB.Query(query,user1,user2,user2,user1);
-	if err!=nil{
-		if err!=sql.ErrNoRows{
-			return nil,fmt.Errorf("no messages shared yet")
+	messageRows, err := DB.Query(query, user1, user2, user2, user1)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return nil, fmt.Errorf("no messages shared yet")
 		}
-		return nil,fmt.Errorf("Database Issue")
+		return nil, fmt.Errorf("Database Issue")
 	}
-	var messages []Message;
-	for messageRows.Next(){
+	var messages []Message
+	for messageRows.Next() {
 		var msg Message
-		err:=messageRows.Scan(&msg.ID,&msg.Sender,&msg.Receiver,&msg.Message,&msg.IsRead,msg.CreatedAt.Truncate(time.Hour))
-		if err!=nil{
-			return nil,fmt.Errorf("Database issue",err)
+		err := messageRows.Scan(&msg.ID, &msg.Sender, &msg.Receiver, &msg.Message, &msg.IsRead, msg.CreatedAt.Truncate(time.Hour))
+		if err != nil {
+			return nil, fmt.Errorf("Database issue", err)
 		}
-         messages=append(messages, msg)
+		messages = append(messages, msg)
 	}
-	return messages,nil
+	return messages, nil
 }
