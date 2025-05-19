@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/styling/auth.css">
+</head>
+<body>
+    <form id="loginForm" action="/login" method="POST">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="overall">
+        <h1>Login</h1>
+        <p id="error-message">Enter valid credentials to login</p>
+        <div class="passButton">
+        <input type="email" id="email" name="email" placeholder="email"><br><br>
+        <input type="password" id="password" name="password" required placeholder="password"><br><br>
+        <button type="submit">Login</button>
+        <p>Don't have an account? <a href="/register">Register here</a>.</p>
+    </div>
+    <script>
+         document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("loginForm")
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault()
+
+                // document.querySelector("error-message").style.display="none"
+
+                try {
+                    const formData = {
+                        email:form.email.value,
+                        password:form.password.value,
+                        csrfToken:form.csrf_token.value
+                        
+                    }             
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        body: JSON.stringify(formData)
+                    })
+                    if (!response.ok) {
+                        const errorData = await response.json()
+                        showError(errorData.error || "Login failed")
+                        return
+                    }
+                    window.location.href = '/'
+                } catch (error) {
+                    showError("Network error.Please try again")
+                }
+            })
+        })
+        function showError(message) {
+            document.getElementById("error-message").textContent = message
+            document.getElementById("error-message").style.color = 'red'
+        }
+    </script>
+    </script>
+    </body>
+    </div>
+    </form>
+</html>

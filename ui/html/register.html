@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="/static/styling/auth.css">
+</head>
+
+<body>
+    <form action="register" method="post" id="registerForm">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="overall">
+            <h1>Create account</h1>
+
+            <!-- <div id="error-message" class="error-message">   -->
+            <p id="error-message">Enter your details to register</p>
+            <!-- </div> -->
+            <div class="emailUsername">
+                <input type="email" id="email" name="email" required placeholder="Email">
+                <input type="text" name="username" id="Username" required placeholder="username">
+            </div>
+            <div class="passButton">
+                <input type="password" name="password" id="password" required placeholder="password">
+                <input type="password" name="confirmPassword" id="confirmPassword" required
+                    placeholder="confirm password">
+                <div>
+                    <input type="checkbox" name="tac" id="tac" required>
+                    <label for="tac">I accept the terms and conditions of use</label>
+
+                </div>
+                <button type="submit">Register</button>
+
+            </div>
+        </div>
+    </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("registerForm")
+            form.addEventListener("submit", async (event) => {
+                event.preventDefault()
+
+                document.getElementById("error-message").style.color = 'inherit'
+
+
+                if (form.password.value !== form.confirmPassword.value) {
+                    showError("Password do not match")
+                    return
+                }
+
+                if (!form.tac.checked) {
+                    showError("You must accept the terms and conditions")
+                    return
+                }
+                try {
+
+                    const formData = {
+                        username: form.username.value,
+                        email: form.email.value,
+                        password: form.password.value,
+                        confirmPassword: form.confirmPassword.value,
+                        tac: form.tac.checked,
+                        csrfToken: form.csrf_token.value
+                    }
+
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify(formData)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json()
+                        showError(errorData.error || "Registration failed")
+                        return
+                    } 
+                    const successData = await response.json()
+                    if (successData.redirect) {
+                        showSuccess(successData.message)
+                        window.location.href = successData.redirect
+                    }
+                } catch (error) {
+                    showError("Network error.Please try again")
+                }
+            })
+        })
+        function showError(message) {
+            document.getElementById("error-message").textContent = message
+            document.getElementById("error-message").style.color = 'red'
+        }
+
+        function showSuccess(message) {
+            document.getElementById("error-message").textContent = message
+            document.getElementById("error-message").style.color = 'green'
+        }
+        
+    </script>
+</body>
+
+</html>
