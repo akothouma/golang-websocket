@@ -31,7 +31,7 @@ func (m *Message) MessageHistory(user1, user2 uuid.UUID) ([]Message, error) {
 	query := `SELECT * FROM Messages 
 	WHERE (sender=? AND receiver=?)
 	OR(sender=? AND receiver=?)
-	ORDER_BY timestamp ASC
+	ORDER BY timestamp ASC
 	LIMIT 10 OFFSET 0`
 
 	messageRows, err := DB.Query(query, user1, user2, user2, user1)
