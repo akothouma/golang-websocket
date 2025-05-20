@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"net/http"
 	"sync"
 	"time"
@@ -15,6 +16,11 @@ type Client struct {
 	Connection *websocket.Conn
 	UserID     string
 	IsOnline  bool
+}
+
+type IncomingMessage struct{
+	Receiver string `json:"reciever"`
+	Content string `json:"content"`
 }
 
 
@@ -57,7 +63,7 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 
 	}
 
-	var mess models.Message
+	// var mess models.Message
 
 	clientsMux.Lock()
 	clients[client] = true
@@ -71,11 +77,34 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 			clientsMux.Unlock()
 			break
 		}
-		mess.Message=string(msg)
-		mess.CreatedAt=time.Now()
-		mess.ID=uuid.New()
-		mess.Sender=userID
+
+		var incoming IncomingMessage
+		err=json.Unmarshal(msg,&incoming)
+		if err !=nil{
+			continue
+		}
+
+		//message
+		mess:=models.Message{
+			ID: uuid.New(),
+			Sender: userID,
+			Receiver: incoming.Receiver,
+			Message: incoming.Content,
+			IsRead: false,
+			CreatedAt: time.Now(),
+			
+
+		}
 		_=mess.MessageToDatabase()
+
+		//Send to receiver
+		clientsMux.Lock()
+		for c :=range clients{
+			if c.UserID==incoming.Receiver{
+				c.Connection.WriteJSON(mess)
+			}
+		}
+		clientsMux.Unlock()
 
 	}
 }
