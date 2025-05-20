@@ -44,7 +44,7 @@ func (m *Message) MessageHistory(user1, user2 uuid.UUID) ([]Message, error) {
 	var messages []Message
 	for messageRows.Next() {
 		var msg Message
-		err := messageRows.Scan(&msg.ID, &msg.Sender, &msg.Receiver, &msg.Message, &msg.IsRead, msg.CreatedAt.Truncate(time.Hour))
+		err := messageRows.Scan(&msg.ID, &msg.Sender, &msg.Receiver, &msg.Message, &msg.IsRead, msg.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("Database issue", err)
 		}
