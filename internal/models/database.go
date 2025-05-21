@@ -33,12 +33,13 @@ func InitializeDB() (*sql.DB, error) {
 
 	CREATE TABLE IF NOT EXISTS messages(
 	messageID TEXT UNIQUE NOT NULL,
+	user_uuid TEXT UNIQUE NOT NULL,
 	messageText TEXT NOT NULL,
 	sender TEXT UNIQUE NOT NULL,
 	receiver TEXT UNIQUE NOT NULL,
 	isRead BOOL,
 	createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_uuid) REFERENCES users(user_uuid)
+	FOREIGN KEY (user_uuid) REFERENCES users(id)
 	);
 		
 	CREATE TABLE IF NOT EXISTS sessions (
