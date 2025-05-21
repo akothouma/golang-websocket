@@ -12,11 +12,11 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-type Client struct {
-	Connection *websocket.Conn
-	UserID     string
-	IsOnline  bool
-}
+// type Client struct {
+// 	Connection *websocket.Conn
+// 	UserID     string
+// 	IsOnline  bool
+// }
 
 type IncomingMessage struct{
 	Receiver string `json:"reciever"`
@@ -32,7 +32,7 @@ type BroadcastMessage struct{
 
 
 var (
-	clients    = make(map[string]*Client)
+	clients    = make(map[string]*websocket.Conn)
 	broadcast  = make(chan BroadcastMessage)
 	upgrader   = websocket.Upgrader{}
 	db         *sql.DB
@@ -57,24 +57,17 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	go handleClients(r,conn)
+	go handleClientConnections(r,conn)
+	go broadcastToClients();
 }
 
-func handleClients(r *http.Request, conn *websocket.Conn) {
+func handleClientConnections(r *http.Request, conn *websocket.Conn) {
 	defer conn.Close()
 	userID := r.Context().Value("user_uuid").(string)
-
-	client := &Client{
-		Connection: conn,
-		//UserID:     userID,
-		IsOnline: true,
-
-	}
-
 	// var mess models.Message
 
 	clientsMux.Lock()
-	clients[userID] = client
+	clients[userID] = conn
 	clientsMux.Unlock()
 
 	for{
@@ -104,6 +97,7 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 
 		}
 		_=mess.MessageToDatabase()
+		
 
 		//Send to broadcast channel
 		broadcast<-BroadcastMessage{
@@ -113,4 +107,22 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 
 		}
 	}
+}
+func broadcastToClients(){
+	for{
+		select{
+		case msg:=<-broadcast:
+			clientsMux.Lock()
+			if receiverConnection,ok:=clients[msg.ReceiverID];ok{
+				receiverConnection.WriteJSON(msg.Message)
+			}
+			clientsMux.Unlock();
+			clientsMux.Lock()
+			if senderConnection,ok:=clients[msg.SenderID];ok{
+				senderConnection.WriteJSON(msg.Message);
+			}
+			clientsMux.Unlock();
+		}
+	}
+
 }
