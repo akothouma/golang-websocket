@@ -20,13 +20,20 @@ type Client struct {
 
 type IncomingMessage struct{
 	Receiver string `json:"reciever"`
+
 	Content string `json:"content"`
+}
+
+type BroadcastMessage struct{
+	SenderID string
+	ReceiverID string
+	Message models.Message
 }
 
 
 var (
-	clients    = make(map[Client]bool)
-	broadcast  = make(chan string)
+	clients    = make(map[string]*Client)
+	broadcast  = make(chan BroadcastMessage)
 	upgrader   = websocket.Upgrader{}
 	db         *sql.DB
 	clientsMux sync.Mutex
@@ -54,11 +61,12 @@ func chatHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleClients(r *http.Request, conn *websocket.Conn) {
+	defer conn.Close()
 	userID := r.Context().Value("user_uuid").(string)
 
-	client := Client{
+	client := &Client{
 		Connection: conn,
-		UserID:     userID,
+		//UserID:     userID,
 		IsOnline: true,
 
 	}
@@ -66,14 +74,14 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 	// var mess models.Message
 
 	clientsMux.Lock()
-	clients[client] = true
+	clients[userID] = client
 	clientsMux.Unlock()
 
 	for{
         _,msg,err:=conn.ReadMessage()
 		if err != nil {
 			clientsMux.Lock()
-			delete(clients, client)
+			delete(clients, userID)
 			clientsMux.Unlock()
 			break
 		}
@@ -97,14 +105,12 @@ func handleClients(r *http.Request, conn *websocket.Conn) {
 		}
 		_=mess.MessageToDatabase()
 
-		//Send to receiver
-		clientsMux.Lock()
-		for c :=range clients{
-			if c.UserID==incoming.Receiver{
-				c.Connection.WriteJSON(mess)
-			}
-		}
-		clientsMux.Unlock()
+		//Send to broadcast channel
+		broadcast<-BroadcastMessage{
+			SenderID: userID,
+			ReceiverID: incoming.Receiver,
+			Message: mess,
 
+		}
 	}
 }
