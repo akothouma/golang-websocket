@@ -116,8 +116,6 @@ func broadcastToClients(){
 			if receiverConnection,ok:=clients[msg.ReceiverID];ok{
 				receiverConnection.WriteJSON(msg.Message)
 			}
-			clientsMux.Unlock();
-			clientsMux.Lock()
 			if senderConnection,ok:=clients[msg.SenderID];ok{
 				senderConnection.WriteJSON(msg.Message);
 			}
