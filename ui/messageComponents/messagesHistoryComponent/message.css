@@ -13,7 +13,7 @@ body {
     gap: 10px;
   }
   
-  .message {
+  .msg {
     max-width: 60%;
     padding: 10px 15px;
     border-radius: 15px;
@@ -23,13 +23,13 @@ body {
     display: inline-block;
   }
   
-  .message.left {
+  .msg.left {
     background-color: #f1f0f0;
     align-self: flex-start;
     border-top-left-radius: 0;
   }
   
-  .message.right {
+  .msg.right {
     background-color: #daf1ff;
     align-self: flex-end;
     border-top-right-radius: 0;

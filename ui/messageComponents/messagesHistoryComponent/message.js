@@ -1,6 +1,6 @@
 export default  MessageCarriers=()=>{
     const chatContainer=document.createElement('div');
-    chatContainer.className='mesage_history'
+    chatContainer.className='message_history'
 
      function addMessage(mess,side='left'){
         const msg=document.createElement('p');
@@ -11,5 +11,6 @@ export default  MessageCarriers=()=>{
     const messageInput=document.createElement('input');
     messageInput.placeholder='Type here...';
     messageInput.style.bottom='0';
+    chatContainer.appendChild(messageInput);
   return {chatContainer ,addMessage} 
 }

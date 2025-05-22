@@ -1,4 +1,4 @@
-export const image=()=>{
+export const Image=()=>{
 const profile=document.createElement("img");
 profile.className='profile_image';
 profile.style.height='400px';

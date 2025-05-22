@@ -482,8 +482,14 @@ main .container .right{
 
 }
 
+.right{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
 
-.right .categories{
+
+.right .categorie {
     display: flex;
     flex-direction: column;
     background: var(--color-white);
