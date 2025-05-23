@@ -1,4 +1,4 @@
-import Card from '../messageComponents/CardComponent/card.js'
+import {Card} from '../messageComponents/CardComponent/card.js'
 
 document.addEventListener('DOMContentLoaded',()=>{
     const root=document.getElementById("message_layout");
@@ -10,5 +10,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     root.style.borderRadius='var(--card-border-radius)';
     root.style.fontSize='1.4rem';
     root.style.height='max-content';  
-    root.appendChild(Card());
+    const cardContainer=Card();
+    root.appendChild(cardContainer);
 })
