@@ -10,7 +10,7 @@ const data = [
     { senderId: "user7", messageContent: "Let’s do it!" }
 ];
 
- const Card = () => {
+ export const Card = () => {
     const cardContainer = document.createElement("div")
     data.forEach((onemessage) => {
         const onecard = document.createElement("div");
@@ -40,4 +40,3 @@ const data = [
     return cardContainer
 
 }
-export default Card;

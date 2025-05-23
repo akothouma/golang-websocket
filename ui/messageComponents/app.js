@@ -1,8 +1,8 @@
-import {Card} from './CardComponent/card.js'
+import Card from '../messageComponents/CardComponent/card.js'
 
 document.addEventListener('DOMContentLoaded',()=>{
     const root=document.getElementById("message_layout");
-    root.style.height='100px'
+    root.style.height='100px';
     root.style.display='flex';
     root.style.flexDirection='column';
     root.style.background='var(--color-white)';
