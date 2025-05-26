@@ -24,28 +24,33 @@ type ClientConnection struct{
 
 }
 
+type ClientMessage struct{
+	Event string `json:"event"`
+	Payload Payload 
+}
+
 type Payload struct{
 	Msg string `json:"messageType"`
+    ReceiverID string `json:"receiverID"`
+    Content string
 }
 
 type ErrorObject struct{
-	Msg string `json:"ErrMessage`
+	Error string `json:"error"`
 	
 }
 
 type BroadcastMessage struct{
-	SenderID string
-	ReceiverID string
 	Message models.Message
 }
 
 
 var (
-	clients    = make(map[string]*websocket.Conn)
-	broadcast  = make(chan BroadcastMessage)
-	upgrader   = websocket.Upgrader{}
-	db         *sql.DB
-	clientsMux sync.Mutex
+	clients    = make(map[*websocket.Conn]string);
+	broadcast  = make(chan BroadcastMessage);
+	upgrader   = websocket.Upgrader{};
+	db         *sql.DB;
+	clientsMux sync.Mutex;
 )
 
 func ChatHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,24 +71,24 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	go handleClientConnections(r,conn)
-	go broadcastToClients();
+	go handleClientConnections(w,r,conn);
+	go broadcastToClients(conn,clients);
 }
 
-func handleClientConnections(r *http.Request, conn *websocket.Conn) {
+func (dep Dependencies)handleClientConnections(w http.ResponseWriter,r *http.Request, conn *websocket.Conn) {
 	defer conn.Close()
 	userID := r.Context().Value("user_uuid").(string)
 	// var mess models.Message
 
-	clientsMux.Lock()
-	clients[userID] = conn
-	clientsMux.Unlock()
+	clientsMux.Lock();
+	clients[conn] = userID
+	clientsMux.Unlock();
 
 	for{
         _,msg,err:=conn.ReadMessage()
 		if err != nil {
 			clientsMux.Lock()
-			delete(clients, userID)
+			delete(clients, conn)
 			clientsMux.Unlock()
 			break
 		}
@@ -100,15 +105,15 @@ func handleClientConnections(r *http.Request, conn *websocket.Conn) {
 
 		switch(messageType){
 		case "get_online_users":
-			getConnectedUsers(clients)
+			dep.getConnectedUsers(w,clients)
 		}
 
 		//message
 		mess:=models.Message{
 			ID: uuid.New(),
 			Sender: userID,
-			// Receiver: incoming.Receiver,
-			// Message: incoming.Content,
+			Receiver: incoming.Payload.ReceiverID,
+			Message: incoming.Payload.Content,
 			IsRead: false,
 			CreatedAt: time.Now(),
 			
@@ -116,33 +121,42 @@ func handleClientConnections(r *http.Request, conn *websocket.Conn) {
 		}
 		_=mess.MessageToDatabase()
 		
-
 		//Send to broadcast channel
 		broadcast<-BroadcastMessage{
-			SenderID: userID,
-			//ReceiverID: incoming.Receiver,
 			Message: mess,
-
 		}
 	}
 }
-func broadcastToClients(){
+func broadcastToClients(sender *websocket.Conn, receiver map[*websocket.Conn]string){
 	for{
 		select{
 		case msg:=<-broadcast:
 			clientsMux.Lock()
-			if receiverConnection,ok:=clients[msg.ReceiverID];ok{
-				receiverConnection.WriteJSON(msg.Message)
-			}
-			if senderConnection,ok:=clients[msg.SenderID];ok{
-				senderConnection.WriteJSON(msg.Message);
+			    for receiverConn,val :=range receiver{
+					if val==msg.Message.Receiver{
+						receiverConn.WriteJSON(msg.Message);
+					}
+				}
+				sender.WriteJSON(msg.Message);
 			}
 			clientsMux.Unlock();
 		}
-	}
-
 }
 
-func getConnectedUsers(c map[string]*websocket.Conn){
 
+
+func(dep *Dependencies) getConnectedUsers(w http.ResponseWriter,connections map[*websocket.Conn]string){
+	userid:=[] string{};
+for _,userID:=range connections{
+   userid=append(userid, userID)
+}
+allConnectedUsers,err:=dep.Forum.GetAllConnectedUsers(userid);
+if err!=nil{
+	json.NewEncoder(w).Encode(ErrorObject{Error:"oops something went wrong"})
+}
+
+json.NewEncoder(w).Encode(map[string]interface{}{
+	"message":"connected_client_list",
+	"value":allConnectedUsers,
+});
 }
