@@ -10,7 +10,8 @@
         const msg=document.createElement('p');
         msg.style.fontSize='12px';
         msg.classList.add(`msg${side}`);
-        msg.textContent=mess
+        msg.textContent=mess;
+        msg.style.justifyContent='center';
         chat.appendChild(msg)
     }
     const messageInput=document.createElement('input');
@@ -21,5 +22,5 @@
 
     AddMessage("hello");
     AddMessage("hello from the server side...At least I can sat that I have connected",'right')
-  return {chatContainer} 
+  return {chatContainer,AddMessage} 
   }

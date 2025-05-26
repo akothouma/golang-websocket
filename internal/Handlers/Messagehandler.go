@@ -18,10 +18,19 @@ import (
 // 	IsOnline  bool
 // }
 
-type IncomingMessage struct{
-	Receiver string `json:"reciever"`
+type ClientConnection struct{
+	Event string `json:"event"`
+	Payload Payload `json:"payload"`
 
-	Content string `json:"content"`
+}
+
+type Payload struct{
+	Msg string `json:"messageType"`
+}
+
+type ErrorObject struct{
+	Msg string `json:"ErrMessage`
+	
 }
 
 type BroadcastMessage struct{
@@ -39,7 +48,7 @@ var (
 	clientsMux sync.Mutex
 )
 
-func chatHandler(w http.ResponseWriter, r *http.Request) {
+func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -79,18 +88,27 @@ func handleClientConnections(r *http.Request, conn *websocket.Conn) {
 			break
 		}
 
-		var incoming IncomingMessage
+		var incoming ClientConnection
+
+
 		err=json.Unmarshal(msg,&incoming)
 		if err !=nil{
 			continue
+		}
+
+		messageType:=incoming.Payload.Msg;
+
+		switch(messageType){
+		case "get_online_users":
+			getConnectedUsers(clients)
 		}
 
 		//message
 		mess:=models.Message{
 			ID: uuid.New(),
 			Sender: userID,
-			Receiver: incoming.Receiver,
-			Message: incoming.Content,
+			// Receiver: incoming.Receiver,
+			// Message: incoming.Content,
 			IsRead: false,
 			CreatedAt: time.Now(),
 			
@@ -102,7 +120,7 @@ func handleClientConnections(r *http.Request, conn *websocket.Conn) {
 		//Send to broadcast channel
 		broadcast<-BroadcastMessage{
 			SenderID: userID,
-			ReceiverID: incoming.Receiver,
+			//ReceiverID: incoming.Receiver,
 			Message: mess,
 
 		}
@@ -122,5 +140,9 @@ func broadcastToClients(){
 			clientsMux.Unlock();
 		}
 	}
+
+}
+
+func getConnectedUsers(c map[string]*websocket.Conn){
 
 }

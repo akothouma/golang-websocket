@@ -1,6 +1,34 @@
-import {Card} from '../messageComponents/CardComponent/card.js'
+import {Card} from '../messageComponents/CardComponent/card.js';
+import { MessageCarriers } from '../messageComponents/messagesHistoryComponent/message.js';
 
 document.addEventListener('DOMContentLoaded',()=>{
+    
+        const socket=new WebSocket("ws://localhost:8000/ws");
+    
+        socket.addEventListener("open",()=>{
+            const request={
+                event:"open",
+                payload:{
+                       messageType:"get_online_users",
+                }
+            }
+            console.log("server connected succesfully");
+            socket.send(JSON.stringify(request));
+
+        })
+
+        // socket.addEventListener("message",(e)=>{
+        //     try{
+        //       const data =JSON.parse(e.data);
+        //       const {message,val}=data;
+
+
+        //     }catch(error){
+
+        //     }
+        // })
+    
+    
     const root=document.getElementById("message_layout");
     root.style.height='100px';
     root.style.display='flex';
@@ -12,4 +40,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     root.style.height='max-content';  
     const renderedView=Card();
     root.appendChild(renderedView);
+
+    const {AddMessage}=MessageCarriers();
+    
 })
