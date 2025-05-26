@@ -10,6 +10,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     root.style.borderRadius='var(--card-border-radius)';
     root.style.fontSize='1.4rem';
     root.style.height='max-content';  
-    const cardContainer=Card();
-    root.appendChild(cardContainer);
+    const renderedView=Card();
+    root.appendChild(renderedView);
 })
