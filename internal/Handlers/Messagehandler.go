@@ -140,17 +140,21 @@ func (dep *Dependencies)broadcastToClients(sender *websocket.Conn, receiver map[
 	}
 }
 
-func (dep *Dependencies) getConnectedUsers(w http.ResponseWriter, connections map[*websocket.Conn]string) {
+func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, connections map[*websocket.Conn]string) {
 	userid := []string{}
 	for _, userID := range connections {
 		userid = append(userid, userID)
 	}
 	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(userid)
 	if err != nil {
-		json.NewEncoder(w).Encode(ErrorObject{Error: "oops something went wrong"})
+		// json.NewEncoder(w).Encode(ErrorObject{Error: "oops something went wrong"})
+		//fix: we sending response through the websocket not HTTP response writer (w) in websocket
+		conn.WriteJSON(ErrorObject{Error:"Something went wrong retrieving connected users"})
+		return
+
 	}
 
-	json.NewEncoder(w).Encode(map[string]interface{}{
+	conn.WriteJSON(map[string]interface{}{
 		"message": "connected_client_list",
 		"value":   allConnectedUsers,
 	})
