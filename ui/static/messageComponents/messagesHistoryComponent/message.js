@@ -1,3 +1,5 @@
+ import { initSocket } from "../../script/socket";
+
  export const MessageCarriers=()=>{
     const chatContainer=document.createElement('div');
     chatContainer.className='message_history'
@@ -20,7 +22,25 @@
     messageInput.style.bottom='0';
     chatContainer.append(chat,messageInput);
 
-    AddMessage("hello");
-    AddMessage("hello from the server side...At least I can sat that I have connected",'right')
+
+   const socket=initSocket();
+   messageInput.addEventListener('keydown',(e)=>{
+      if (e.key=="Enter"){
+         const message=e.target.value;
+         if (socket && socket.readyState==WebSocket.OPEN){
+
+            const request={
+               event:"sending_message",
+               payload:{
+                  messageType:"chat_message",
+                  receiverID:chatContainer.id,
+                  content:message,
+               }
+            }
+            socket.send(message);
+            AddMessage(message)
+         }
+      }
+   })
   return {chatContainer,AddMessage} 
   }

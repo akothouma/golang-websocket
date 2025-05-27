@@ -12,11 +12,6 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-// type Client struct {
-// 	Connection *websocket.Conn
-// 	UserID     string
-// 	IsOnline  bool
-// }
 
 type ClientConnection struct {
 	Event   string  `json:"event"`
@@ -31,7 +26,7 @@ type ClientMessage struct {
 type Payload struct {
 	Msg        string `json:"messageType"`
 	ReceiverID string `json:"receiverID"`
-	Content    string
+	Content    string `json:"content"`
 }
 
 type ErrorObject struct {
@@ -138,7 +133,7 @@ func (dep *Dependencies) broadcastToClients(sender *websocket.Conn) {
 				}
 			
 			// Send back to sender
-			sender.WriteJSON(msg.Message)
+			//sender.WriteJSON(msg.Message)
 			ClientsMux.Unlock()
 		}
 	}

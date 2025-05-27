@@ -1,9 +1,8 @@
 import { Card } from '../messageComponents/CardComponent/card.js';
-import { MessageCarriers } from '../messageComponents/messagesHistoryComponent/message.js';
+import {initSocket} from './socket.js'
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    const socket = new WebSocket("ws://localhost:8000/ws");
+   const socket=initSocket();
 
     socket.addEventListener("open", () => {
         const request = {
@@ -48,6 +47,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     root.appendChild(renderedView);
 
-    const { AddMessage } = MessageCarriers();
+    // const { AddMessage } = MessageCarriers();
 
 })

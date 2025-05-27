@@ -75,6 +75,7 @@ function showPrivateMessages(senderId, cardsView) {
     });
 
     const { chatContainer } = MessageCarriers();
+    chatContainer.id=senderId;
     messageContainer.append(backButton, chatContainer);
     renderedView.innerHTML = '';
     renderedView.appendChild(messageContainer);
