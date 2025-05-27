@@ -66,11 +66,11 @@ func (dep *Dependencies)ChatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	go dep.handleClientConnections(w, r, conn)
+	go dep.handleClientConnections(r, conn)
 	go dep.broadcastToClients(conn, clients)
 }
 
-func (dep *Dependencies) handleClientConnections(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) {
+func (dep *Dependencies) handleClientConnections( r *http.Request, conn *websocket.Conn) {
 	defer conn.Close()
 	userID := r.Context().Value("user_uuid").(string)
 	// var mess models.Message
@@ -99,7 +99,7 @@ func (dep *Dependencies) handleClientConnections(w http.ResponseWriter, r *http.
 
 		switch messageType {
 		case "get_online_users":
-			dep.getConnectedUsers(w, clients)
+			dep.getConnectedUsers(conn, clients)
 			continue //Won't create message for this instance now
 		case "chat_message":
 			//We only creating message for actual chat messages now
