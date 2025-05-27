@@ -1,68 +1,64 @@
-import Image from '../imageComponent/image.js'
-import { MessageCarriers } from '../messagesHistoryComponent/message.js'
-
-const data = [
-    { senderId: "user1", messageContent: "Hey, how are you?" },
-    { senderId: "user2", messageContent: "I’m good! Just working on the project." },
-    { senderId: "user3", messageContent: "Nice! Need any help?" },
-    { senderId: "user4", messageContent: "You up for a quick call?" },
-    { senderId: "user5", messageContent: "Sure, I’m free now." },
-    { senderId: "user6", messageContent: "Let’s do it!" }
-];
+import Image from '../imageComponent/image.js';
+import { MessageCarriers } from '../messagesHistoryComponent/message.js';
 
 export const Card = () => {
     const renderedView = document.createElement("div");
     renderedView.style.height = 'fit-content';
     renderedView.style.overflow = 'hidden';
 
-    const cardsView = showConnections();
-    renderedView.appendChild(cardsView);
-    return renderedView;
-}
-
-function showConnections() {
     const cardContainer = document.createElement("div");
-    cardContainer.display = 'flex';
-    cardContainer.flexDirection = 'column'
-    cardContainer.style.alignContent = 'space-between'
+    cardContainer.style.display = 'flex';
+    cardContainer.style.flexDirection = 'column';
+    cardContainer.style.alignContent = 'space-between';
     cardContainer.style.gap = '15px';
 
-    //const activecard = null;
-    data.forEach((oneConnection) => {
-        const onecard = document.createElement("div");
-        const displayContainer = document.createElement('div');
-        onecard.style.width = 'fit-content';
-        onecard.style.height = 'fit-content';
-        onecard.style.display = 'flex';
-        onecard.id = oneConnection.senderId;
-        onecard.classList.add('card');
-        onecard.style.flexDirection = 'column'
-        onecard.style.alignContent = 'space-between'
-        onecard.style.gap = '15px';
-        onecard.style.cursor = 'pointer'
+    renderedView.appendChild(cardContainer);
 
+    function showConnections(data) {
+       
+        cardContainer.innerHTML = '';
 
-        displayContainer.style.display = 'flex';
-        displayContainer.flexDirection = 'row'
-        const imageside = document.createElement('div');
-        imageside.appendChild(Image());
+        data.forEach((oneConnection) => {
+            const onecard = document.createElement("div");
+            const displayContainer = document.createElement('div');
 
-        const lastMessageSide = document.createElement('div')
-        const lastMessage = document.createElement('p');
-        lastMessage.textContent = oneConnection.messageContent
-        lastMessage.style.fontSize='12px';
-        lastMessageSide.appendChild(lastMessage);
+            onecard.style.width = 'fit-content';
+            onecard.style.height = 'fit-content';
+            onecard.style.display = 'flex';
+            onecard.id = oneConnection.senderId;
+            onecard.classList.add('card');
+            onecard.style.flexDirection = 'column';
+            onecard.style.alignContent = 'space-between';
+            onecard.style.gap = '15px';
+            onecard.style.cursor = 'pointer';
 
-        displayContainer.append(imageside,lastMessage)
+            displayContainer.style.display = 'flex';
+            displayContainer.style.flexDirection = 'row';
 
-        onecard.appendChild(displayContainer);
-        onecard.addEventListener("click", () => {
-            showPrivateMessages(oneConnection.senderId, cardContainer);
+            const imageside = document.createElement('div');
+            imageside.appendChild(Image());
+
+            const lastMessageSide = document.createElement('div');
+            const lastMessage = document.createElement('p');
+            lastMessage.textContent = oneConnection.messageContent;
+            lastMessage.style.fontSize = '12px';
+            lastMessageSide.appendChild(lastMessage);
+
+            displayContainer.append(imageside, lastMessageSide);
+
+            onecard.appendChild(displayContainer);
+            onecard.addEventListener("click", () => {
+                showPrivateMessages(oneConnection.senderId, cardContainer);
+            });
+
+            cardContainer.appendChild(onecard);
         });
-        cardContainer.appendChild(onecard);
+    }
 
-    });
-    return cardContainer;
+    return {
+        renderedView,
+        showConnections
+    };
 }
 
 function showPrivateMessages(senderId, cardsView) {
@@ -70,16 +66,16 @@ function showPrivateMessages(senderId, cardsView) {
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message_container');
     messageContainer.id = senderId;
+
     const backButton = document.createElement('button');
-    backButton.textContent="← Back";
+    backButton.textContent = "← Back";
     backButton.addEventListener("click", () => {
         renderedView.innerHTML = '';
-        renderedView.appendChild(cardsView)
+        renderedView.appendChild(cardsView);
     });
 
     const { chatContainer } = MessageCarriers();
-    messageContainer.append(backButton, chatContainer)
+    messageContainer.append(backButton, chatContainer);
     renderedView.innerHTML = '';
-    renderedView.appendChild(messageContainer)
-
+    renderedView.appendChild(messageContainer);
 }

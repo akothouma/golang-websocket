@@ -40,7 +40,7 @@ func Routes() *http.ServeMux {
 	mux.HandleFunc("/liked_posts", models.RenderLikedPostsPage)
 	mux.Handle("/upload-profile", dep.AuthMiddleware(http.HandlerFunc(handlers.UploadProfilePictureHandler)))
 	mux.Handle("/register", dep.CSRFMiddleware(http.HandlerFunc(dep.RegisterHandler)))
-	mux.Handle("/ws",dep.AuthMiddleware(http.HandlerFunc(handlers.ChatHandler)))
+	mux.Handle("/ws",dep.AuthMiddleware(http.HandlerFunc(dep.ChatHandler)))
 	mux.Handle("/logout", http.HandlerFunc(dep.LogoutHandler))
 	mux.Handle("/login", dep.CSRFMiddleware(http.HandlerFunc(dep.LoginHandler)))
 	mux.Handle("/add_comment", dep.AuthMiddleware(http.HandlerFunc(handlers.AddCommentHandler)))

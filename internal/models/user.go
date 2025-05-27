@@ -10,13 +10,13 @@ import (
 )
 
 type User struct {
-	ID       int
-	UserID   string
-	Email    string
-	Username string
-	Password string
+	ID             int
+	UserID         string
+	Email          string
+	Username       string
+	Password       string
 	ProfilePicture string // 🔹 This stores the Base64-encoded image
-	ContentType string
+	ContentType    string
 	// forum    database.ForumModel
 }
 
@@ -68,6 +68,7 @@ func (f *ForumModel) GetUserByID(userID int) (*User, error) {
 	}
 	return &user, nil
 }
+
 func (f *ForumModel) GetUserByUsername(username string) (*User, error) {
 	query := "SELECT id, email, username, password, profile_picture FROM users WHERE username = ?"
 	row := f.DB.QueryRow(query, username)
@@ -89,26 +90,30 @@ func (f *ForumModel) GetUserByUsername(username string) (*User, error) {
 	return &user, nil
 }
 
-func (f *ForumModel)GetAllConnectedUsers(usersID []string)([]User,error){
-	var users []User;
-	query:="SELECT username,profile_picture FROM users WHERE user_uuid=?"
-	for _,userID:=range usersID{
-		row,err:= f.DB.Query(query,userID)
-		if err!=nil{
-			if err==sql.ErrNoRows{
-				return nil,fmt.Errorf("This user doesn't exist");
+func (f *ForumModel) GetAllConnectedUsers(usersID []string) ([]User, error) {
+	var users []User
+	query := "SELECT username,profile_picture FROM users WHERE user_uuid=?"
+	for _, userID := range usersID {
+		row, err := f.DB.Query(query, userID)
+		if err != nil {
+			if err == sql.ErrNoRows {
+				return nil, fmt.Errorf("This user doesn't exist")
 			}
-			return nil, fmt.Errorf(err.Error());
+			return nil, fmt.Errorf(err.Error())
 		}
-		var u User;
-		var profilepic []byte;
-	    err=row.Scan(&u.Username,&profilepic);
-		if err!=nil{
-          return nil,fmt.Errorf(err.Error())
+		
+		var u User
+		for row.Next() {
+			var profilepic []byte
+			
+			err = row.Scan(&u.Username, &profilepic)
+			if err != nil {
+				return nil, fmt.Errorf(err.Error())
+			}
+			u.ProfilePicture = MediaToBase64(profilepic)
+			u.UserID = userID
 		}
-		u.ProfilePicture=MediaToBase64(profilepic);
-		u.UserID=userID;
-		users=append(users,u)
+		users = append(users, u)
 	}
- return users,nil
+	return users, nil
 }
