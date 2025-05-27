@@ -1,26 +1,27 @@
 import Image from '../imageComponent/image.js'
 import { MessageCarriers } from '../messagesHistoryComponent/message.js'
 
-const data = [
-    { senderId: "user1", messageContent: "Hey, how are you?" },
-    { senderId: "user2", messageContent: "I’m good! Just working on the project." },
-    { senderId: "user3", messageContent: "Nice! Need any help?" },
-    { senderId: "user4", messageContent: "You up for a quick call?" },
-    { senderId: "user5", messageContent: "Sure, I’m free now." },
-    { senderId: "user6", messageContent: "Let’s do it!" }
-];
+// const data = [
+//     { senderId: "user1", messageContent: "Hey, how are you?" },
+//     { senderId: "user2", messageContent: "I’m good! Just working on the project." },
+//     { senderId: "user3", messageContent: "Nice! Need any help?" },
+//     { senderId: "user4", messageContent: "You up for a quick call?" },
+//     { senderId: "user5", messageContent: "Sure, I’m free now." },
+//     { senderId: "user6", messageContent: "Let’s do it!" }
+// ];
 
 export const Card = () => {
     const renderedView = document.createElement("div");
     renderedView.style.height = 'fit-content';
     renderedView.style.overflow = 'hidden';
 
-    const cardsView = showConnections();
+    const cardsView =ShowConnections(data);
     renderedView.appendChild(cardsView);
-    return renderedView;
+    return {renderedView,
+        ShowConnections};
 }
 
-function showConnections() {
+function ShowConnections(data) {
     const cardContainer = document.createElement("div");
     cardContainer.display = 'flex';
     cardContainer.flexDirection = 'column'

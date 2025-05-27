@@ -16,17 +16,23 @@ document.addEventListener('DOMContentLoaded',()=>{
             socket.send(JSON.stringify(request));
 
         })
+        const {ShowConnections}=Card()
+        socket.addEventListener("message",(e)=>{
+            try{
+              const data =JSON.parse(e.data);
+              const {message,value}=data;
 
-        // socket.addEventListener("message",(e)=>{
-        //     try{
-        //       const data =JSON.parse(e.data);
-        //       const {message,val}=data;
+              switch (message){
+                case "connected_client_list":
+                    ShowConnections(value);
+              }
 
 
-        //     }catch(error){
 
-        //     }
-        // })
+            }catch(error){
+
+            }
+        })
     
     
     const root=document.getElementById("message_layout");
