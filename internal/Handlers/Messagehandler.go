@@ -125,14 +125,16 @@ func (dep *Dependencies)broadcastToClients(sender *websocket.Conn, receiver map[
 		select {
 		case msg := <-broadcast:
 			clientsMux.Lock()
+			//Send to receiver
 			for receiverConn, val := range receiver {
 				if val == msg.Message.Receiver {
 					receiverConn.WriteJSON(msg.Message)
 				}
 			}
+			//Send back to sender
 			sender.WriteJSON(msg.Message)
+			clientsMux.Unlock()
 		}
-		clientsMux.Unlock()
 	}
 }
 
