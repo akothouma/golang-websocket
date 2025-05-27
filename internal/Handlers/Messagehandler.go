@@ -100,23 +100,25 @@ func (dep *Dependencies) handleClientConnections(w http.ResponseWriter, r *http.
 		switch messageType {
 		case "get_online_users":
 			dep.getConnectedUsers(w, clients)
+			continue //Won't create message for this instance now
+		case "chat_message":
+			//We only creating message for actual chat messages now
+			mess := models.Message{
+				ID:        uuid.New(),
+				Sender:    userID,
+				Receiver:  incoming.Payload.ReceiverID,
+				Message:   incoming.Payload.Content,
+				IsRead:    false,
+				CreatedAt: time.Now(),
+			}
+			_ = mess.MessageToDatabase()
+	
+			// Send to broadcast channel
+			broadcast <- BroadcastMessage{
+				Message: mess,
+			}
 		}
 
-		// message
-		mess := models.Message{
-			ID:        uuid.New(),
-			Sender:    userID,
-			Receiver:  incoming.Payload.ReceiverID,
-			Message:   incoming.Payload.Content,
-			IsRead:    false,
-			CreatedAt: time.Now(),
-		}
-		_ = mess.MessageToDatabase()
-
-		// Send to broadcast channel
-		broadcast <- BroadcastMessage{
-			Message: mess,
-		}
 	}
 }
 
