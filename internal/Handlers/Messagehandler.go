@@ -48,7 +48,7 @@ var (
 	clientsMux sync.Mutex
 )
 
-func ChatHandler(w http.ResponseWriter, r *http.Request) {
+func (dep *Dependencies)ChatHandler(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -66,8 +66,8 @@ func ChatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer conn.Close()
 
-	go handleClientConnections(w, r, conn)
-	go broadcastToClients(conn, clients)
+	go dep.handleClientConnections(w, r, conn)
+	go dep.broadcastToClients(conn, clients)
 }
 
 func (dep *Dependencies) handleClientConnections(w http.ResponseWriter, r *http.Request, conn *websocket.Conn) {
@@ -120,7 +120,7 @@ func (dep *Dependencies) handleClientConnections(w http.ResponseWriter, r *http.
 	}
 }
 
-func broadcastToClients(sender *websocket.Conn, receiver map[*websocket.Conn]string) {
+func (dep *Dependencies)broadcastToClients(sender *websocket.Conn, receiver map[*websocket.Conn]string) {
 	for {
 		select {
 		case msg := <-broadcast:
