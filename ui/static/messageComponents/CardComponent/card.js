@@ -15,6 +15,7 @@ export const Card = () => {
     renderedView.appendChild(cardContainer);
 
     function showConnections(data) {
+            console.log("from card",data)   
        
         cardContainer.innerHTML = '';
 
@@ -22,10 +23,10 @@ export const Card = () => {
             const onecard = document.createElement("div");
             const displayContainer = document.createElement('div');
 
-            onecard.style.width = 'fit-content';
+            onecard.style.width = '100%';
             onecard.style.height = 'fit-content';
             onecard.style.display = 'flex';
-            onecard.id = oneConnection.senderId;
+            onecard.id = `${oneConnection.Username}`;
             onecard.classList.add('card');
             onecard.style.flexDirection = 'column';
             onecard.style.alignContent = 'space-between';
@@ -40,7 +41,7 @@ export const Card = () => {
 
             const lastMessageSide = document.createElement('div');
             const lastMessage = document.createElement('p');
-            lastMessage.textContent = oneConnection.messageContent;
+            lastMessage.textContent = `${oneConnection.messageContent}`;
             lastMessage.style.fontSize = '12px';
             lastMessageSide.appendChild(lastMessage);
 
@@ -48,7 +49,7 @@ export const Card = () => {
 
             onecard.appendChild(displayContainer);
             onecard.addEventListener("click", () => {
-                showPrivateMessages(oneConnection.senderId, cardContainer);
+                showPrivateMessages(oneConnection.Username, cardContainer);
             });
 
             cardContainer.appendChild(onecard);
@@ -65,7 +66,7 @@ function showPrivateMessages(senderId, cardsView) {
     const renderedView = cardsView.parentNode;
     const messageContainer = document.createElement('div');
     messageContainer.classList.add('message_container');
-    messageContainer.id = senderId;
+    messageContainer.id = `${senderId}`;
 
     const backButton = document.createElement('button');
     backButton.textContent = "← Back";

@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
     socket.addEventListener("message", (e) => {
         try {
             const data = JSON.parse(e.data);
-            console.log(data);
             const { message, value } = data;
             switch (message) {
                 case "connected_client_list":

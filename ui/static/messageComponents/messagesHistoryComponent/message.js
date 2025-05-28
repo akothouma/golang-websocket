@@ -1,4 +1,4 @@
- import { initSocket } from "../../script/socket";
+ import { initSocket } from "../../script/socket.js";
 
  export const MessageCarriers=()=>{
     const chatContainer=document.createElement('div');
@@ -15,6 +15,7 @@
         msg.textContent=mess;
         msg.style.justifyContent='center';
         chat.appendChild(msg)
+        
     }
     const messageInput=document.createElement('input');
     messageInput.placeholder='Type here...';
@@ -37,9 +38,10 @@
                   content:message,
                }
             }
-            socket.send(message);
-            AddMessage(message)
+            socket.send(JSON.stringify(request))
          }
+         AddMessage(message)
+         messageInput.value=''
       }
    })
   return {chatContainer,AddMessage} 
