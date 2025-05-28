@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -11,7 +12,6 @@ import (
 	"github.com/gorilla/websocket"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
-
 
 type ClientConnection struct {
 	Event   string  `json:"event"`
@@ -29,6 +29,8 @@ type Payload struct {
 	Content    string `json:"content"`
 }
 
+var chatBroadcastOnce sync.Once
+
 type ErrorObject struct {
 	Error string `json:"error"`
 }
@@ -38,7 +40,7 @@ type BroadcastMessage struct {
 }
 
 var (
-	Clients = make(map[string]*websocket.Conn)
+	Clients    = make(map[string]*websocket.Conn)
 	broadcast  = make(chan BroadcastMessage)
 	upgrader   = websocket.Upgrader{}
 	ClientsMux sync.Mutex
@@ -63,15 +65,18 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 	// defer conn.Close()
 
 	go dep.handleClientConnections(r, conn)
-	go dep.broadcastToClients(conn)
+	// 5. Start ChatBroadcastHandler (via sync.Once)
+	chatBroadcastOnce.Do(func() {
+		dep.StartChatBroadcastHandler()
+	})
 }
 
 func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocket.Conn) {
 	defer conn.Close()
-	userID := r.Context().Value("user_uuid").(string)
 
-	ClientsMux.Lock();
-	Clients[userID]=conn;
+	userID := r.Context().Value("user_uuid").(string)
+	ClientsMux.Lock()
+	Clients[userID] = conn
 	ClientsMux.Unlock()
 	fmt.Println(Clients)
 
@@ -79,11 +84,11 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			ClientsMux.Lock()
-			delete(Clients, userID);
-			conn.Close();
+			delete(Clients, userID)
+			conn.Close()
 			ClientsMux.Unlock()
 			break
-			
+
 		}
 
 		var incoming ClientConnection
@@ -97,7 +102,7 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 
 		switch messageType {
 		case "get_online_users":
-			dep.getConnectedUsers(conn);
+			dep.getConnectedUsers(conn)
 			break // Won't create message for this instance now
 		case "chat_message":
 			// We only creating message for actual chat messages now
@@ -120,37 +125,58 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 	}
 }
 
-func (dep *Dependencies) broadcastToClients(sender *websocket.Conn) {
+// This function starts the single, global broadcast handler for chat messages
+func (dep *Dependencies) StartChatBroadcastHandler() {
+	go func() {
+		log.Println(">>> Global broadcast listener goroutine STARTED. Listening on broadcast channel. <<<")
+		for {
+			select {
+			case msg := <-broadcast:
+				log.Printf(">>> Broadcast listener: Received message ID %s from broadcast channel for sender %s to receiver %s. <<<", msg.Message.ID, msg.Message.Sender, msg.Message.Receiver)
+				dep.broadcastToClients(msg)
+			}
+		}
+	}()
+}
+
+func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
+	ClientsMux.Lock()
+	defer ClientsMux.Unlock()
 	fmt.Println("broadcast", len(Clients))
+
+	// senderID := msg.Message.Sender
+	// receiverID := msg.Message.Receiver
 	for {
 		select {
 		case msg := <-broadcast:
 			ClientsMux.Lock()
 			// Send to receiver
-			receiverConn, ok := Clients[msg.Message.Receiver] 
-				if ok  {
-					receiverConn.WriteJSON(msg.Message)
-				}
-			
+			receiverConn, ok := Clients[msg.Message.Receiver]
+			if ok {
+				receiverConn.WriteJSON(msg.Message)
+			}
+
 			// Send back to sender
-			//sender.WriteJSON(msg.Message)
+			// sender.WriteJSON(msg.Message)
 			ClientsMux.Unlock()
 		}
 	}
 }
 
 func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn) {
-	userid := []string{}
+	connectedUserList := []string{}
 	for userID := range Clients {
-		userid = append(userid, userID)
+		connectedUserList = append(connectedUserList, userID)
 	}
-	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(userid)
+	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
 	if err != nil {
 		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
 		return
 	}
-	conn.WriteJSON(map[string]any{
-		"message": "connected_client_list",
-		"value":   allConnectedUsers,
-	})
+
+	response := map[string]interface{}{
+		"message": "connected_client_list", // Frontend expects this key
+		"value":   allConnectedUsers,       // Frontend expects this key
+	}
+	conn.WriteJSON(response)
 }
