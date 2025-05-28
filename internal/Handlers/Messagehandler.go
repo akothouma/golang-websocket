@@ -143,24 +143,13 @@ func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
 	fmt.Println("broadcast", len(Clients))
-
-	// senderID := msg.Message.Sender
-	// receiverID := msg.Message.Receiver
-	for {
-		select {
-		case msg := <-broadcast:
-			ClientsMux.Lock()
-			// Send to receiver
-			receiverConn, ok := Clients[msg.Message.Receiver]
-			if ok {
-				receiverConn.WriteJSON(msg.Message)
-			}
-
-			// Send back to sender
-			// sender.WriteJSON(msg.Message)
-			ClientsMux.Unlock()
-		}
+	ClientsMux.Lock()
+	// Send to receiver
+	receiverConn, ok := Clients[msg.Message.Receiver]
+	if ok {
+		receiverConn.WriteJSON(msg.Message)
 	}
+	ClientsMux.Unlock()
 }
 
 func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn) {
