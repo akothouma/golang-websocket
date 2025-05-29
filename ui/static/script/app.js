@@ -1,5 +1,7 @@
 import { Card } from '../messageComponents/CardComponent/card.js';
-import {initSocket} from './socket.js'
+import {initSocket} from './socket.js';
+import { MessageCarriers } from '../messageComponents/messagesHistoryComponent/message.js';
+
 
 document.addEventListener('DOMContentLoaded', () => {
    const socket=initSocket();
@@ -17,14 +19,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     })
     const { showConnections, renderedView } = Card();
+    const {AddMessage}=MessageCarriers();
     socket.addEventListener("message", (e) => {
         try {
             const data = JSON.parse(e.data);
-            const { message, value } = data;
+            console.log("raw backend data",data);
+            const { message, value,currentUser} = data;
             switch (message) {
                 case "connected_client_list":
-                    showConnections(value)
+                    showConnections(value,currentUser);
                     break;
+                case "send_private_message":
+                    console.log("received private data",value)
+                    AddMessage(value,'right')
+                break;
             }
 
         } catch (error) {

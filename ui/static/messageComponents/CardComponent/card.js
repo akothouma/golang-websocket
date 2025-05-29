@@ -14,15 +14,16 @@ export const Card = () => {
 
     renderedView.appendChild(cardContainer);
 
-    function showConnections(data) {
-            console.log("from card",data)   
-       
-        cardContainer.innerHTML = '';
+    function showConnections(data,myID) {
+            console.log("from card",data,myID)    
 
-        data.forEach((oneConnection) => {
+            cardContainer.innerHTML = '';
+            //const data= data1.filter((data1.UserID),data1.UserID!==myID);
+            data.forEach((oneConnection) => {
+            
             const onecard = document.createElement("div");
             const displayContainer = document.createElement('div');
-
+            
             onecard.style.width = '100%';
             onecard.style.height = 'fit-content';
             onecard.style.display = 'flex';
@@ -32,27 +33,30 @@ export const Card = () => {
             onecard.style.alignContent = 'space-between';
             onecard.style.gap = '15px';
             onecard.style.cursor = 'pointer';
-
+            
             displayContainer.style.display = 'flex';
             displayContainer.style.flexDirection = 'row';
-
+            
             const imageside = document.createElement('div');
             imageside.appendChild(Image());
-
+            
             const lastMessageSide = document.createElement('div');
             const lastMessage = document.createElement('p');
             lastMessage.textContent = `${oneConnection.messageContent}`;
             lastMessage.style.fontSize = '12px';
             lastMessageSide.appendChild(lastMessage);
-
+            
             displayContainer.append(imageside, lastMessageSide);
-
+            
             onecard.appendChild(displayContainer);
             onecard.addEventListener("click", () => {
-                showPrivateMessages(oneConnection.Username, cardContainer);
+                showPrivateMessages(oneConnection.UserID, cardContainer);
             });
-
+            
             cardContainer.appendChild(onecard);
+            if( oneConnection.UserID===myID){
+               onecard.style.display="none";
+            }
         });
     }
 

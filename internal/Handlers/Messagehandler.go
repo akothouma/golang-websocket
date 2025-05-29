@@ -34,7 +34,6 @@ type BroadcastMessage struct {
 	Message models.Message
 }
 
-var incoming ClientMessage
 var (
 	Clients    = make(map[string]*websocket.Conn)
 	broadcast  = make(chan BroadcastMessage)
@@ -52,14 +51,14 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 	upgrader.CheckOrigin = func(r *http.Request) bool {
 		return true
 	}
-
+	
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		println("failed to establish connection", err)
 		return
 	}
 	// defer conn.Close()
-
+	
 	go dep.handleClientConnections(r, conn)
 
 	// 5. Start ChatBroadcastHandler (via sync.Once)
@@ -70,25 +69,29 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 
 func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocket.Conn) {
 	defer conn.Close()
-
+	
 	userID := r.Context().Value("user_uuid").(string)
 
 	ClientsMux.Lock()
 	Clients[userID] = conn
 	ClientsMux.Unlock()
 	fmt.Println(Clients)
+	
 
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
 			ClientsMux.Lock()
-			delete(Clients, userID)
-			conn.Close()
+			defer func(){
+				delete(Clients, userID)
+				conn.Close()
+			}()
 			ClientsMux.Unlock()
 			break
-
+			
 		}
-
+		
+		var incoming ClientMessage
 		err = json.Unmarshal(msg, &incoming)
 		if err != nil {
 			continue
@@ -98,15 +101,16 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 
 		switch messageType {
 		case "get_online_users":
-			dep.getConnectedUsers(conn)
+			dep.getConnectedUsers(conn,userID)
 			break // Won't create message for this instance now
 		case "chat_message":
 			// We only creating message for actual chat messages now
+			ClientsMux.Lock()
 			dep.handleMessageBroadcast(conn,userID,incoming.Payload)
+			ClientsMux.Unlock()
 		}
 	}
 }
-
 // This function starts the single, global broadcast handler for chat messages
 func (dep *Dependencies) StartChatBroadcastHandler() {
 	go func() {
@@ -125,20 +129,36 @@ func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
 	fmt.Println("broadcast", len(Clients))
-	ClientsMux.Lock()
+	
 	// Send to receiver
-	receiverConn, ok := Clients[msg.Message.Receiver]
-	if ok {
-		receiverConn.WriteJSON(msg.Message)
-	}
-	ClientsMux.Unlock()
+	receiverId:=msg.Message.Receiver
+	
+	receiverConn,ok:=Clients[receiverId]
+		if ok{
+			
+			receiverConn.WriteJSON(map[string]any{
+						"message":"send_private_message",
+						"value":msg.Message.Message,
+					})
+		}
+		
+	
+	// if ok {
+	// 	receiverConn.WriteJSON(map[string]any{
+	// 		"message":"send_private_message",
+	// 		"value":msg.Message.Message,
+	// 	})
+	// }
+	// fmt.Println(receiverConn)
 }
 
-func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn) {
+func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn,currentuser string) {
 	connectedUserList := []string{}
+	ClientsMux.Lock()
 	for userID := range Clients {
 		connectedUserList = append(connectedUserList, userID)
 	}
+	ClientsMux.Unlock();
 	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
 	if err != nil {
 		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
@@ -147,6 +167,7 @@ func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn) {
 	conn.WriteJSON(map[string]any{
 		"message": "connected_client_list",
 		"value":   allConnectedUsers,
+		"currentUser":currentuser,
 	})
 }
 
@@ -167,4 +188,5 @@ func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn,senderid strin
 	broadcast <- BroadcastMessage{
 		Message: mess,
 	}
+	
 }

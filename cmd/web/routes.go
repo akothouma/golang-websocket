@@ -29,7 +29,6 @@ func Routes() *http.ServeMux {
 		InfoLog:  infoLog,
 		Forum:    &models.ForumModel{DB: db},
 	}
-    go dep.BroadcastToClients();
 	mux := http.NewServeMux()
 
 	models.InitTemplates("./ui/html/")
