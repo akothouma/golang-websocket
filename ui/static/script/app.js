@@ -7,7 +7,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const chatViews={};
     let currentChatReceiver=null;//Track current chat receiver
+
+    //Initialize socket ONCE
    const socket=initSocket();
+
+    // Store socket reference globally so other components can use it
+    window.globalSocket = socket;
 
     socket.addEventListener("open", () => {
         const request = {
@@ -21,7 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("request sent succesfully");
 
     })
-    const { showConnections, renderedView,setCurrentReceiver } = Card();
+    const { showConnections, renderedView} = Card();
     const {AddMessage}=MessageCarriers();
 
     //store reference to AddMessage globally
@@ -44,12 +49,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 case "send_private_message":
                     console.log("Received private data",value,"from:",senderID)
                      // Only add message if we're currently chatting with this sender
-                    if (currentChatReceiver === senderID) {
-                        AddMessage(value, 'left', senderID);
-                    }
+                    if (currentChatReceiver === data.senderID) {
+                        AddMessage(data.value, 'left', senderID);
+                    }else {
+                    console.log(`Message from ${data.senderID} received, but not the current chat. Chatting with: ${currentChatReceiver}`);
+                }
                     break;
                 case "message_sent_confirmation":
-                      console.log("Message sent confirmation received");
+                     console.log("Message sent confirmation received for message to:", data.receiverID, "value:", data.value); // Access data.receiverID if needed
                     break;
                 default:
                     console.log("Unknown message type:", message);
@@ -57,7 +64,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         } catch (error) {
             console.error("WebSocket message handling error:", error);
-            return;
+            // return;
         }
     })
 
