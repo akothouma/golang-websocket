@@ -4,6 +4,9 @@ import { MessageCarriers } from '../messageComponents/messagesHistoryComponent/m
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const chatViews={};
+    let currentChatReceiver=null;//Track current chat receiver
    const socket=initSocket();
 
     socket.addEventListener("open", () => {
@@ -18,21 +21,38 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("request sent succesfully");
 
     })
-    const { showConnections, renderedView } = Card();
+    const { showConnections, renderedView,setCurrentReceiver } = Card();
     const {AddMessage}=MessageCarriers();
+
+    //store reference to AddMessage globally
+     window.addMessageToChat = AddMessage;
+
+        // Function to set current chat receiver
+    window.setCurrentChatReceiver = (receiverId) => {
+        currentChatReceiver = receiverId;
+        console.log("Current chat receiver set to:", receiverId);
+    };
     socket.addEventListener("message", (e) => {
         try {
             const data = JSON.parse(e.data);
             console.log("raw backend data",data);
-            const { message, value,currentUser} = data;
+            const { message, value,currentUser} = data;//Extract senderID
             switch (message) {
                 case "connected_client_list":
                     showConnections(value,currentUser);
                     break;
                 case "send_private_message":
-                    console.log("received private data",value)
-                    AddMessage(value,'right')
-                break;
+                    console.log("Received private data",value,"from:",senderID)
+                     // Only add message if we're currently chatting with this sender
+                    if (currentChatReceiver === senderID) {
+                        AddMessage(value, 'left', senderID);
+                    }
+                    break;
+                case "message_sent_confirmation":
+                      console.log("Message sent confirmation received");
+                    break;
+                default:
+                    console.log("Unknown message type:", message);
             }
 
         } catch (error) {
