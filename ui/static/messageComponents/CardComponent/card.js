@@ -107,8 +107,14 @@ function showPrivateMessages(receiverId, cardsView) {
         renderedView.appendChild(cardsView);
     });
 
-    const { chatContainer } = MessageCarriers();
+    const { chatContainer,AddMessage:AddMessageForThisChat } = MessageCarriers();
     chatContainer.id = receiverId;
+
+      // ---- NEW ----
+    // Update the global reference to point to the AddMessage of THIS new chat window
+    if (window.setGlobalAddMessageFunction) {
+        window.setGlobalAddMessageFunction(AddMessageForThisChat);
+    }
     
     // Set current chat receiver
     if (window.setCurrentChatReceiver) {

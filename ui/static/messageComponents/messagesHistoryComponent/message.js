@@ -83,10 +83,10 @@ messageInput.addEventListener('keydown',(e)=>{
                   content:message,
                }
             }
-             console.log("Sending message:", request);
+            // console.log("Sending message:", request);
             socket.send(JSON.stringify(request))
             //Add message to sender's view immediately
-            AddMessage(message, 'right');
+            AddMessage(message,'right');
 
             // Clear input after sending
             messageInput.value=''
