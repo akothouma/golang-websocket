@@ -31,16 +31,16 @@ func InitializeDB() (*sql.DB, error) {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 
-	CREATE TABLE IF NOT EXISTS messages(
-	messageID TEXT UNIQUE NOT NULL,
-	user_uuid TEXT UNIQUE NOT NULL,
-	messageText TEXT NOT NULL,
-	sender TEXT UNIQUE NOT NULL,
-	receiver TEXT UNIQUE NOT NULL,
-	isRead BOOL,
-	createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-	FOREIGN KEY (user_uuid) REFERENCES users(id)
-	);
+CREATE TABLE IF NOT EXISTS messages(
+    messageID TEXT PRIMARY KEY NOT NULL,
+    sender TEXT NOT NULL,
+    receiver TEXT NOT NULL,
+    messageText TEXT NOT NULL,
+    isRead BOOLEAN DEFAULT FALSE,
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender) REFERENCES users(id),
+    FOREIGN KEY (receiver) REFERENCES users(id)
+);
 		
 	CREATE TABLE IF NOT EXISTS sessions (
 		id TEXT PRIMARY KEY,

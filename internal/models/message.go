@@ -19,7 +19,7 @@ type Message struct {
 }
 
 func (m *Message) MessageToDatabase() error {
-	query := "INSERT INTO Message VALUES(?,?,?,?,?,?)"
+	query := "INSERT INTO messages VALUES(?,?,?,?,?,?,?)"
 	_, err := DB.Exec(query, m.ID, m.Sender, m.Receiver, m.Message, m.IsRead, m.CreatedAt)
 	if err != nil {
 		return fmt.Errorf("couldn't add message to database")
@@ -28,7 +28,7 @@ func (m *Message) MessageToDatabase() error {
 }
 
 func (m *Message) MessageHistory(user1, user2 uuid.UUID) ([]Message, error) {
-	query := `SELECT * FROM Messages 
+	query := `SELECT * FROM messages 
 	WHERE (sender=? AND receiver=?)
 	OR(sender=? AND receiver=?)
 	ORDER BY timestamp ASC
