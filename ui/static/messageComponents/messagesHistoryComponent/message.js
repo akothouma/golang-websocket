@@ -56,15 +56,18 @@
     chatContainer.append(chat, messageInput);
 
 
-   const socket=initSocket();
-   messageInput.addEventListener('keydown',(e)=>{
-      if (e.key=="Enter"){
+//    const socket=initSocket();
+messageInput.addEventListener('keydown',(e)=>{
+    if (e.key=="Enter"){
         e.preventDefault();
         const message=e.target.value.trim();
         if (!message){
             console.log("Empty message, not sending");
             return;
         } 
+
+         // Use the global socket instead of creating a new one
+        const socket=window.globalSocket;
             
          if (socket && socket.readyState==WebSocket.OPEN){
             const receiverId=chatContainer.id;
