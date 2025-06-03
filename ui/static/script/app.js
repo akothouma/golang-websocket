@@ -4,6 +4,17 @@ import { MessageCarriers } from '../messageComponents/messagesHistoryComponent/m
 
 
 document.addEventListener('DOMContentLoaded', () => {
+    let activeAddMessageFunction=null;
+
+     // Holds the AddMessage for the current chat
+    // Don't get AddMessage from MessageCarriers() here directly for the global var initially,
+    // as it won't be the one for the displayed chat window
+
+      // ---- NEW ----
+    window.setGlobalAddMessageFunction = (newAddMessageFunc) => {
+        activeAddMessageFunction = newAddMessageFunc;
+        console.log("Global AddMessage function updated.");
+    };
 
     const chatViews={};
     let currentChatReceiver=null;//Track current chat receiver
@@ -36,34 +47,49 @@ document.addEventListener('DOMContentLoaded', () => {
     window.setCurrentChatReceiver = (receiverId) => {
         currentChatReceiver = receiverId;
         console.log("Current chat receiver set to:", receiverId);
+         if (!receiverId) { // When going back, no chat is active
+            activeAddMessageFunction = null;
+            console.log("Global AddMessage function cleared (no active chat).");
+        }
     };
     socket.addEventListener("message", (e) => {
         try {
             const data = JSON.parse(e.data);
             console.log("raw backend data",data);
-            const { message, value,currentUser} = data;//Extract senderID
+                 // IMPORTANT: 'currentUser' is only relevant for "connected_client_list" from data
+        // 'senderID' is relevant for "send_private_message" from data
+        // 'receiverID' is relevant for "message_sent_confirmation" from data
+            //Destructure only whats common 
+            const { message, value} = data;//Extract senderID
             switch (message) {
                 case "connected_client_list":
-                    showConnections(value,currentUser);
+                     // 'currentUser' comes from data in this specific message type
+                    showConnections(value, data.currentUser);//Accesing it directly
                     break;
                 case "send_private_message":
-                    console.log("Received private data",value,"from:",senderID)
+                     // Access data.senderID directly for this message type
+                    console.log("Received private data",data.value,"from sender:",data.senderID)
                      // Only add message if we're currently chatting with this sender
                     if (currentChatReceiver === data.senderID) {
-                        AddMessage(data.value, 'left', senderID);
+                          if (activeAddMessageFunction) {
+                            activeAddMessageFunction(data.value, 'left', data.senderID);
+                        } else {
+                            console.error("No active AddMessage function to display received message!");
+                        }
                     }else {
                     console.log(`Message from ${data.senderID} received, but not the current chat. Chatting with: ${currentChatReceiver}`);
                 }
                     break;
                 case "message_sent_confirmation":
-                     console.log("Message sent confirmation received for message to:", data.receiverID, "value:", data.value); // Access data.receiverID if needed
+                      // Access data.receiverID directly for this message type
+                     console.log("Message sent confirmation received for message to:", data.receiverID, "value:", data.value); 
                     break;
                 default:
-                    console.log("Unknown message type:", message);
+                    console.log("Unknown message type:", message,"Full data:",data);
             }
 
         } catch (error) {
-            console.error("WebSocket message handling error:", error);
+            console.error("WebSocket message handling error:", error,"Raw data was:",e.data);
             // return;
         }
     })
