@@ -213,18 +213,21 @@ func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn, senderid stri
 		IsRead:    false,
 		CreatedAt: time.Now(),
 	}
-	
-	err := mess.MessageToDatabase()
-	if err != nil {
-		log.Printf("Database error: %v", err)
-		c.WriteJSON(ErrorObject{Error: "Failed to save message. Please try again."})
-		return
-	}
-	
-	log.Printf("Message saved to database: %s -> %s: '%s'", senderid, p.ReceiverID, p.Content)
-	
+	// Send to broadcast channel FIRST, or make sure it's always sent.
+	log.Printf("Queueing message for broadcast (ID: %s): %s -> %s: '%s'", mess.ID, senderid, p.ReceiverID, p.Content)
 	// Send to broadcast channel
 	broadcast <- BroadcastMessage{
 		Message: mess,
 	}
+	// err := mess.MessageToDatabase()
+	// if err != nil {
+	// 	log.Printf("Database error details: %v", err)
+	// 	c.WriteJSON(ErrorObject{Error: "Failed to save message. Please try again."})
+	// 	return
+	// }else{
+
+	// 	log.Printf("Message saved to database: %s -> %s: '%s'", senderid, p.ReceiverID, p.Content)
+		
+	// }
+	
 }
