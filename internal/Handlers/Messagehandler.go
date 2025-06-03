@@ -127,23 +127,24 @@ func (dep *Dependencies) StartChatBroadcastHandler() {
 		}
 	}()
 }
-
 func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
-	
+
 	log.Printf("Broadcasting to %d connected clients", len(Clients))
-	
+
 	// Send to receiver
 	receiverId := msg.Message.Receiver
-	senderID := msg.Message.Sender
-	
+	senderID := msg.Message.Sender // This is the ORIGINAL sender of the message
+
+	log.Println("Receiver ID:",receiverId) // Your debug log
+
 	// Send to receiver
 	if receiverConn, ok := Clients[receiverId]; ok {
 		err := receiverConn.WriteJSON(map[string]any{
 			"message":  "send_private_message",
 			"value":    msg.Message.Message,
-			"senderID": senderID,
+			"senderID": senderID, // Correct: payload contains the ORIGINAL sender's ID
 		})
 		if err != nil {
 			log.Printf("Error sending to receiver %s: %v", receiverId, err)
@@ -154,21 +155,26 @@ func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	} else {
 		log.Printf("Receiver %s not found in connected clients", receiverId)
 	}
-	
+
 	// Send confirmation back to sender
-	if senderConn, ok := Clients[senderID]; ok {
+	if senderConn, ok := Clients[senderID]; ok { // Check ORIGINAL sender
 		err := senderConn.WriteJSON(map[string]any{
 			"message":    "message_sent_confirmation",
 			"value":      msg.Message.Message,
-			"receiverID": receiverId,
+			"receiverID": receiverId, // Correct: confirmation includes who it was sent TO
 		})
 		if err != nil {
 			log.Printf("Error sending confirmation to sender %s: %v", senderID, err)
 			delete(Clients, senderID)
 		}
-	}
+        // It would be good to have an 'else' log here for successful confirmation sending too:
+        // else {
+		//	  log.Printf("Message confirmation sent to original sender %s", senderID)
+		// }
+	} else {
+        log.Printf("Original sender %s for confirmation not found in connected clients", senderID)
+    }
 }
-
 func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, currentuser string) {
 	connectedUserList := []string{}
 	ClientsMux.Lock()
