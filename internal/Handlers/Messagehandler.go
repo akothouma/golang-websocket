@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"sync"
@@ -57,11 +56,10 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 		println("failed to establish connection", err)
 		return
 	}
-	// defer conn.Close()
 	
 	go dep.handleClientConnections(r, conn)
 
-	// 5. Start ChatBroadcastHandler (via sync.Once)
+	// Start ChatBroadcastHandler (via sync.Once)
 	chatBroadcastOnce.Do(func() {
 		dep.StartChatBroadcastHandler()
 	})
@@ -71,54 +69,59 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 	defer conn.Close()
 	
 	userID := r.Context().Value("user_uuid").(string)
+	log.Printf("New WebSocket connection established for user: %s", userID)
 
 	ClientsMux.Lock()
 	Clients[userID] = conn
 	ClientsMux.Unlock()
-	fmt.Println(Clients)
+	log.Printf("Connected clients count: %d", len(Clients))
 	
 
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
+			log.Printf("WebSocket read error for user %s: %v", userID, err)
 			ClientsMux.Lock()
-			defer func(){
-				delete(Clients, userID)
-				conn.Close()
-			}()
+			delete(Clients, userID)
 			ClientsMux.Unlock()
+			log.Printf("User %s disconnected. Remaining clients: %d", userID, len(Clients))
 			break
-			
 		}
+		
+		log.Printf("Raw message received from user %s: %s", userID, string(msg))
 		
 		var incoming ClientMessage
 		err = json.Unmarshal(msg, &incoming)
 		if err != nil {
+			log.Printf("JSON unmarshal error from user %s: %v. Raw message: %s", userID, err, string(msg))
 			continue
 		}
-		fmt.Println(incoming)
+		
+		log.Printf("Parsed message from user %s: Event='%s', MessageType='%s', ReceiverID='%s', Content='%s'", 
+			userID, incoming.Event, incoming.Payload.Msg, incoming.Payload.ReceiverID, incoming.Payload.Content)
+		
 		messageType := incoming.Payload.Msg
 
 		switch messageType {
 		case "get_online_users":
-			dep.getConnectedUsers(conn,userID)
-			break // Won't create message for this instance now
+			log.Printf("Processing get_online_users request from user %s", userID)
+			dep.getConnectedUsers(conn, userID)
 		case "chat_message":
-			// We only creating message for actual chat messages now
-			ClientsMux.Lock()
-			dep.handleMessageBroadcast(conn,userID,incoming.Payload)
-			ClientsMux.Unlock()
+			log.Printf("Processing chat_message from user %s to user %s", userID, incoming.Payload.ReceiverID)
+			dep.handleMessageBroadcast(conn, userID, incoming.Payload)
+		default:
+			log.Printf("Unknown message type '%s' from user %s", messageType, userID)
 		}
 	}
 }
-// This function starts the single, global broadcast handler for chat messages
+
 func (dep *Dependencies) StartChatBroadcastHandler() {
 	go func() {
 		log.Println(">>> Global broadcast listener goroutine STARTED. Listening on broadcast channel. <<<")
 		for {
 			select {
 			case msg := <-broadcast:
-				log.Printf(">>> Broadcast listener: Received message ID %s from broadcast channel for sender %s to receiver %s. <<<", msg.Message.ID, msg.Message.Sender, msg.Message.Receiver)
+				log.Printf(">>> Broadcasting message ID %s from %s to %s <<<", msg.Message.ID, msg.Message.Sender, msg.Message.Receiver)
 				dep.broadcastToClients(msg)
 			}
 		}
@@ -128,50 +131,80 @@ func (dep *Dependencies) StartChatBroadcastHandler() {
 func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
-	fmt.Println("broadcast", len(Clients))
+	
+	log.Printf("Broadcasting to %d connected clients", len(Clients))
 	
 	// Send to receiver
-	receiverId:=msg.Message.Receiver
+	receiverId := msg.Message.Receiver
+	senderID := msg.Message.Sender
 	
-	receiverConn,ok:=Clients[receiverId]
-		if ok{
-			
-			receiverConn.WriteJSON(map[string]any{
-						"message":"send_private_message",
-						"value":msg.Message.Message,
-					})
+	// Send to receiver
+	if receiverConn, ok := Clients[receiverId]; ok {
+		err := receiverConn.WriteJSON(map[string]any{
+			"message":  "send_private_message",
+			"value":    msg.Message.Message,
+			"senderID": senderID,
+		})
+		if err != nil {
+			log.Printf("Error sending to receiver %s: %v", receiverId, err)
+			delete(Clients, receiverId)
+		} else {
+			log.Printf("Message sent to receiver %s", receiverId)
 		}
-		
+	} else {
+		log.Printf("Receiver %s not found in connected clients", receiverId)
+	}
 	
-	// if ok {
-	// 	receiverConn.WriteJSON(map[string]any{
-	// 		"message":"send_private_message",
-	// 		"value":msg.Message.Message,
-	// 	})
-	// }
-	// fmt.Println(receiverConn)
+	// Send confirmation back to sender
+	if senderConn, ok := Clients[senderID]; ok {
+		err := senderConn.WriteJSON(map[string]any{
+			"message":    "message_sent_confirmation",
+			"value":      msg.Message.Message,
+			"receiverID": receiverId,
+		})
+		if err != nil {
+			log.Printf("Error sending confirmation to sender %s: %v", senderID, err)
+			delete(Clients, senderID)
+		}
+	}
 }
 
-func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn,currentuser string) {
+func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, currentuser string) {
 	connectedUserList := []string{}
 	ClientsMux.Lock()
 	for userID := range Clients {
 		connectedUserList = append(connectedUserList, userID)
 	}
-	ClientsMux.Unlock();
+	ClientsMux.Unlock()
+	
 	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
 	if err != nil {
 		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
 		return
 	}
+	
 	conn.WriteJSON(map[string]any{
-		"message": "connected_client_list",
-		"value":   allConnectedUsers,
-		"currentUser":currentuser,
+		"message":     "connected_client_list",
+		"value":       allConnectedUsers,
+		"currentUser": currentuser,
 	})
 }
 
-func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn,senderid string,p Payload) {
+func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn, senderid string, p Payload) {
+	log.Printf("Handling message broadcast - Sender: %s, Receiver: %s, Content: '%s'", senderid, p.ReceiverID, p.Content)
+	
+	if p.ReceiverID == "" {
+		log.Printf("Error: Missing receiver ID")
+		c.WriteJSON(ErrorObject{Error: "Invalid message: missing receiver"})
+		return
+	}
+	
+	if p.Content == "" {
+		log.Printf("Error: Missing message content")
+		c.WriteJSON(ErrorObject{Error: "Invalid message: missing content"})
+		return
+	}
+	
 	mess := models.Message{
 		ID:        uuid.New(),
 		Sender:    senderid,
@@ -180,13 +213,18 @@ func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn,senderid strin
 		IsRead:    false,
 		CreatedAt: time.Now(),
 	}
-	err:= mess.MessageToDatabase();
-	if err!=nil{
-      c.WriteJSON(ErrorObject{Error:"oops,something went wrong.Please resend message"})
+	
+	err := mess.MessageToDatabase()
+	if err != nil {
+		log.Printf("Database error: %v", err)
+		c.WriteJSON(ErrorObject{Error: "Failed to save message. Please try again."})
+		return
 	}
+	
+	log.Printf("Message saved to database: %s -> %s: '%s'", senderid, p.ReceiverID, p.Content)
+	
 	// Send to broadcast channel
 	broadcast <- BroadcastMessage{
 		Message: mess,
 	}
-	
 }
