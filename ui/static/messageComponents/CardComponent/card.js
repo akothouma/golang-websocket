@@ -79,8 +79,21 @@ export const Card = () => {
         showConnections
     };
 };
-
 function showPrivateMessages(receiverId, cardsView) {
+    
+    const request={
+        event:"frontend request",
+        payload:{
+            "messageType":"get_message_history",
+            "receiverID":receiverId,
+        }
+    }
+    const socket=window.globalSocket;
+    if (socket && socket.readyState == WebSocket.OPEN){
+        socket.send(JSON.stringify(request))
+    }else{
+        console.log("failed to send request for message history")
+    }
     console.log("Opening private messages with receiver ID:", receiverId);
     
     const renderedView = cardsView.parentNode;
