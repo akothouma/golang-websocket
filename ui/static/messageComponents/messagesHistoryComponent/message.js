@@ -13,7 +13,7 @@
     chat.style.marginBottom = '10px';
 
      function AddMessage(mess,side='left',senderId=null){
-          const msg = document.createElement('p');
+        const msg = document.createElement('p');
         msg.style.fontSize = '12px';
         msg.style.margin = '5px 0';
         msg.style.padding = '8px 12px';
@@ -41,7 +41,7 @@
         // Auto-scroll to bottom
         chat.scrollTop = chat.scrollHeight;
         
-        console.log(`Message added: ${mess} (side: ${side})`);
+        //console.log(`Message added: ${mess} (side: ${side})`);
         
     }
       const messageInput = document.createElement('input');
