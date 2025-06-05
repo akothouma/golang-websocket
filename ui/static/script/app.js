@@ -86,30 +86,41 @@ document.addEventListener('DOMContentLoaded', () => {
                     break;
 
                 case "message_history":
-                    console.log(data)
-                    break
+                    if (activeAddMessageFunction) {
+                        value.forEach((onemessage) => {
+                                if (onemessage.sender== currentChatReceiver) {
+                                    activeAddMessageFunction(onemessage.message,'right')
+                                }
+                                else {
+                                    activeAddMessageFunction(onemessage.message)
+                                }
+                            })
+                    } else {
+                        console.log("couldn't add message history")
+                    }
+            break;
                 default:
-                    console.log("Unknown message type:", message, "Full data:", data);
-            }
+            console.log("Unknown message type:", message, "Full data:", data);
+        }
 
         } catch (error) {
-            console.error("WebSocket message handling error:", error, "Raw data was:", e.data);
-            // return;
-        }
-    })
+        console.error("WebSocket message handling error:", error, "Raw data was:", e.data);
+        // return;
+    }
+})
 
 
-    const root = document.getElementById("message_layout");
-    root.style.height = '100px';
-    root.style.display = 'flex';
-    root.style.flexDirection = 'column';
-    root.style.background = 'var(--color-white)';
-    root.style.padding = 'var(--card-padding)';
-    root.style.borderRadius = 'var(--card-border-radius)';
-    root.style.fontSize = '1.4rem';
-    root.style.height = 'max-content';
+const root = document.getElementById("message_layout");
+root.style.height = '100px';
+root.style.display = 'flex';
+root.style.flexDirection = 'column';
+root.style.background = 'var(--color-white)';
+root.style.padding = 'var(--card-padding)';
+root.style.borderRadius = 'var(--card-border-radius)';
+root.style.fontSize = '1.4rem';
+root.style.height = 'max-content';
 
-    root.appendChild(renderedView);
+root.appendChild(renderedView);
 
     // const { AddMessage } = MessageCarriers();
 
