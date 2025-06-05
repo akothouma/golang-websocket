@@ -104,7 +104,7 @@ input[type="file"] {
 
 /* GENERAL STYLES */
 .container{
-    width: 80%;
+    width: 90%;
     margin: 0 auto;
 }
 
@@ -446,7 +446,7 @@ input[type="text"]{
 main .container .right{
     margin-top: 1rem;
     height: max-content;  
-    width: 20vw;
+    width: 30vw;
 }
 
 .interaction-buttons{
