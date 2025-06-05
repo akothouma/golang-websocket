@@ -11,7 +11,7 @@ export const Card = () => {
     
     const cardContainer = document.createElement("div");
     const messageContainer = document.createElement('div');
-    messageContainer.width='fit-content'
+    // messageContainer.width='fit-content'
     messageContainer.classList.add('message_container');
     messageContainer.style.display="none";
     cardContainer.style.display = 'flex';
@@ -84,6 +84,7 @@ export const Card = () => {
                 messageContainer.style.width='80%'
                 lastMessage.style.display="none"
                 userInfo.style.display="none"
+                
                 showPrivateMessages(oneConnection.UserID, cardContainer,lastMessage,userInfo);
             });
             
@@ -97,6 +98,7 @@ export const Card = () => {
     };
 };
 function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) {
+
     
     const request={
         event:"frontend request",
@@ -114,6 +116,7 @@ function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) 
     console.log("Opening private messages with receiver ID:", receiverId);
     
     const messageContainer = document.querySelector('.message_container');
+    messageContainer.innerHTML=''
     messageContainer.id = `${receiverId}`;
     
     const backButton = document.createElement('button');
