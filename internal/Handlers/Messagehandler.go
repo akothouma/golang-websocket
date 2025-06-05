@@ -13,6 +13,12 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
+type UserWithStatus struct{
+	UserID string `json:"userid"`
+	Username string `json:"username"`
+	IsOnline bool `json:"isOnline"`
+}
+
 type ClientMessage struct {
 	Event   string  `json:"event"`
 	Payload Payload `json:"payload"`
@@ -58,7 +64,18 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	go dep.handleClientConnections(r, conn)
+	//Pass the userID from context setup by middleware
+	userIDFromContext := r.Context().Value("user_uuid")
+	if userIDFromContext==nil{
+		log.Println("Error: user_uuid not found in context for WebSocket connection")
+		conn.Close()
+		return
+
+	}
+	userID:=userIDFromContext.(string)
+
+
+	go dep.handleClientConnections(userID, conn)
 
 	// Start ChatBroadcastHandler (via sync.Once)
 	chatBroadcastOnce.Do(func() {
@@ -66,17 +83,28 @@ func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocket.Conn) {
-	defer conn.Close()
 
-	userID := r.Context().Value("user_uuid").(string)
+//pass user id as arg now
+func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.Conn) {
+	defer func() {
+		ClientsMux.Lock()
+		delete(Clients, userID)
+		ClientsMux.Unlock()
+		log.Printf("User %s disconnected. Remaining clients: %d", userID, len(Clients))
+		dep.broadcastUserStatusUpdate(userID, false) // Broadcast offline status to others
+		conn.Close()
+	}()
+
 	log.Printf("New WebSocket connection established for user: %s", userID)
 
 	ClientsMux.Lock()
 	Clients[userID] = conn
 	ClientsMux.Unlock()
 	log.Printf("Connected clients count: %d", len(Clients))
+	//Broadcast to other connected clients that this user is now online
+	// The newly connected user will request the full list themselves.
 
+	dep.broadcastUserStatusUpdate(userID, true)
 	for {
 		_, msg, err := conn.ReadMessage()
 		if err != nil {
@@ -103,9 +131,10 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 		messageType := incoming.Payload.Msg
 
 		switch messageType {
-		case "get_online_users":
-			log.Printf("Processing get_online_users request from user %s", userID)
-			dep.getConnectedUsers(conn, userID)
+			//Client requests the full list of users with status
+		case "get_user_list":
+			log.Printf("Processing get_user_list request from user %s", userID)
+			dep.sendFullUserList(conn, userID)
 		case "chat_message":
 			log.Printf("Processing chat_message from user %s to user %s", userID, incoming.Payload.ReceiverID)
 			dep.handleMessageBroadcast(conn, userID, incoming.Payload)
@@ -116,6 +145,70 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 		}
 	}
 }
+
+//New function to send the full list of users with their online status
+func (dep *Dependencies) sendFullUserList(conn *websocket.Conn, currentUserID string) {
+	allDBUsers, err := dep.Forum.GetAllUsers() // Assuming this returns []models.User
+	if err != nil {
+		log.Printf("Error getting all users from database: %v", err)
+		conn.WriteJSON(ErrorObject{Error: "Failed to retrieve user list"})
+		return
+	}
+
+	usersWithStatus := []UserWithStatus{}
+	ClientsMux.Lock() // Lock before accessing Clients map
+	for _, dbUser := range allDBUsers {
+		var dbUserIDStr string=dbUser.UserID
+		_, isOnline := Clients[dbUserIDStr]
+		usersWithStatus = append(usersWithStatus, UserWithStatus{
+			UserID:   dbUserIDStr,
+			Username: dbUser.Username,
+			IsOnline: isOnline,
+		})
+	}
+	ClientsMux.Unlock() // Unlock after accessing Clients map
+
+	err = conn.WriteJSON(map[string]interface{}{
+		"message":     "user_list_full", // New message type for the client
+		"value":       usersWithStatus,
+		"currentUser": currentUserID, // Send back the ID of the user making the request
+	})
+	if err != nil {
+		log.Printf("Error sending full user list to %s: %v", currentUserID, err)
+	} else {
+		log.Printf("Sent full user list to %s. Count: %d", currentUserID, len(usersWithStatus))
+	}
+}
+
+//New function to broadcast user online/offline status updates
+func (dep *Dependencies) broadcastUserStatusUpdate(changedUserID string, isOnline bool) {
+	ClientsMux.Lock()
+	defer ClientsMux.Unlock()
+
+	message := map[string]interface{}{
+		"message": "user_status_update", // New message type for client
+		"payload": map[string]interface{}{
+			"userID":   changedUserID,
+			"isOnline": isOnline,
+		},
+	}
+
+	log.Printf("Broadcasting status update for user %s: isOnline=%t. Total clients: %d", changedUserID, isOnline, len(Clients))
+
+	for userID, clientConn := range Clients {
+		if userID == changedUserID && isOnline {
+			log.Printf("Skipping broadcastUserStatusUpdate to self: %s", userID)
+			continue
+		}
+
+		if err := clientConn.WriteJSON(message); err != nil {
+			log.Printf("Error broadcasting status update to user %s for %s: %v", userID, changedUserID, err)
+		} else {
+			log.Printf("Successfully broadcasted status update for %s to %s", changedUserID, userID)
+		}
+	}
+}
+
 
 func (dep *Dependencies) StartChatBroadcastHandler() {
 	go func() {
@@ -179,26 +272,26 @@ func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
 	}
 }
 
-func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, currentuser string) {
-	connectedUserList := []string{}
-	ClientsMux.Lock()
-	for userID := range Clients {
-		connectedUserList = append(connectedUserList, userID)
-	}
-	ClientsMux.Unlock()
+// func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, currentuser string) {
+// 	connectedUserList := []string{}
+// 	ClientsMux.Lock()
+// 	for userID := range Clients {
+// 		connectedUserList = append(connectedUserList, userID)
+// 	}
+// 	ClientsMux.Unlock()
 
-	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
-	if err != nil {
-		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
-		return
-	}
+// 	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
+// 	if err != nil {
+// 		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
+// 		return
+// 	}
 
-	conn.WriteJSON(map[string]any{
-		"message":     "connected_client_list",
-		"value":       allConnectedUsers,
-		"currentUser": currentuser,
-	})
-}
+// 	conn.WriteJSON(map[string]any{
+// 		"message":     "connected_client_list",
+// 		"value":       allConnectedUsers,
+// 		"currentUser": currentuser,
+// 	})
+// }
 
 func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn, senderid string, p Payload) {
 	log.Printf("Handling message broadcast - Sender: %s, Receiver: %s, Content: '%s'", senderid, p.ReceiverID, p.Content)
@@ -249,17 +342,18 @@ func (dep *Dependencies) GetMessageHistory(conn *websocket.Conn, receiver, sende
 		"message":    "message_history",
 		"value":      prevMess,
 		"receiverID": receiver,
+		"senderID":sender,
 	})
 }
 
-func (dep *Dependencies) GetAllUsers(conn *websocket.Conn) {
-	allUsers, err := dep.Forum.GetAllUsers()
-	if err != nil {
-		fmt.Println("Error getting all users", err)
-		return
-	}
-	conn.WriteJSON(map[string]any{
-		"message": "all_users",
-		"value":   allUsers,
-	})
-}
+// func (dep *Dependencies) GetAllUsers(conn *websocket.Conn) {
+// 	allUsers, err := dep.Forum.GetAllUsers()
+// 	if err != nil {
+// 		fmt.Println("Error getting all users", err)
+// 		return
+// 	}
+// 	conn.WriteJSON(map[string]any{
+// 		"message": "all_users",
+// 		"value":   allUsers,
+// 	})
+// }
