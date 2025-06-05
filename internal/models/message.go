@@ -18,33 +18,33 @@ type Message struct {
 	CreatedAt time.Time `json:"timestamp"`
 }
 
-func (m *Message) MessageToDatabase() error {
-	query := "INSERT INTO Message VALUES(?,?,?,?,?,?)"
+func MessageToDatabase(m *Message) error {
+	query := "INSERT INTO messages VALUES(?,?,?,?,?,?)"
 	_, err := DB.Exec(query, m.ID, m.Sender, m.Receiver, m.Message, m.IsRead, m.CreatedAt)
 	if err != nil {
-		return fmt.Errorf("couldn't add message to database")
+		return fmt.Errorf("couldn't add message to database %s",err)
 	}
 	return nil
 }
 
-func (m *Message) MessageHistory(user1, user2 uuid.UUID) ([]Message, error) {
-	query := `SELECT * FROM Messages 
+func MessageHistory(user1, user2 string) ([]Message, error) {
+	fmt.Println("The users",user1,user2);
+	query := `SELECT * FROM messages 
 	WHERE (sender=? AND receiver=?)
 	OR(sender=? AND receiver=?)
-	ORDER BY timestamp ASC
-	LIMIT 10 OFFSET 0`
-
+	ORDER BY CreatedAt ASC`
+	
 	messageRows, err := DB.Query(query, user1, user2, user2, user1)
 	if err != nil {
-		if err != sql.ErrNoRows {
+		if err == sql.ErrNoRows {
 			return nil, fmt.Errorf("no messages shared yet")
 		}
-		return nil, fmt.Errorf("Database Issue")
+		return nil, fmt.Errorf("Database Issue %s",err)
 	}
 	var messages []Message
 	for messageRows.Next() {
 		var msg Message
-		err := messageRows.Scan(&msg.ID, &msg.Sender, &msg.Receiver, &msg.Message, &msg.IsRead, msg.CreatedAt)
+		err := messageRows.Scan(&msg.ID, &msg.Sender, &msg.Receiver, &msg.Message, &msg.IsRead, &msg.CreatedAt)
 		if err != nil {
 			return nil, fmt.Errorf("Database issue", err)
 		}

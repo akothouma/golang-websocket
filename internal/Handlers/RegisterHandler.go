@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"html/template"
 	"log"
@@ -29,6 +30,7 @@ type Dependencies struct {
 	InfoLog   *log.Logger
 	Forum     *models.ForumModel
 	Templates *template.Template
+	db        *sql.DB
 }
 
 func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request) {

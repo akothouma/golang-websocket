@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -17,8 +18,6 @@ func main() {
 	}
 	log.Println("Current working directory:", cwd)
 
-	
-	
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t",
 		log.Ldate|log.Ltime|log.Lshortfile)
@@ -31,6 +30,7 @@ func main() {
 	}
 
 	infoLog.Printf("Starting server on port %v:", *addr)
+	fmt.Println("server started")
 	err = serv.ListenAndServe()
 	errorLog.Fatal(err)
 }
