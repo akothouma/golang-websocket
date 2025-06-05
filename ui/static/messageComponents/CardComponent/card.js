@@ -85,7 +85,7 @@ export const Card = () => {
                 lastMessage.style.display="none"
                 userInfo.style.display="none"
                 
-                showPrivateMessages(oneConnection.UserID, cardContainer,lastMessage,userInfo);
+                showPrivateMessages(oneConnection.UserID, cardContainer,lastMessage,userInfo,oneConnection.Username);
             });
             
             cardContainer.appendChild(onecard);
@@ -97,7 +97,7 @@ export const Card = () => {
         showConnections
     };
 };
-function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) {
+function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata,username) {
 
     
     const request={
@@ -119,6 +119,11 @@ function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) 
     messageContainer.innerHTML=''
     messageContainer.id = `${receiverId}`;
     
+   
+    const usernameDisplay=document.createElement('p')
+    usernameDisplay.innerHTML=username
+    usernameDisplay.style.fontSize='14px'
+
     const backButton = document.createElement('button');
     backButton.textContent = "← Back";
     backButton.style.padding = '10px 15px';
@@ -155,6 +160,6 @@ function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) 
         window.setCurrentChatReceiver(receiverId);
     }
     
-    messageContainer.append(backButton, chatContainer);
+    messageContainer.append(backButton, usernameDisplay,chatContainer);
  
 }

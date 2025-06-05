@@ -8,6 +8,18 @@
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.6/css/unicons.css">
 </head>
 <body>
+    <div class="login hidden">
+      <form id="loginForm" action="/login" method="POST">
+        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+        <div class="overall">
+        <h1>Login</h1>
+        <p id="error-message">Enter valid credentials to login</p>
+        <div class="passButton">
+        <input type="email" id="email" name="email" placeholder="Enter email or username....check that it works before submission"><br><br>
+        <input type="password" id="password" name="password" required placeholder="password"><br><br>
+        <button type="submit">Login</button>
+        <p>Don't have an account? <a href="/register">Register here</a>.</p>
+    </div>
 
   <!--========================== NAV BAR ==========================-->
     <nav>
@@ -28,8 +40,8 @@
                 {{if .UserName}}
                 <a href="/logout" class="btn btn-primary" >Logout</a>                
                 {{else}}
-                <a href="/login" class="btn btn-primary" >Login</a>
-                <a href="/register" class="btn btn-primary" >Register</a>
+                <button class="btn btn-primary" id="loginButton" >Login</button>
+                <button class="btn btn-primary" id="RegisterButton" >Register</button>
                 {{end}}
             </div>
             <i class="uil uil-clipboard-alt mobRight"></i>            
@@ -162,6 +174,7 @@
 
             <!--====================== MIDDLE ======================-->
       <div class="middle">      
+        
 
         
 

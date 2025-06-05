@@ -49,6 +49,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
+document.getElementById('loginButton').addEventListener('click',(e)=>{
+
+})
 
 // Handle post creation form submission
 document.getElementById('createPostForm').addEventListener('submit', async (e) => {
