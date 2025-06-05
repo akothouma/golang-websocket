@@ -117,3 +117,36 @@ func (f *ForumModel) GetAllConnectedUsers(usersID []string) ([]User, error) {
 	}
 	return users, nil
 }
+
+
+func (f *ForumModel) GetAllUsers() ([]User, error) {
+	var users []User
+
+	query := "SELECT user_uuid, username, profile_picture FROM users"
+
+	rows, err := f.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error querying users: %v", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var u User
+		var profilepic []byte
+
+		err := rows.Scan(&u.UserID, &u.Username, &profilepic)
+		if err != nil {
+			return nil, fmt.Errorf("error scanning user row: %v", err)
+		}
+
+		u.ProfilePicture = MediaToBase64(profilepic)
+		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %v", err)
+	}
+
+	return users, nil
+}
+
