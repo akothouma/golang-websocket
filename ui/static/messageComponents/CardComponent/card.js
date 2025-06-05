@@ -5,13 +5,20 @@ export const Card = () => {
     const renderedView = document.createElement("div");
     renderedView.style.height = 'fit-content';
     renderedView.style.overflow = 'hidden';
+    renderedView.style.display='flex';
+    renderedView.style.flexDirection='row';
+    renderedView.style.gap='5px';
     
     const cardContainer = document.createElement("div");
+    const messageContainer = document.createElement('div');
+    messageContainer.width='fit-content'
+    messageContainer.classList.add('message_container');
+    messageContainer.style.display="none";
     cardContainer.style.display = 'flex';
     cardContainer.style.flexDirection = 'column';
     cardContainer.style.alignContent = 'space-between';
     cardContainer.style.gap = '15px';
-    renderedView.appendChild(cardContainer);
+    renderedView.append(cardContainer,messageContainer);
 
     function showConnections(data, myID) {
         console.log("From card:", data, myID);
@@ -44,17 +51,22 @@ export const Card = () => {
             displayContainer.style.gap = '10px';
             
             const imageside = document.createElement('div');
-            imageside.appendChild(Image());
-            
-            const userInfo = document.createElement('div');
-            const username = document.createElement('h4');
+            imageside.style.display="flex"
+            imageside.style.flexDirection='column'
+            const username = document.createElement('p');
+            username.style.fontSize = '8px';
             username.textContent = oneConnection.Username;
             username.style.margin = '0';
+            imageside.appendChild(Image(),username);
+            
+            const userInfo = document.createElement('div');
+            userInfo.style.width='fit-content'
             
             const lastMessageSide = document.createElement('div');
             const lastMessage = document.createElement('p');
+            lastMessage.style.width='inherit'
             lastMessage.textContent = oneConnection.messageContent || 'No messages yet';
-            lastMessage.style.fontSize = '12px';
+            lastMessage.style.fontSize = '8px';
             lastMessage.style.color = '#666';
             lastMessage.style.margin = '5px 0 0 0';
             
@@ -67,7 +79,12 @@ export const Card = () => {
             
             onecard.addEventListener("click", () => {
                 console.log("Opening chat with:", oneConnection.Username, "ID:", oneConnection.UserID);
-                showPrivateMessages(oneConnection.UserID, cardContainer);
+                cardContainer.style.width='20%'
+                messageContainer.style.display="block"
+                messageContainer.style.width='80%'
+                lastMessage.style.display="none"
+                userInfo.style.display="none"
+                showPrivateMessages(oneConnection.UserID, cardContainer,lastMessage,userInfo);
             });
             
             cardContainer.appendChild(onecard);
@@ -79,7 +96,7 @@ export const Card = () => {
         showConnections
     };
 };
-function showPrivateMessages(receiverId, cardsView) {
+function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata) {
     
     const request={
         event:"frontend request",
@@ -96,9 +113,7 @@ function showPrivateMessages(receiverId, cardsView) {
     }
     console.log("Opening private messages with receiver ID:", receiverId);
     
-    const renderedView = cardsView.parentNode;
-    const messageContainer = document.createElement('div');
-    messageContainer.classList.add('message_container');
+    const messageContainer = document.querySelector('.message_container');
     messageContainer.id = `${receiverId}`;
     
     const backButton = document.createElement('button');
@@ -112,12 +127,15 @@ function showPrivateMessages(receiverId, cardsView) {
     backButton.style.cursor = 'pointer';
     
     backButton.addEventListener("click", () => {
+        messageContainer.innerHTML=''
+        messageContainer.style.display="none"
+        cardsView.style.width='100%'
+        lastMessageElement.style.display="block"
+        metadata.style.display="block"
         // Clear current chat receiver when going back
         if (window.setCurrentChatReceiver) {
             window.setCurrentChatReceiver(null);
         }
-        renderedView.innerHTML = '';
-        renderedView.appendChild(cardsView);
     });
 
     const { chatContainer,AddMessage:AddMessageForThisChat } = MessageCarriers();
@@ -135,6 +153,5 @@ function showPrivateMessages(receiverId, cardsView) {
     }
     
     messageContainer.append(backButton, chatContainer);
-    renderedView.innerHTML = '';
-    renderedView.appendChild(messageContainer);
+ 
 }
