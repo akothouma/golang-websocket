@@ -110,7 +110,7 @@ func (dep *Dependencies) handleClientConnections(r *http.Request, conn *websocke
 			log.Printf("Processing chat_message from user %s to user %s", userID, incoming.Payload.ReceiverID)
 			dep.handleMessageBroadcast(conn, userID, incoming.Payload)
 		case "get_message_history":
-			dep.GetMessageHistory(conn,incoming.Payload.ReceiverID,userID)
+			dep.GetMessageHistory(conn, incoming.Payload.ReceiverID, userID)
 		default:
 			log.Printf("Unknown message type '%s' from user %s", messageType, userID)
 		}
@@ -239,16 +239,27 @@ func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn, senderid stri
 	}
 }
 
-func (dep *Dependencies) GetMessageHistory(conn *websocket.Conn,receiver, sender string) {
-
-	prevMess,err := models.MessageHistory(receiver, sender)
+func (dep *Dependencies) GetMessageHistory(conn *websocket.Conn, receiver, sender string) {
+	prevMess, err := models.MessageHistory(receiver, sender)
 	if err != nil {
 		fmt.Println("Error getting message history", err)
 	}
-	fmt.Println("messagesHistory",prevMess)
-    conn.WriteJSON(map[string]any{
-		"message":"message_history",
-		"value":prevMess,
-		"receiverID":receiver,
+	fmt.Println("messagesHistory", prevMess)
+	conn.WriteJSON(map[string]any{
+		"message":    "message_history",
+		"value":      prevMess,
+		"receiverID": receiver,
+	})
+}
+
+func (dep *Dependencies) GetAllUsers(conn *websocket.Conn) {
+	allUsers, err := dep.Forum.GetAllUsers()
+	if err != nil {
+		fmt.Println("Error getting all users", err)
+		return
+	}
+	conn.WriteJSON(map[string]any{
+		"message": "all_users",
+		"value":   allUsers,
 	})
 }
