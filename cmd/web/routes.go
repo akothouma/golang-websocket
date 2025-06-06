@@ -34,7 +34,7 @@ func Routes() *http.ServeMux {
 	models.InitTemplates("./ui/html/")
 	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./ui/static"))))
 	mux.Handle("/post", dep.AuthMiddleware(http.HandlerFunc(dep.PostHandler)))
-	mux.Handle("/", http.HandlerFunc(models.RenderPostsPage))
+	mux.Handle("/", dep.CSRFMiddleware(http.HandlerFunc(models.RenderPostsPage)))
 	mux.HandleFunc("/my_posts", models.RenderMyPostsPage)
 	mux.HandleFunc("/liked_posts", models.RenderLikedPostsPage)
 	mux.Handle("/upload-profile", dep.AuthMiddleware(http.HandlerFunc(handlers.UploadProfilePictureHandler)))
