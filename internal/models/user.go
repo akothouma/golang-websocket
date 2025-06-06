@@ -10,27 +10,68 @@ import (
 )
 
 type User struct {
-	ID             int
-	UserID         string
-	Email          string
-	Username       string
-	Password       string
-	ProfilePicture string // 🔹 This stores the Base64-encoded image
-	ContentType    string
-	// forum    database.ForumModel
+    ID             int
+    UserID         string
+    FirstName      string `json:"firstName"` // Add if you want to receive and store
+    LastName       string `json:"lastName"`  // Add if you want to receive and store
+    Email          string `json:"email"`
+    Username       string `json:"username"`
+    Password       string `json:"password"` // This will store the HASH
+    Age            int    `json:"age,omitempty"`       // Add if you want to receive and store
+    Gender         string `json:"gender,omitempty"`    // Add if you want to receive and store
+    ProfilePicture string `json:"profilePicture,omitempty"`
+    ContentType    string `json:"contentType,omitempty"`
 }
 
-func (f *ForumModel) CreateUser(userUuid, email, username, password string) error {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+func (f *ForumModel) CreateUser(
+	userUuid string,
+	firstName string, // New parameter
+	lastName string,  // New parameter
+	email string,
+	username string,
+	plainPassword string, // Renamed for clarity
+	age int,         // New parameter (pass 0 or a specific value if not provided/optional)
+	gender string,    // New parameter (pass empty string if not provided/optional)
+) error {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	querystatement := "INSERT INTO users(user_uuid,email, username, password) VALUES(?,?,?,?)"
-	_, err = f.DB.Exec(querystatement, userUuid, email, username, string(hashedPassword))
+	// Make sure the query statement matches your updated schema column names
+	// and the order of parameters.
+	queryStatement := `
+        INSERT INTO users (
+            user_uuid, 
+            first_name, 
+            last_name, 
+            email, 
+            username, 
+            password, 
+            age, 
+            gender
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	// log.Printf("Executing query: %s with params: %s, %s, %s, %s, %s, %s, %d, %s",
+	// 	queryStatement, userUuid, firstName, lastName, email, username, " HASHED_PASSWORD ", age, gender)
+
+	_, err = f.DB.Exec(queryStatement,
+		userUuid,
+		firstName,
+		lastName,
+		email,
+		username,
+		string(hashedPassword),
+		age,     // If age can be optional and your schema allows NULL, you might need sql.NullInt32
+		gender,  // If gender can be optional and your schema allows NULL, you might need sql.NullString
+	)
+
 	if err != nil {
-		return fmt.Errorf("failed to insert user: %w", err)
+		// You might want more specific error handling here to check for UNIQUE constraint violations
+		// (e.g., for email or username) to return more user-friendly messages.
+		return fmt.Errorf("failed to insert user into database: %w", err)
 	}
+
 	return nil
 }
 
