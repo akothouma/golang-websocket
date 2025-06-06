@@ -6,31 +6,43 @@
     <title>Forum</title>
     <link rel="stylesheet" href="/static/styling/style.css">
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v2.1.6/css/unicons.css">
+     <style>
+        .hidden {
+            display: none !important;
+        }
+        /* Optional: basic styling for page sections to ensure they are block level */
+        .page-section {
+            display: block; 
+        }
+        /* Ensure login/register forms take up reasonable space and are centered */
+        #loginSection .overall, #registerSection .overall {
+            max-width: 600px; /* Adjust as needed */
+            margin: 20px auto; /* Center the form container */
+            padding: 20px;
+            border: 1px solid #ddd; /* Example border */
+            border-radius: 8px; /* Example border radius */
+            background-color: #fff; /* Example background */
+        }
+         /* Ensure container within login/register forms provide padding similar to main content */
+        #loginSection > .container, #registerSection > .container {
+            padding-top: 20px; /* Or match your existing main .container padding */
+            padding-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
-    <div class="login hidden">
-      <form id="loginForm" action="/login" method="POST">
-        <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
-        <div class="overall">
-        <h1>Login</h1>
-        <p id="error-message">Enter valid credentials to login</p>
-        <div class="passButton">
-        <input type="email" id="email" name="email" placeholder="Enter email or username....check that it works before submission"><br><br>
-        <input type="password" id="password" name="password" required placeholder="password"><br><br>
-        <button type="submit">Login</button>
-        <p>Don't have an account? <a href="/register">Register here</a>.</p>
-    </div>
 
-  <!--========================== NAV BAR ==========================-->
+    
+    <!--========================== NAV BAR ==========================-->
     <nav>
-
+        
         <div class="container">
             <i class="uil uil-bars"></i>
-
+            
             <h2 class="logo">
                 Forum
             </h2>
-
+            
             <div class="search-bar">
                 <i class="uil uil-search"></i>
                 <input type="search" placeholder="Not functional yet">
@@ -48,10 +60,81 @@
         </div>
         
     </nav>
-  <!--========================== END OF NAV BAR ==========================-->
+    <!--========================== END OF NAV BAR ==========================-->
+    <!-- Login Section -->
+   <div id="loginSection" class="page-section hidden">
+       <div class="container">
+           <form id="loginForm" action="/login" method="POST">
+               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+               <div class="overall">
+                   <h1>Login</h1>
+                   <!-- Display error message from server if present -->
+                   <p id="login-error-message"> {{if .LoginError}} {{.LoginError}} {{else}} Enter valid credentials to login {{end}}</p>
+                   <div class="passButton">
+                       <input type="email" id="login_email" name="email" placeholder="Enter email or username" required><br><br>
+                       <input type="password" id="login_password" name="password" required placeholder="password"><br><br>
+                       <button type="submit">Login</button>
+                       <p>Don't have an account? <a href="#" id="showRegisterFromLogin">Register here</a>.</p>
+                   </div>
+               </div>
+           </form>
+       </div>
+   </div>
+       
+<!-- Register Section -->
+  <div id="registerSection" class="page-section hidden">
+       <div class="container">
+           <form action="/register" method="post" id="registerForm">
+               <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+               <div class="overall">
+                   <h1>Create account</h1>
+                   <!-- Display error message from server if present -->
+                   <p id="register-error-message">{{if .RegisterError}} {{.RegisterError}} {{else}} Enter your details to register {{end}}</p>
+                   <div class="BothNames">
+                       <input type="text" id="firstName" name="firstName" required placeholder="First Name">
+                       <input type="text" name="lastName" id="lastName" required placeholder="Last Name">
+                   </div>
+                   <div class="emailUsername">
+                       <input type="email" id="register_email" name="email" required placeholder="Email">
+                       <input type="text" name="username" id="register_username" required placeholder="Nickname">
+                   </div>
+                   <div class="AgeGender">
+                       <input type="number" id="age" name="age" required placeholder="Age" min="1" max="150">
+                       <p>Enter your gender (optional):</p>
+                       <div>
+                           <input type="radio" name="gender" id="gender_male" value="male">
+                           <label for="gender_male">Male</label>
+                       </div>
+                       <div>
+                           <input type="radio" name="gender" id="gender_female" value="female">
+                           <label for="gender_female">Female</label>
+                       </div>
+                       <div>
+                           <input type="radio" name="gender" id="gender_other" value="other">
+                           <label for="gender_other">Other</label>
+                       </div>
+                        <div>
+                           <input type="radio" name="gender" id="gender_none" value="" checked>
+                           <label for="gender_none">Prefer not to say</label>
+                       </div>
+                   </div>
+                   <div class="passButton">
+                       <input type="password" name="password" id="register_password" required placeholder="password">
+                       <input type="password" name="confirmPassword" id="confirmPassword" required placeholder="confirm password">
+                       <div>
+                           <input type="checkbox" name="tac" id="tac" required>
+                           <label for="tac">I accept the terms and conditions of use</label>
+                       </div>
+                       <button type="submit">Register</button>
+                       <p>Already have an account? <a href="#" id="showLoginFromRegister">Login here</a>.</p>
+                   </div>
+               </div>
+           </form>
+       </div>
+   </div>
 
     <!----------------------- MAIN ----------------------->
-    <main>
+   <main id="mainContentSection" class="page-section {{if or .LoginError .RegisterError}}hidden{{end}}">
         <div class="container">
             
             <!--====================== LEFT ======================-->
@@ -429,6 +512,231 @@
     </main>
   <!----------------------- END OF MAIN ----------------------->
 </body>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // --- SPA Navigation Elements (from your HTML structure) ---
+        const navLoginButton = document.getElementById('loginButton'); // Your navbar Login button
+        const navRegisterButton = document.getElementById('RegisterButton'); // Your navbar Register button
+        const forumLogo = document.querySelector('nav .logo'); // Optional: clicking logo shows main content
+
+        const showRegisterLinkInLogin = document.getElementById('showRegisterFromLogin'); // "Register here" link in login form
+        const showLoginLinkInRegister = document.getElementById('showLoginFromRegister'); // "Login here" link in register form
+
+        // Page Sections
+        const loginSection = document.getElementById('loginSection');
+        const registerSection = document.getElementById('registerSection');
+        const mainContentSection = document.getElementById('mainContentSection'); // Assuming you'll add an ID to your main content wrapper
+                                                                                  // If not, this part for main content won't work perfectly.
+                                                                                  // For now, it will focus on login/register toggling.
+
+        const allPageSections = [loginSection, registerSection, mainContentSection].filter(Boolean); // Filter out nulls if a section is not found
+
+        function showPageSection(sectionToShow) {
+            allPageSections.forEach(section => {
+                if (section) { // Ensure the section element exists
+                    section.classList.add('hidden');
+                }
+            });
+            if (sectionToShow) {
+                sectionToShow.classList.remove('hidden');
+            }
+            window.scrollTo(0, 0); // Scroll to top for better UX
+        }
+
+        // --- SPA Navigation Event Listeners ---
+        if (navLoginButton) {
+            navLoginButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPageSection(loginSection);
+                // Optionally clear previous error messages when switching views
+                const loginErrorMsgEl = document.getElementById('login-error-message');
+                if (loginErrorMsgEl) loginErrorMsgEl.textContent = 'Enter valid credentials to login'; loginErrorMsgEl.style.color='inherit';
+            });
+        }
+
+        if (navRegisterButton) {
+            navRegisterButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPageSection(registerSection);
+                // Optionally clear previous error messages when switching views
+                const registerErrorMsgEl = document.getElementById('register-error-message');
+                if(registerErrorMsgEl) registerErrorMsgEl.textContent = 'Enter your details to register'; registerErrorMsgEl.style.color='inherit';
+            });
+        }
+
+        if (forumLogo && mainContentSection) { // If you want logo to show main content
+            forumLogo.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPageSection(mainContentSection);
+            });
+        }
+
+        if (showRegisterLinkInLogin) {
+            showRegisterLinkInLogin.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPageSection(registerSection);
+                const registerErrorMsgEl = document.getElementById('register-error-message');
+                if(registerErrorMsgEl) registerErrorMsgEl.textContent = 'Enter your details to register'; registerErrorMsgEl.style.color='inherit';
+            });
+        }
+
+        if (showLoginLinkInRegister) {
+            showLoginLinkInRegister.addEventListener('click', (e) => {
+                e.preventDefault();
+                showPageSection(loginSection);
+                const loginErrorMsgEl = document.getElementById('login-error-message');
+                if (loginErrorMsgEl) loginErrorMsgEl.textContent = 'Enter valid credentials to login'; loginErrorMsgEl.style.color='inherit';
+
+            });
+        }
+        
+        // --- Initial Page State (Handle server-side errors on page load) ---
+        // This part checks if the server rendered the page with an error,
+        // which might mean main content is hidden and a specific form should be shown.
+        const loginErrorMsgInitial = document.getElementById('login-error-message');
+        const registerErrorMsgInitial = document.getElementById('register-error-message');
+        const defaultLoginMsg = "Enter valid credentials to login";
+        const defaultRegisterMsg = "Enter your details to register";
+
+        // Determine which section to show initially
+        let initiallyVisibleSection = mainContentSection; // Default to main content
+
+        if (loginSection && loginErrorMsgInitial && loginErrorMsgInitial.textContent.trim() !== defaultLoginMsg.trim()) {
+            initiallyVisibleSection = loginSection;
+        } else if (registerSection && registerErrorMsgInitial && registerErrorMsgInitial.textContent.trim() !== defaultRegisterMsg.trim()) {
+            initiallyVisibleSection = registerSection;
+        }
+        
+        // If mainContentSection is intended to be hidden by server-side logic when errors exist
+        // And an error form is determined above, ensure other sections are hidden.
+        if (initiallyVisibleSection !== mainContentSection && mainContentSection) {
+            mainContentSection.classList.add('hidden');
+        } else if (initiallyVisibleSection === mainContentSection && mainContentSection && mainContentSection.classList.contains('hidden')) {
+            // If main content is the target but somehow marked hidden and no specific error form should be shown,
+            // default to login, or ensure main content is visible if no login.
+             if (loginSection) initiallyVisibleSection = loginSection;
+             else if (mainContentSection) mainContentSection.classList.remove('hidden'); // ensure it's not accidentally hidden
+        }
+        
+        showPageSection(initiallyVisibleSection);
+
+
+        // VVVV YOUR FORM SUBMISSION JAVASCRIPT GOES HERE VVVV
+        // (The script you provided in the previous message for handling fetch requests on form submit)
+        // Make sure it uses the correct IDs: login_email, login_password, login-error-message,
+        // register_email, register_username, register_password, register-error-message etc.
+        // as per the HTML in your earlier snippet.
+
+        const loginForm = document.getElementById("loginForm");
+        const registerForm = document.getElementById("registerForm");
+
+        // --- Helper function to display messages specific to login or registration form ---
+        function displayFormMessage(formType, message, isSuccess = false) {
+            let messageElementId = "";
+            let defaultMessage = "";
+
+            if (formType === "login") {
+                messageElementId = "login-error-message";
+                defaultMessage = "Enter valid credentials to login";
+            } else if (formType === "register") {
+                messageElementId = "register-error-message";
+                defaultMessage = "Enter your details to register";
+            }
+
+            const messageElement = document.getElementById(messageElementId);
+            if (messageElement) {
+                messageElement.textContent = message || defaultMessage;
+                if (message) {
+                    messageElement.style.color = isSuccess ? 'green' : 'red';
+                    messageElement.style.fontWeight = 'bold';
+                } else {
+                    messageElement.style.color = 'inherit';
+                    messageElement.style.fontWeight = 'normal';
+                }
+            }
+        }
+
+        // --- Handle login form submission ---
+        if (loginForm) {
+            loginForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                displayFormMessage("login", ""); // Clear previous specific message
+
+                try {
+                    const formData = {
+                        email: loginForm.login_email.value, 
+                        password: loginForm.login_password.value,
+                        csrfToken: loginForm.csrf_token.value
+                    };
+                    const response = await fetch('/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        displayFormMessage("login", errorData.error || "Login failed", false);
+                        return;
+                    }
+                    window.location.href = '/';
+                } catch (error) {
+                    console.error("Login Fetch Error:", error);
+                    displayFormMessage("login", "Network error. Please try again.", false);
+                }
+            });
+        }
+
+        // --- Handle registration form submission ---
+        if (registerForm) {
+            registerForm.addEventListener("submit", async (event) => {
+                event.preventDefault();
+                displayFormMessage("register", ""); // Clear previous specific message
+
+                if (registerForm.register_password.value !== registerForm.confirmPassword.value) {
+                    displayFormMessage("register", "Passwords do not match", false);
+                    return;
+                }
+                if (!registerForm.tac.checked) {
+                    displayFormMessage("register", "You must accept the terms and conditions", false);
+                    return;
+                }
+                try {
+                    const genderRadio = registerForm.querySelector('input[name="gender"]:checked');
+                    const formData = {
+                        firstName: registerForm.firstName.value,
+                        lastName: registerForm.lastName.value,
+                        username: registerForm.register_username.value,
+                        email: registerForm.register_email.value,
+                        age: registerForm.age.value ? parseInt(registerForm.age.value) : null,
+                        gender: genderRadio ? genderRadio.value : "",
+                        password: registerForm.register_password.value,
+                        tac: registerForm.tac.checked,
+                        csrfToken: registerForm.csrf_token.value
+                    };
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(formData)
+                    });
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        displayFormMessage("register", errorData.error || "Registration failed", false);
+                        return;
+                    }
+                    const successData = await response.json();
+                    displayFormMessage("register", successData.message || "Registration successful!", true);
+                    if (successData.redirect) {
+                        setTimeout(() => { window.location.href = successData.redirect; }, 1500);
+                    }
+                } catch (error) {
+                    console.error("Registration Fetch Error:", error);
+                    displayFormMessage("register", "Network error. Please try again.", false);
+                }
+            });
+        }
+    });
+    </script>
 <script src="/static/script/script.js"></script>
 <script type="module" src="/static/script/app.js"></script>
 <script type="module" src="/static/script/socket.js"></script>
