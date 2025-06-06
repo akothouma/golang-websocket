@@ -62,6 +62,10 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	//pass csrf_token through the context
+	csrfToken := r.Context().Value("csrf_token").(string)
+	data["CSRFToken"] = csrfToken
+
 	// Add debugging information
 	
 	data["UserName"] = username 
