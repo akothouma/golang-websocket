@@ -1,165 +1,84 @@
-import Image from '../imageComponent/image.js';
+// ui/messageComponents/CardComponent/card.js
 import { MessageCarriers } from '../messagesHistoryComponent/message.js';
 
 export const Card = () => {
     const renderedView = document.createElement("div");
-    renderedView.style.height = 'fit-content';
-    renderedView.style.overflow = 'hidden';
-    renderedView.style.display='flex';
-    renderedView.style.flexDirection='row';
-    renderedView.style.gap='5px';
-    
-    const cardContainer = document.createElement("div");
-    const messageContainer = document.createElement('div');
-    // messageContainer.width='fit-content'
-    messageContainer.classList.add('message_container');
-    messageContainer.style.display="none";
-    cardContainer.style.display = 'flex';
-    cardContainer.style.flexDirection = 'column';
-    cardContainer.style.alignContent = 'space-between';
-    cardContainer.style.gap = '15px';
-    renderedView.append(cardContainer,messageContainer);
+    renderedView.className = 'chat-wrapper';
 
-    function showConnections(data, myID) {
-        console.log("From card:", data, myID);
-        cardContainer.innerHTML = '';
-        
-        // Filter out current user from the list
-        const filteredData = data.filter(connection => connection.UserID !== myID);
-        
-        filteredData.forEach((oneConnection) => {
-            const onecard = document.createElement("div");
-            const displayContainer = document.createElement('div');
+    const cardContainer = document.createElement("div");
+    cardContainer.className = 'user-list-container';
+    
+    const messageArea = document.createElement('div');
+    messageArea.className = 'message-area-container';
+    // No more style.display here, we use CSS classes
+
+    renderedView.append(cardContainer, messageArea);
+
+    function updateUserList(users) {
+        users.sort((a, b) => {
+            const timeA = a.lastMessageTime ? new Date(a.lastMessageTime).getTime() : 0;
+            const timeB = b.lastMessageTime ? new Date(b.lastMessageTime).getTime() : 0;
             
-            onecard.style.width = '100%';
-            onecard.style.height = 'fit-content';
-            onecard.style.display = 'flex';
-            onecard.id = `${oneConnection.Username}`;
-            onecard.classList.add('card');
-            onecard.style.flexDirection = 'column';
-            onecard.style.alignContent = 'space-between';
-            onecard.style.gap = '15px';
-            onecard.style.cursor = 'pointer';
-            onecard.style.padding = '10px';
-            onecard.style.border = '1px solid #ccc';
-            onecard.style.borderRadius = '5px';
-            onecard.style.marginBottom = '5px';
+            if (timeA !== timeB) {
+                return timeB - timeA;
+            }
+            return a.username.localeCompare(b.username); 
+        });
+
+        cardContainer.innerHTML = ''; 
+
+        users.forEach((user) => {
+            if (user.userID === window.myUserID) return;
+
+            const userCard = document.createElement("div");
+            userCard.className = 'user-card';
+            userCard.dataset.userId = user.userID; 
+
+              // The user's status, including a class for styling and the text itself
+            const statusHTML = user.isOnline 
+                ? `<span class="user-status online">Online</span>`
+                : `<span class="user-status offline">Offline</span>`;
+
+            userCard.innerHTML = `
+                <div class="user-card-avatar ${user.isOnline ? 'online' : ''}">
+                      <div class="initials">${user.username.charAt(0).toUpperCase()}</div>
+                    <div class="status-dot"></div>
+                </div>
+                <div class="user-card-info">
+                    // FIX: Use lowercase 'username'
+                    <strong class="username">${user.username}</strong>
+                    <p class="last-message">${user.lastMessageContent || 'Click to chat'}</p>
+                       ${statusHTML}
+                </div>
+            `;
             
-            displayContainer.style.display = 'flex';
-            displayContainer.style.flexDirection = 'row';
-            displayContainer.style.alignItems = 'center';
-            displayContainer.style.gap = '10px';
+            userCard.addEventListener("click", () => openChatWith(user));
             
-            const imageside = document.createElement('div');
-            imageside.style.display="flex"
-            imageside.style.flexDirection='column'
-            const username = document.createElement('p');
-            username.style.fontSize = '8px';
-            username.textContent = oneConnection.Username;
-            username.style.margin = '0';
-            imageside.appendChild(Image(),username);
-            
-            const userInfo = document.createElement('div');
-            userInfo.style.width='fit-content'
-            
-            const lastMessageSide = document.createElement('div');
-            const lastMessage = document.createElement('p');
-            lastMessage.style.width='inherit'
-            lastMessage.textContent = oneConnection.messageContent || 'No messages yet';
-            lastMessage.style.fontSize = '8px';
-            lastMessage.style.color = '#666';
-            lastMessage.style.margin = '5px 0 0 0';
-            
-            userInfo.appendChild(username);
-            lastMessageSide.appendChild(lastMessage);
-            userInfo.appendChild(lastMessageSide);
-            
-            displayContainer.append(imageside, userInfo);
-            onecard.appendChild(displayContainer);
-            
-            onecard.addEventListener("click", () => {
-                console.log("Opening chat with:", oneConnection.Username, "ID:", oneConnection.UserID);
-                cardContainer.style.width='20%'
-                messageContainer.style.display="block"
-                messageContainer.style.width='80%'
-                lastMessage.style.display="none"
-                userInfo.style.display="none"
-                
-                showPrivateMessages(oneConnection.UserID, cardContainer,lastMessage,userInfo,oneConnection.Username);
-            });
-            
-            cardContainer.appendChild(onecard);
+            cardContainer.appendChild(userCard);
         });
     }
 
-    return {
-        renderedView,
-        showConnections
-    };
+    // This function was provided in a previous fix and might have been updated.
+    // Ensure it uses the classList toggle approach.
+    function openChatWith(user) {
+        cardContainer.classList.add('chat-active');
+        messageArea.classList.add('chat-active');
+        
+        document.querySelectorAll('.user-card.active').forEach(c => c.classList.remove('active'));
+       
+        const cardElement = document.querySelector(`.user-card[data-user-id='${user.userID}']`);
+        if (cardElement) {
+            cardElement.classList.add('active');
+        }
+
+        if (window.handleHistoryResponse) window.handleHistoryResponse = null;
+        if (window.appendMessageToActiveChat) window.appendMessageToActiveChat = null;
+        window.activeChatUserID = null;
+    
+        const chatWindow = MessageCarriers(user.userID, user.username);
+        messageArea.innerHTML = '';
+        messageArea.appendChild(chatWindow);
+    }
+
+    return { renderedView, updateUserList };
 };
-function showPrivateMessages(receiverId, cardsView,lastMessageElement,metadata,username) {
-
-    
-    const request={
-        event:"frontend request",
-        payload:{
-            "messageType":"get_message_history",
-            "receiverID":receiverId,
-        }
-    }
-    const socket=window.globalSocket;
-    if (socket && socket.readyState == WebSocket.OPEN){
-        socket.send(JSON.stringify(request))
-    }else{
-        console.log("failed to send request for message history")
-    }
-    console.log("Opening private messages with receiver ID:", receiverId);
-    
-    const messageContainer = document.querySelector('.message_container');
-    messageContainer.innerHTML=''
-    messageContainer.id = `${receiverId}`;
-    
-   
-    const usernameDisplay=document.createElement('p')
-    usernameDisplay.innerHTML=username
-    usernameDisplay.style.fontSize='14px'
-
-    const backButton = document.createElement('button');
-    backButton.textContent = "← Back";
-    backButton.style.padding = '10px 15px';
-    backButton.style.marginBottom = '10px';
-    backButton.style.backgroundColor = '#007bff';
-    backButton.style.color = 'white';
-    backButton.style.border = 'none';
-    backButton.style.borderRadius = '5px';
-    backButton.style.cursor = 'pointer';
-    
-    backButton.addEventListener("click", () => {
-        messageContainer.innerHTML=''
-        messageContainer.style.display="none"
-        cardsView.style.width='100%'
-        lastMessageElement.style.display="block"
-        metadata.style.display="block"
-        // Clear current chat receiver when going back
-        if (window.setCurrentChatReceiver) {
-            window.setCurrentChatReceiver(null);
-        }
-    });
-
-    const { chatContainer,AddMessage:AddMessageForThisChat } = MessageCarriers();
-    chatContainer.id = receiverId;
-
-      // ---- NEW ----
-    // Update the global reference to point to the AddMessage of THIS new chat window
-    if (window.setGlobalAddMessageFunction) {
-        window.setGlobalAddMessageFunction(AddMessageForThisChat);
-    }
-    
-    // Set current chat receiver
-    if (window.setCurrentChatReceiver) {
-        window.setCurrentChatReceiver(receiverId);
-    }
-    
-    messageContainer.append(backButton, usernameDisplay,chatContainer);
- 
-}
