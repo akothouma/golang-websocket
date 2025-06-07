@@ -1,10 +1,12 @@
+// internal/handlers/messagehandler.go
+
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
+	// "encoding/json"
 	"log"
 	"net/http"
+	// "sort"
 	"sync"
 	"time"
 
@@ -13,347 +15,288 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-type UserWithStatus struct{
-	UserID string `json:"userid"`
-	Username string `json:"username"`
-	IsOnline bool `json:"isOnline"`
+// FIX: Renamed and enriched this struct. This is what represents a user in the chat list.
+type UserChatInfo struct {
+	UserID             string    `json:"userID"`
+	Username           string    `json:"username"`
+	IsOnline           bool      `json:"isOnline"`
+	LastMessageContent string    `json:"lastMessageContent"`
+	LastMessageTime    time.Time `json:"lastMessageTime"`
+	IsMe               bool      `json:"isMe,omitempty"`
 }
 
-type ClientMessage struct {
-	Event   string  `json:"event"`
-	Payload Payload `json:"payload"`
+// FIX: Simplified the message structure for both incoming and outgoing websocket messages.
+type WebSocketMessage struct {
+	Type            string      `json:"type"` // e.g., "get_user_list", "private_message", "get_message_history"
+	Content         string      `json:"content,omitempty"`
+	Target          string      `json:"target,omitempty"`      // The userID of the recipient
+	Messages        []models.Message `json:"messages,omitempty"`    // For sending history
+	UserList        []UserChatInfo   `json:"userList,omitempty"`    // For sending user list
+	LastMessageTime time.Time        `json:"lastMessageTime,omitempty"` // For pagination
 }
-
-type Payload struct {
-	Msg        string `json:"messageType"`
-	ReceiverID string `json:"receiverID"`
-	Content    string `json:"content"`
-}
-
-var chatBroadcastOnce sync.Once
 
 type ErrorObject struct {
 	Error string `json:"error"`
 }
 
-type BroadcastMessage struct {
-	Message models.Message
-}
-
 var (
-	Clients    = make(map[string]*websocket.Conn)
-	broadcast  = make(chan BroadcastMessage)
-	upgrader   = websocket.Upgrader{}
-	ClientsMux sync.Mutex
+	Clients         = make(map[string]*websocket.Conn)
+	broadcast       = make(chan models.Message) // FIX: Channel will just carry the message model
+	upgrader        = websocket.Upgrader{}
+	ClientsMux      sync.Mutex
+	broadcastOnce   sync.Once
 )
 
 func (dep *Dependencies) ChatHandler(w http.ResponseWriter, r *http.Request) {
+    // ... your existing ChatHandler code (no changes needed here)
 	cookie, err := r.Cookie("session_id")
 	if err != nil || cookie.Value == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
 
-	upgrader.CheckOrigin = func(r *http.Request) bool {
-		return true
-	}
-
+	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
-		println("failed to establish connection", err)
+		log.Println("failed to establish connection", err)
 		return
 	}
 
-	//Pass the userID from context setup by middleware
 	userIDFromContext := r.Context().Value("user_uuid")
-	if userIDFromContext==nil{
+	if userIDFromContext == nil {
 		log.Println("Error: user_uuid not found in context for WebSocket connection")
 		conn.Close()
 		return
-
 	}
-	userID:=userIDFromContext.(string)
-
+	userID := userIDFromContext.(string)
 
 	go dep.handleClientConnections(userID, conn)
-
-	// Start ChatBroadcastHandler (via sync.Once)
-	chatBroadcastOnce.Do(func() {
-		dep.StartChatBroadcastHandler()
-	})
+	broadcastOnce.Do(dep.StartChatBroadcastHandler)
 }
 
-
-//pass user id as arg now
 func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.Conn) {
+	// Register client
+	ClientsMux.Lock()
+	Clients[userID] = conn
+	ClientsMux.Unlock()
+	log.Printf("User %s connected. Total clients: %d", userID, len(Clients))
+	
+	// Announce to everyone that a user's status changed
+	dep.broadcastUserListUpdate()
+	
 	defer func() {
 		ClientsMux.Lock()
 		delete(Clients, userID)
 		ClientsMux.Unlock()
 		log.Printf("User %s disconnected. Remaining clients: %d", userID, len(Clients))
-		dep.broadcastUserStatusUpdate(userID, false) // Broadcast offline status to others
+		// Announce to everyone that a user's status changed
+		dep.broadcastUserListUpdate()
 		conn.Close()
 	}()
 
-	log.Printf("New WebSocket connection established for user: %s", userID)
-
-	ClientsMux.Lock()
-	Clients[userID] = conn
-	ClientsMux.Unlock()
-	log.Printf("Connected clients count: %d", len(Clients))
-	//Broadcast to other connected clients that this user is now online
-	// The newly connected user will request the full list themselves.
-
-	dep.broadcastUserStatusUpdate(userID, true)
 	for {
-		_, msg, err := conn.ReadMessage()
+		// FIX: Use the new simplified WebSocketMessage struct for reading
+		var msg WebSocketMessage
+		err := conn.ReadJSON(&msg)
 		if err != nil {
-			log.Printf("WebSocket read error for user %s: %v", userID, err)
-			ClientsMux.Lock()
-			delete(Clients, userID)
-			ClientsMux.Unlock()
-			log.Printf("User %s disconnected. Remaining clients: %d", userID, len(Clients))
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("WebSocket read error for user %s: %v", userID, err)
+			}
 			break
 		}
+		
+		log.Printf("Parsed message from user %s: Type='%s', Target='%s', ContentLength=%d", userID, msg.Type, msg.Target, len(msg.Content))
 
-		log.Printf("Raw message received from user %s: %s", userID, string(msg))
-
-		var incoming ClientMessage
-		err = json.Unmarshal(msg, &incoming)
-		if err != nil {
-			log.Printf("JSON unmarshal error from user %s: %v. Raw message: %s", userID, err, string(msg))
-			continue
-		}
-
-		log.Printf("Parsed message from user %s: Event='%s', MessageType='%s', ReceiverID='%s', Content='%s'",
-			userID, incoming.Event, incoming.Payload.Msg, incoming.Payload.ReceiverID, incoming.Payload.Content)
-
-		messageType := incoming.Payload.Msg
-
-		switch messageType {
-			//Client requests the full list of users with status
+		switch msg.Type {
 		case "get_user_list":
-			log.Printf("Processing get_user_list request from user %s", userID)
-			dep.sendFullUserList(conn, userID)
-		case "chat_message":
-			log.Printf("Processing chat_message from user %s to user %s", userID, incoming.Payload.ReceiverID)
-			dep.handleMessageBroadcast(conn, userID, incoming.Payload)
+			// The user list is now broadcast automatically, but we can send it on demand if needed.
+			dep.sendFullUserListToUser(userID)
+
+		case "private_message":
+			if msg.Target == "" || msg.Content == "" {
+				log.Printf("Invalid private message from %s: missing target or content", userID)
+				continue
+			}
+			// Create the message model
+			messageModel := models.Message{
+				ID:        uuid.New(),
+				Sender:    userID,
+				Receiver:  msg.Target,
+				Message:   msg.Content,
+				IsRead:    false, // Will be false until the receiver actually opens the chat
+				CreatedAt: time.Now(),
+			}
+			// Send to broadcast channel to be relayed and saved
+			broadcast <- messageModel
+
 		case "get_message_history":
-			dep.GetMessageHistory(conn, incoming.Payload.ReceiverID, userID)
+			if msg.Target == "" {
+				log.Printf("Invalid history request from %s: missing target", userID)
+				continue
+			}
+			dep.sendMessageHistory(conn, userID, msg.Target, msg.LastMessageTime)
+		
 		default:
-			log.Printf("Unknown message type '%s' from user %s", messageType, userID)
+			log.Printf("Unknown message type '%s' from user %s", msg.Type, userID)
 		}
 	}
 }
 
-//New function to send the full list of users with their online status
-func (dep *Dependencies) sendFullUserList(conn *websocket.Conn, currentUserID string) {
-	allDBUsers, err := dep.Forum.GetAllUsers() // Assuming this returns []models.User
+
+// ADDED: New function to send history with pagination
+func (dep *Dependencies) sendMessageHistory(conn *websocket.Conn, senderID, targetID string, lastTimestamp time.Time) {
+	messages, err := models.GetMessageHistory(senderID, targetID, lastTimestamp, 10)
 	if err != nil {
-		log.Printf("Error getting all users from database: %v", err)
-		conn.WriteJSON(ErrorObject{Error: "Failed to retrieve user list"})
+		log.Printf("Error getting message history for %s<->%s: %v", senderID, targetID, err)
+		// Optionally send an error message to the client
 		return
 	}
 
-	usersWithStatus := []UserWithStatus{}
-	ClientsMux.Lock() // Lock before accessing Clients map
-	for _, dbUser := range allDBUsers {
-		var dbUserIDStr string=dbUser.UserID
-		_, isOnline := Clients[dbUserIDStr]
-		usersWithStatus = append(usersWithStatus, UserWithStatus{
-			UserID:   dbUserIDStr,
-			Username: dbUser.Username,
-			IsOnline: isOnline,
-		})
+	response := WebSocketMessage{
+		Type:     "history_response",
+		Target:   targetID, // The user whose history was requested
+		Messages: messages,
 	}
-	ClientsMux.Unlock() // Unlock after accessing Clients map
 
-	err = conn.WriteJSON(map[string]interface{}{
-		"message":     "user_list_full", // New message type for the client
-		"value":       usersWithStatus,
-		"currentUser": currentUserID, // Send back the ID of the user making the request
-	})
-	if err != nil {
-		log.Printf("Error sending full user list to %s: %v", currentUserID, err)
-	} else {
-		log.Printf("Sent full user list to %s. Count: %d", currentUserID, len(usersWithStatus))
+	if err := conn.WriteJSON(response); err != nil {
+		log.Printf("Error sending message history to %s: %v", senderID, err)
 	}
 }
 
-//New function to broadcast user online/offline status updates
-func (dep *Dependencies) broadcastUserStatusUpdate(changedUserID string, isOnline bool) {
+// REPLACED `sendFullUserList` and `broadcastUserStatusUpdate` with this unified function
+
+// FIX: This is the critical function to change. We will iterate and send a custom list to each user.
+func (dep *Dependencies) broadcastUserListUpdate() {
+	allDBUsers, err := dep.Forum.GetAllUsers()
+	if err != nil {
+		log.Printf("broadcastUserListUpdate: Error getting all users: %v", err)
+		return
+	}
+
+	lastMessages, err := models.GetAllLastMessages()
+	if err != nil {
+		log.Printf("broadcastUserListUpdate: Error getting last messages: %v", err)
+		return
+	}
+
+	lastMessageMap := make(map[string]models.Message)
+	for _, msg := range lastMessages {
+		key := models.GetConversationID(msg.Sender, msg.Receiver)
+		lastMessageMap[key] = msg
+	}
+
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
 
-	message := map[string]interface{}{
-		"message": "user_status_update", // New message type for client
-		"payload": map[string]interface{}{
-			"userID":   changedUserID,
-			"isOnline": isOnline,
-		},
-	}
-
-	log.Printf("Broadcasting status update for user %s: isOnline=%t. Total clients: %d", changedUserID, isOnline, len(Clients))
-
+	log.Printf("Broadcasting tailored user lists to %d clients.", len(Clients))
+	
+	// For each connected client...
 	for userID, clientConn := range Clients {
-		if userID == changedUserID && isOnline {
-			log.Printf("Skipping broadcastUserStatusUpdate to self: %s", userID)
-			continue
+		
+		var usersWithStatus []UserChatInfo // Create a fresh list for this specific user
+
+		// Build the base list of all users from the DB
+		for _, dbUser := range allDBUsers {
+			_, isOnline := Clients[dbUser.UserID]
+
+			userInfo := UserChatInfo{
+				UserID:   dbUser.UserID,
+				Username: dbUser.Username,
+				IsOnline: isOnline,
+				// Add the IsMe flag here!
+				IsMe:     (dbUser.UserID == userID),
+			}
+			usersWithStatus = append(usersWithStatus, userInfo)
+		}
+		
+		// Enrich with last message data
+		for i, u := range usersWithStatus {
+			for _, otherUser := range usersWithStatus {
+				if u.UserID == otherUser.UserID { continue }
+
+				key := models.GetConversationID(u.UserID, otherUser.UserID)
+				if msg, ok := lastMessageMap[key]; ok {
+					// We need to find the most recent message across all conversations for a user
+					if msg.CreatedAt.After(usersWithStatus[i].LastMessageTime) {
+						usersWithStatus[i].LastMessageContent = msg.Message
+						usersWithStatus[i].LastMessageTime = msg.CreatedAt
+					}
+				}
+			}
 		}
 
-		if err := clientConn.WriteJSON(message); err != nil {
-			log.Printf("Error broadcasting status update to user %s for %s: %v", userID, changedUserID, err)
-		} else {
-			log.Printf("Successfully broadcasted status update for %s to %s", changedUserID, userID)
+		// Now send this tailored list to the current client in the loop
+		response := WebSocketMessage{
+			Type:     "user_list_update",
+			UserList: usersWithStatus,
+		}
+		if err := clientConn.WriteJSON(response); err != nil {
+			log.Printf("Error broadcasting tailored user list to user %s: %v", userID, err)
 		}
 	}
+}
+
+
+// ADDED: Helper to send the full list to just one user on demand
+func (dep *Dependencies) sendFullUserListToUser(userID string) {
+	// This function body would be almost identical to broadcastUserListUpdate, 
+	// but only sends to the specific user's connection. 
+	// For simplicity, we can just trigger a full broadcast which is okay for this app scale.
+	dep.broadcastUserListUpdate()
 }
 
 
 func (dep *Dependencies) StartChatBroadcastHandler() {
 	go func() {
-		log.Println(">>> Global broadcast listener goroutine STARTED. Listening on broadcast channel. <<<")
-		for {
-			select {
-			case msg := <-broadcast:
-				log.Printf(">>> Broadcasting message ID %s from %s to %s <<<", msg.Message.ID, msg.Message.Sender, msg.Message.Receiver)
-				dep.broadcastToClients(msg)
+		log.Println("Global broadcast listener goroutine STARTED.")
+		for msg := range broadcast {
+			// Save to database
+			if err := models.MessageToDatabase(&msg); err != nil {
+				log.Printf("DATABASE ERROR: Failed to save message %s: %v", msg.ID, err)
+				continue
 			}
+			log.Printf("Message %s saved to DB.", msg.ID)
+			
+			// Relay to clients
+			dep.relayMessage(&msg)
+			
+			// After a message is successfully sent, broadcast an updated user list
+			// so the order changes in everyone's sidebar.
+			dep.broadcastUserListUpdate()
 		}
 	}()
 }
 
-func (dep *Dependencies) broadcastToClients(msg BroadcastMessage) {
+
+// ADDED: New function to just relay messages to relevant parties.
+func (dep *Dependencies) relayMessage(msg *models.Message) {
 	ClientsMux.Lock()
 	defer ClientsMux.Unlock()
 
-	log.Printf("Broadcasting to %d connected clients", len(Clients))
-
+	response := WebSocketMessage{
+		Type:    "private_message",
+		Content: msg.Message,
+		// This response needs to carry the full message object for rendering
+		Messages: []models.Message{*msg},
+	}
+	
 	// Send to receiver
-	receiverId := msg.Message.Receiver
-	senderID := msg.Message.Sender // This is the ORIGINAL sender of the message
-
-	log.Println("Receiver ID:", receiverId) // Your debug log
-
-	// Send to receiver
-	if receiverConn, ok := Clients[receiverId]; ok {
-		err := receiverConn.WriteJSON(map[string]any{
-			"message":  "send_private_message",
-			"value":    msg.Message.Message,
-			"senderID": senderID, // Correct: payload contains the ORIGINAL sender's ID
-		})
-		if err != nil {
-			log.Printf("Error sending to receiver %s: %v", receiverId, err)
-			delete(Clients, receiverId)
+	if receiverConn, ok := Clients[msg.Receiver]; ok {
+		if err := receiverConn.WriteJSON(response); err != nil {
+			log.Printf("Error sending private message to receiver %s: %v", msg.Receiver, err)
 		} else {
-			log.Printf("Message sent to receiver %s", receiverId)
+			log.Printf("Relayed message to receiver %s", msg.Receiver)
 		}
-	} else {
-		log.Printf("Receiver %s not found in connected clients", receiverId)
 	}
 
-	// Send confirmation back to sender
-	if senderConn, ok := Clients[senderID]; ok { // Check ORIGINAL sender
-		err := senderConn.WriteJSON(map[string]any{
-			"message":    "message_sent_confirmation",
-			"value":      msg.Message.Message,
-			"receiverID": receiverId, // Correct: confirmation includes who it was sent TO
-		})
-		if err != nil {
-			log.Printf("Error sending confirmation to sender %s: %v", senderID, err)
-			delete(Clients, senderID)
+	// Send back to sender so they can see their own message appear in the chat
+	if senderConn, ok := Clients[msg.Sender]; ok {
+		if err := senderConn.WriteJSON(response); err != nil {
+			log.Printf("Error sending private message copy to sender %s: %v", msg.Sender, err)
+		} else {
+			log.Printf("Relayed message copy to sender %s", msg.Sender)
 		}
-		// It would be good to have an 'else' log here for successful confirmation sending too:
-		// else {
-		//	  log.Printf("Message confirmation sent to original sender %s", senderID)
-		// }
-	} else {
-		log.Printf("Original sender %s for confirmation not found in connected clients", senderID)
 	}
 }
 
-// func (dep *Dependencies) getConnectedUsers(conn *websocket.Conn, currentuser string) {
-// 	connectedUserList := []string{}
-// 	ClientsMux.Lock()
-// 	for userID := range Clients {
-// 		connectedUserList = append(connectedUserList, userID)
-// 	}
-// 	ClientsMux.Unlock()
-
-// 	allConnectedUsers, err := dep.Forum.GetAllConnectedUsers(connectedUserList)
-// 	if err != nil {
-// 		conn.WriteJSON(ErrorObject{Error: "Something went wrong retrieving connected users"})
-// 		return
-// 	}
-
-// 	conn.WriteJSON(map[string]any{
-// 		"message":     "connected_client_list",
-// 		"value":       allConnectedUsers,
-// 		"currentUser": currentuser,
-// 	})
-// }
-
-func (dep *Dependencies) handleMessageBroadcast(c *websocket.Conn, senderid string, p Payload) {
-	log.Printf("Handling message broadcast - Sender: %s, Receiver: %s, Content: '%s'", senderid, p.ReceiverID, p.Content)
-
-	if p.ReceiverID == "" {
-		log.Printf("Error: Missing receiver ID")
-		c.WriteJSON(ErrorObject{Error: "Invalid message: missing receiver"})
-		return
-	}
-
-	if p.Content == "" {
-		log.Printf("Error: Missing message content")
-		c.WriteJSON(ErrorObject{Error: "Invalid message: missing content"})
-		return
-	}
-
-	mess := models.Message{
-		ID:        uuid.New(),
-		Sender:    senderid,
-		Receiver:  p.ReceiverID,
-		Message:   p.Content,
-		IsRead:    false,
-		CreatedAt: time.Now(),
-	}
-	// Send to broadcast channel FIRST, or make sure it's always sent.
-	log.Printf("Queueing message for broadcast (ID: %s): %s -> %s: '%s'", mess.ID, senderid, p.ReceiverID, p.Content)
-	// Send to broadcast channel
-	broadcast <- BroadcastMessage{
-		Message: mess,
-	}
-	err := models.MessageToDatabase(&mess)
-	if err != nil {
-		log.Printf("Database error details: %v", err)
-		c.WriteJSON(ErrorObject{Error: "Failed to save message. Please try again."})
-		return
-	} else {
-		log.Printf("Message saved to database: %s -> %s: '%s'", senderid, p.ReceiverID, p.Content)
-	}
-}
-
-func (dep *Dependencies) GetMessageHistory(conn *websocket.Conn, receiver, sender string) {
-	prevMess, err := models.MessageHistory(receiver, sender)
-	if err != nil {
-		fmt.Println("Error getting message history", err)
-	}
-	fmt.Println("messagesHistory", prevMess)
-	conn.WriteJSON(map[string]any{
-		"message":    "message_history",
-		"value":      prevMess,
-		"receiverID": receiver,
-		"senderID":sender,
-	})
-}
-
-// func (dep *Dependencies) GetAllUsers(conn *websocket.Conn) {
-// 	allUsers, err := dep.Forum.GetAllUsers()
-// 	if err != nil {
-// 		fmt.Println("Error getting all users", err)
-// 		return
-// 	}
-// 	conn.WriteJSON(map[string]any{
-// 		"message": "all_users",
-// 		"value":   allUsers,
-// 	})
-// }
+// DELETE or comment out the old `broadcastToClients` and `handleMessageBroadcast` as they are now replaced.
