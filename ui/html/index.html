@@ -737,9 +737,12 @@
         }
     });
     </script>
-<script src="/static/script/script.js"></script>
-<script type="module" src="/static/script/app.js"></script>
-<script type="module" src="/static/script/socket.js"></script>
+ <!-- Load regular scripts first if they are dependencies -->
+    <script src="/static/script/script.js"></script>
+
+    <!-- Load the main module script last. It will handle importing others. -->
+    <script type="module" src="/static/script/app.js"></script>
+</body>
 </html>
 <!-- real-time-forum/ui/messageComponents/app.js
 real-time-forum/ui/static/script/script.js -->
