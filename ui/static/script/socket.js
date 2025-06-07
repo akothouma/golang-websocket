@@ -1,4 +1,3 @@
-// ui/static/script/socket.js
 
 let socket = null;
 
