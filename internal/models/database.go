@@ -35,15 +35,15 @@ func InitializeDB() (*sql.DB, error) {
 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 		);
 
-CREATE TABLE IF NOT EXISTS messages(
+CREATE TABLE IF NOT EXISTS messages (
     messageID TEXT PRIMARY KEY NOT NULL,
     sender TEXT NOT NULL,
     receiver TEXT NOT NULL,
     messageText TEXT NOT NULL,
     isRead BOOLEAN DEFAULT FALSE,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender) REFERENCES users(id),
-    FOREIGN KEY (receiver) REFERENCES users(id)
+    FOREIGN KEY (sender) REFERENCES users(user_uuid),
+    FOREIGN KEY (receiver) REFERENCES users(user_uuid)
 );
 		
 	CREATE TABLE IF NOT EXISTS sessions (
