@@ -1,6 +1,17 @@
-// ui/messageComponents/messagesHistoryComponent/message.js
 
-// A utility function to prevent an event from firing too often.
+/**
+ * @file This script defines the `MessageCarriers` component, which is responsible for rendering
+ * a complete, interactive chat window for a single conversation. This includes the header,
+ * the message history area with infinite scroll, and the message input form.
+ */
+
+/**
+ * A utility function to limit how often a function can be called. This prevents spamming
+ * the server with requests, especially for events like scrolling.
+ * @param {Function} func The function to throttle.
+ * @param {number} limit The cooldown period in milliseconds.
+ * @returns {Function} A new, throttled version of the function.
+ */
 function throttle(func, limit) {
     let inThrottle;
     return function() {
@@ -14,57 +25,75 @@ function throttle(func, limit) {
     };
 }
 
+/**
+ * The MessageCarriers component factory. It's instantiated each time a user is clicked.
+ * It encapsulates all the state and logic for one specific conversation.
+ * @param {string} receiverId The unique ID of the user we are chatting with.
+ * @param {string} receiverUsername The display name of the user we are chatting with.
+ * @returns {HTMLElement} The root DOM element for the chat window.
+ */
 export const MessageCarriers = (receiverId, receiverUsername) => {
-    // ---- Component State ----
+    
+    // ---- Component-Scoped State ----
+    
+    /** A flag to prevent multiple history fetch requests from being sent simultaneously. */
     let isFetchingHistory = false;
+    
+    /** 
+     * A helper function to get the timestamp of the oldest message currently displayed.
+     * This timestamp acts as a cursor for fetching the next page of history.
+     * @returns {string|null} The ISO string timestamp or null if no messages are present.
+     */
     const oldestMessageTimestamp = () => {
-        // Get the timestamp from the first message element's dataset
         const firstMessage = chatHistory.firstChild;
         return firstMessage ? firstMessage.dataset.timestamp : null;
     };
     
-    // Set the global active chat ID so app.js knows where to direct incoming messages
+    // ---- Global State Registration ---
+    
+    // Set global variables to let other parts of the app (like app.js) know
+    // which chat is currently active.
     window.activeChatUserID = receiverId;
 
-    // ---- DOM Elements ----
+    // --- Create Core DOM Elements ---
+    
     const chatContainer = document.createElement('div');
     chatContainer.className = 'chat-container';
-    chatContainer.id = `chat-with-${receiverId}`;
+    chatContainer.id = `chat-with-${receiverId}`; // Unique ID for this chat window
     
-    // Header
     const header = document.createElement('header');
     header.className = 'chat-header';
 
-    
     const backButton = document.createElement('button');
     backButton.className = 'back-button';
-    // Using an icon from the library you already have
-  backButton.innerHTML = `<i class="uil uil-arrow-left"></i>`;
+    backButton.innerHTML = `<i class="uil uil-arrow-left"></i>`;
 
-const headerTitle = document.createElement('h3');
+    const headerTitle = document.createElement('h3');
     headerTitle.textContent = receiverUsername;
 
     header.append(backButton, headerTitle);
-
-    // Message History Area
+    
     const chatHistory = document.createElement('div');
     chatHistory.className = 'chat-history';
 
-    // Message Input Form
     const messageForm = document.createElement('form');
     messageForm.className = 'message-form';
+
     const messageInput = document.createElement('input');
     messageInput.type = 'text';
     messageInput.placeholder = 'Type a message...';
     messageInput.autocomplete = 'off';
+
     const sendButton = document.createElement('button');
     sendButton.type = 'submit';
     sendButton.textContent = 'Send';
-    messageForm.append(messageInput, sendButton);
 
+    messageForm.append(messageInput, sendButton);
     chatContainer.append(header, chatHistory, messageForm);
     
     // ---- Logic and Event Handlers ----
+    
+    /** Sends a request to the server to fetch a page of message history. */
     function requestHistory(timestamp = null) {
         if (isFetchingHistory) return;
         isFetchingHistory = true;
@@ -76,30 +105,33 @@ const headerTitle = document.createElement('h3');
             socket.send(JSON.stringify({
                 type: 'get_message_history',
                 target: receiverId,
-                lastMessageTime: timestamp // Backend will handle null time
+                lastMessageTime: timestamp // The backend handles null time correctly.
             }));
         }
     }
 
-     // ADD THIS NEW EVENT LISTENER
+    /** The back button click handler. It resets the UI to show the user list again. */
     backButton.addEventListener('click', () => {
         const userListContainer = document.querySelector('.user-list-container');
         const messageAreaContainer = document.querySelector('.message-area-container');
-
+        
+        // Toggle CSS classes to reverse the layout transition.
         if (userListContainer) userListContainer.classList.remove('chat-active');
         if (messageAreaContainer) messageAreaContainer.classList.remove('chat-active');
         
+        // Un-highlight any active user card.
         document.querySelectorAll('.user-card.active').forEach(c => c.classList.remove('active'));
         
-        // Cleanup global state
+        // Clean up global state so incoming messages are no longer directed here.
         window.activeChatUserID = null;
     });
     
-    // Function to add a single message to the DOM.
+    /** Renders a single message object into the DOM as a message bubble. */
     function renderMessage(msg, prepend = false) {
         const msgWrapper = document.createElement('div');
-        msgWrapper.className = `message-wrapper ${msg.sender === window.myUserID ? 'sent' : 'received'}`;
-        // Store timestamp for pagination
+        const isSentByMe = msg.sender === window.myUserID;
+        msgWrapper.className = `message-wrapper ${isSentByMe ? 'sent' : 'received'}`;
+        // Store the message timestamp directly on the element for easy access by our pagination logic.
         msgWrapper.dataset.timestamp = msg.timestamp;
 
         const date = new Date(msg.timestamp);
@@ -108,13 +140,14 @@ const headerTitle = document.createElement('h3');
         msgWrapper.innerHTML = `
             <div class="message-bubble">
                 <div class="message-info">
-                    <strong>${msg.sender === window.myUserID ? 'You' : receiverUsername}</strong>
+                    <strong>${isSentByMe ? 'You' : receiverUsername}</strong>
                     <span class="timestamp">${formattedDate}</span>
                 </div>
                 <p class="message-content">${msg.content || msg.message}</p> 
             </div>
         `;
         
+        // If `prepend` is true, add the message to the top (for history). Otherwise, append to the bottom (for live messages).
         if (prepend) {
             chatHistory.insertBefore(msgWrapper, chatHistory.firstChild);
         } else {
@@ -122,47 +155,51 @@ const headerTitle = document.createElement('h3');
         }
     }
     
-    // Expose a function to app.js to handle incoming history chunks
+    /**
+     * This function is exposed globally to be called by `app.js` when history data arrives from the server.
+     * It handles rendering the chunk of historical messages.
+     * @param {string} target The user ID this history is for, to ensure we're updating the correct chat.
+     * @param {Array<Object>} messages An array of message objects.
+     */
     window.handleHistoryResponse = (target, messages) => {
-        if (target !== receiverId) return; // History for a different chat
+        if (target !== receiverId) return; // Ignore if it's not for this chat.
         
+        // Keep the user's scroll position stable while adding new content at the top.
         const oldScrollHeight = chatHistory.scrollHeight;
-
-        messages.forEach(msg => renderMessage(msg, true)); // Prepend older messages
-
-        // Maintain scroll position after prepending
+        messages.forEach(msg => renderMessage(msg, true)); // Prepend each historical message.
         const newScrollHeight = chatHistory.scrollHeight;
         chatHistory.scrollTop = newScrollHeight - oldScrollHeight;
 
         isFetchingHistory = false;
         
-        // If it's the initial load, scroll to bottom
-        if (!oldestMessageTimestamp()) {
-             chatHistory.scrollTop = chatHistory.scrollHeight;
+        // On the very first load, scroll all the way to the bottom to see the newest messages.
+        if (messages.length > 0 && chatHistory.scrollTop === 0) {
+            chatHistory.scrollTop = chatHistory.scrollHeight;
         }
     };
     
-    // Expose a function for app.js to append live messages
+    /** Exposed globally so `app.js` can push live messages into this active chat window. */
     window.appendMessageToActiveChat = (msg) => {
-        renderMessage(msg, false);
-        chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom on new message
+        renderMessage(msg, false); // Append live messages to the end.
+        chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll to the bottom.
     };
     
-    // Infinite scroll listener
+    /** The throttled scroll event listener for implementing infinite scroll. */
     chatHistory.addEventListener('scroll', throttle(() => {
+        // If the user has scrolled to the very top and we are not already fetching...
         if (chatHistory.scrollTop === 0 && !isFetchingHistory) {
             const lastTs = oldestMessageTimestamp();
-            if (lastTs) {
-                requestHistory(lastTs);
+            if (lastTs) { // ...and if there are messages to paginate from...
+                requestHistory(lastTs); //...fetch the next page.
             }
         }
-    }, 1000)); // Throttle to run at most once per second
+    }, 1000)); // Limit to one request per second.
     
-    // Message sending listener
+    /** The submit event handler for the message input form. */
     messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const content = messageInput.value.trim();
-        if (content) {
+        if (content) { // Don't send empty messages.
             const socket = window.globalSocket;
             if (socket && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({
@@ -170,26 +207,15 @@ const headerTitle = document.createElement('h3');
                     target: receiverId,
                     content: content,
                 }));
-                messageInput.value = '';
+                messageInput.value = ''; // Clear the input field.
             }
         }
     });
 
-    // Initial fetch
-    if(window.chatCache[receiverId]) {
-         // If we have a cache, render it first for a snappy UI
-        window.chatCache[receiverId].forEach(msg => renderMessage(msg));
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-        // Then maybe fetch newer messages? For now, we'll just fetch all on open.
-    }
-    
+    // --- Initial Data Fetch ---
+    // The component is now fully set up, so we make the initial request for chat history.
     requestHistory();
 
+    // Finally, return the main container element for this component.
     return chatContainer;
 };
-
-// Remove the window functions when the component is "unmounted" (the user clicks back or closes the chat)
-// You would need to add this cleanup logic in card.js when the chat window is replaced.
-// For example:
-// if (window.handleHistoryResponse) window.handleHistoryResponse = null;
-// if (window.appendMessageToActiveChat) window.appendMessageToActiveChat = null;
