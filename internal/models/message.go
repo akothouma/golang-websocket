@@ -89,9 +89,9 @@ func GetMessageHistory(user1, user2 string, lastTimestamp time.Time, limit int) 
 	// The messages were fetched in reverse-chronological order (newest first).
 	// We reverse the slice in-place to return them in chronological order (oldest first),
 	// which is easier for the frontend to render correctly when prepending history.
-	for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
-		messages[i], messages[j] = messages[j], messages[i]
-	}
+	// for i, j := 0, len(messages)-1; i < j; i, j = i+1, j-1 {
+	// 	messages[i], messages[j] = messages[j], messages[i]
+	// }
 
 	return messages, nil
 }
