@@ -292,7 +292,7 @@ func (dep *Dependencies) StartChatBroadcastHandler() {
 			dep.relayMessage(&msg)
 
 			// Step 3: Broadcast an updated user list so everyone's sidebar re-sorts with the new "last message".
-			dep.broadcastUserListUpdate()
+			//dep.broadcastUserListUpdate()
 		}
 	}()
 }
