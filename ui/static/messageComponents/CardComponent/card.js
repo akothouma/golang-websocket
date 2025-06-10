@@ -106,6 +106,8 @@ export const Card = () => {
         // 2. Visually highlight the currently active chat in the sidebar.
         document.querySelectorAll('.user-card.active').forEach(c => c.classList.remove('active'));
         const cardElement = document.querySelector(`.user-card[data-user-id='${user.userID}']`);
+        const lastMessage=document.querySelector(".last-message")
+        lastMessage.style.display="none"
         if (cardElement) {
             cardElement.classList.add('active');
         }

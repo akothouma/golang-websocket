@@ -115,6 +115,8 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
         socket.send(JSON.stringify({ type: 'get_user_list' }))
         const userListContainer = document.querySelector('.user-list-container');
         const messageAreaContainer = document.querySelector('.message-area-container');
+         const lastMessage=document.querySelector(".last-message")
+        lastMessage.style.display="block"
         
         // Toggle CSS classes to reverse the layout transition.
         if (userListContainer) userListContainer.classList.remove('chat-active');
