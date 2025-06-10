@@ -94,13 +94,13 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     // ---- Logic and Event Handlers ----
     
     /** Sends a request to the server to fetch a page of message history. */
+    const socket = window.globalSocket;
     function requestHistory(timestamp = null) {
         if (isFetchingHistory) return;
         isFetchingHistory = true;
         
         console.log(`Requesting history for ${receiverId} before ${timestamp || 'the beginning'}`);
 
-        const socket = window.globalSocket;
         if (socket && socket.readyState === WebSocket.OPEN) {
             socket.send(JSON.stringify({
                 type: 'get_message_history',
@@ -112,6 +112,7 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
 
     /** The back button click handler. It resets the UI to show the user list again. */
     backButton.addEventListener('click', () => {
+        socket.send(JSON.stringify({ type: 'get_user_list' }))
         const userListContainer = document.querySelector('.user-list-container');
         const messageAreaContainer = document.querySelector('.message-area-container');
         
@@ -124,6 +125,7 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
         
         // Clean up global state so incoming messages are no longer directed here.
         window.activeChatUserID = null;
+
     });
     
     /** Renders a single message object into the DOM as a message bubble. */
