@@ -63,15 +63,14 @@ document.getElementById('createPostForm').addEventListener('submit', async (e) =
     });
 
     if (response.ok) {
-        console.log('post created')
-        alert('Post created successfully!');
         window.location.href = '/';
+        window.location.reload();
+        // alert('Post created successfully!');
     } else if (response.status === 401) {
         alert('Failed to create post: user not logged in.');
         window.location.href = '/login';
     } else {
         alert('Failed to create post.');
-        // window.location.reload();
     }
 });
 
