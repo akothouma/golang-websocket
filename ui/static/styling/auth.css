@@ -32,7 +32,7 @@ h1{
     width: 100%;
 }
 
-#Username,#firstName,#lastName{
+#Username{
     margin-right: 15px;
     padding: 20px;
     background-color: transparent;
@@ -41,7 +41,7 @@ h1{
     margin: 15px;
     font-size: 16px;
 }
-#password,#confirmPassword,#email{
+#password,#confirmPassword,#email,#firstName,#lastName{
     position: relative;
     margin-top: 10px;
     padding: 20px;
@@ -51,7 +51,7 @@ h1{
     margin: 15px;
     font-size: 16px;
 }
-#email{
+#email,#firstName{
     margin-left: 15px;
     padding: 20px;
     margin-right:0px ;
@@ -73,7 +73,7 @@ button{
     box-shadow: 5px 5px 5px 5px rgba(0, 0, 255, 0.2);
 }
    
-.emailUsername input,.BothNames input{
+.emailUsername input{
     width:50%;
     padding: 20px;
     border-radius:50px;

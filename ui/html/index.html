@@ -84,12 +84,12 @@
                 <div class="overall">
                     <h1>Login</h1>
                     <!-- Display error message from server if present -->
-                    <p id="login-error-message"> {{if .LoginError}} {{.LoginError}} {{else}} Enter valid credentials to
+                    <p id="error-message"> {{if .LoginError}} {{.LoginError}} {{else}} Enter valid credentials to
                         login {{end}}</p>
                     <div class="passButton">
-                        <input type="email" id="login_email" name="email" placeholder="Enter email or username"
+                        <input type="email" id="email" name="email" placeholder="Enter email or username"
                             required><br><br>
-                        <input type="password" id="login_password" name="password" required
+                        <input type="password" id="password" name="password" required
                             placeholder="password"><br><br>
                         <button type="submit">Login</button>
                         <p>Don't have an account? <a href="#" id="showRegisterFromLogin">Register here</a>.</p>
@@ -114,8 +114,8 @@
                     <input type="text" name="lastName" id="lastName" required placeholder="Last Name">
                 </div>
                 <div class="emailUsername">
-                    <input type="email" id="register_email" name="email" required placeholder="Email">
-                    <input type="text" name="username" id="register_username" required placeholder="Nickname">
+                    <input type="email" id="email" name="email" required placeholder="Email">
+                    <input type="text" name="username" id="Username" required placeholder="Nickname">
                 </div>
                 <div class="AgeGender">
                     <input type="number" id="age" name="age" required placeholder="Age" min="1" max="150">
