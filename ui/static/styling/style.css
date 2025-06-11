@@ -549,6 +549,7 @@ nav .uil{
     padding: var(--card-padding);
     box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.1);
     height:fit-content;
+    max-height: 70vh;
     display: flex;
     flex-direction: column;
 }
