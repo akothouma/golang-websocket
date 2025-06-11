@@ -49,30 +49,31 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-document.getElementById('loginButton').addEventListener('click',(e)=>{
+// document.getElementById('loginButton').addEventListener('click',(e)=>{
 
-})
-
-// Handle post creation form submission
-document.getElementById('createPostForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const response = await fetch('/post', {
-        method: 'POST',
-        body: formData
+// })
+document.addEventListener("DOMContentLoaded",()=>{
+    document.getElementById('createPostForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const response = await fetch('/post', {
+            method: 'POST',
+            body: formData
+        });
+    
+        if (response.ok) {
+            window.location.href = '/';
+            // window.location.reload();
+        } else if (response.status === 401) {
+            alert('Failed to create post: user not logged in.');
+            window.location.href = '/login';
+        } else {
+            alert('Failed to create post.');
+        }
     });
 
-    if (response.ok) {
-        window.location.href = '/';
-        window.location.reload();
-        // alert('Post created successfully!');
-    } else if (response.status === 401) {
-        alert('Failed to create post: user not logged in.');
-        window.location.href = '/login';
-    } else {
-        alert('Failed to create post.');
-    }
 });
+// Handle post creation form submission
 
 // Handle like/dislike form submissions
 // Like/dislike handler for both posts and comments
