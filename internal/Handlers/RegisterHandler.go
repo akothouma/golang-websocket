@@ -195,6 +195,6 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	w.WriteHeader(http.StatusCreated) // 201 Created is conventional for successful resource creation
 	json.NewEncoder(w).Encode(map[string]string{
 		"message":  "Registration successful! You can now login.",
-		"redirect": "/", // Or a path that shows the login form in your SPA
+		"redirect": "/login", // Or a path that shows the login form in your SPA
 	})
 }
