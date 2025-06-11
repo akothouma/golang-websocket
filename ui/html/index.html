@@ -113,8 +113,8 @@
                     <input type="text" name="lastName" id="lastName" required placeholder="Last Name">
                 </div>
                 <div class="emailUsername">
-                    <input type="email" id="email" name="email" required placeholder="Email">
-                    <input type="text" name="username" id="Username" required placeholder="Nickname">
+                    <input type="email" id="register_email" name="email" required placeholder="Email">
+                    <input type="text" name="username" id="register_username" required placeholder="Nickname">
                 </div>
                 <div class="AgeGender">
                     <input type="number" id="age" name="age" required placeholder="Age" min="1" max="150">
@@ -130,7 +130,7 @@
                     </div>
                 </div>
                 <div class="passButton">
-                    <input type="password" name="password" id="password" required placeholder="password">
+                    <input type="password" name="password" id="register_password" required placeholder="password">
                     <input type="password" name="confirmPassword" id="confirmPassword" required
                         placeholder="confirm password">
                     <div>
@@ -692,8 +692,8 @@
 
                 try {
                     const formData = {
-                        email: loginForm.login_email.value,
-                        password: loginForm.login_password.value,
+                        email: loginForm.email.value,
+                        password: loginForm.password.value,
                         csrfToken: loginForm.csrf_token.value
                     };
                     const response = await fetch('/login', {
