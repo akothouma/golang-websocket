@@ -89,8 +89,7 @@
                     <div class="passButton">
                         <input type="email" id="email" name="email" placeholder="Enter email or username"
                             required><br><br>
-                        <input type="password" id="password" name="password" required
-                            placeholder="password"><br><br>
+                        <input type="password" id="password" name="password" required placeholder="password"><br><br>
                         <button type="submit">Login</button>
                         <p>Don't have an account? <a href="#" id="showRegisterFromLogin">Register here</a>.</p>
                     </div>
@@ -119,22 +118,15 @@
                 </div>
                 <div class="AgeGender">
                     <input type="number" id="age" name="age" required placeholder="Age" min="1" max="150">
-                    <p>Enter your gender (optional):</p>
-                    <div>
-                        <input type="radio" name="gender" id="gender_male" value="male">
-                        <label for="gender_male">Male</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="gender" id="gender_female" value="female">
-                        <label for="gender_female">Female</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="gender" id="gender_other" value="other">
-                        <label for="gender_other">Other</label>
-                    </div>
-                    <div>
-                        <input type="radio" name="gender" id="gender_none" value="" checked>
-                        <label for="gender_none">Prefer not to say</label>
+
+                    <div class="gender">
+                        <label for="gender">Enter your gender (optional):</label>
+                        <select name="gender" id="gender">
+                            <option value="" selected>Prefer not to say</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
                     </div>
                 </div>
                 <div class="passButton">
