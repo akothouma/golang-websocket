@@ -176,6 +176,8 @@ func PostsRows(rows *sql.Rows) ([]Post, error) {
 			return nil, err
 		}
 
+		p.FormattedDate=p.CreatedAt.Format("January 2, 2006 at 3:04 PM")
+
 		p.Initial = string(p.UserName[0])
 
 		p.MediaString = MediaToBase64(p.Media)
