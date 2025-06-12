@@ -241,7 +241,7 @@ document.querySelectorAll('.comment-form').forEach(form => {
             });
 
             if (response.ok) {
-                alert('Comment created successfully');
+                // alert('Comment created successfully');
                 window.location.reload();
             } else if (response.status === 401) {
                 alert('Failed to comment: user not logged in.');
