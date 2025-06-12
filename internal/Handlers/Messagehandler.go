@@ -99,7 +99,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 	ClientsMux.Lock()
 	Clients[userID] = conn
 	ClientsMux.Unlock()
-	log.Printf("User %s connected. Total clients: %d", userID, len(Clients))
 	dep.broadcastUserListUpdate()
 
 	// 2. Announce the new user's status to all other clients.
@@ -109,7 +108,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 		ClientsMux.Lock()
 		delete(Clients, userID)
 		ClientsMux.Unlock()
-		log.Printf("User %s disconnected. Remaining clients: %d", userID, len(Clients))
 		// Announce the user's offline status to all remaining clients.
 		dep.broadcastUserListUpdate()
 		conn.Close()
@@ -122,7 +120,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 		if err != nil {
 			// Handle WebSocket close errors gracefully.
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("WebSocket read error for user %s: %v", userID, err)
 			}
 			break // Exit loop on error to trigger the deferred cleanup.
 		}
@@ -136,7 +133,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 		case "private_message":
 			// Client is sending a private message to another user.
 			if msg.Target == "" || msg.Content == "" {
-				log.Printf("Invalid private message from %s: missing target or content", userID)
 				continue
 			}
 			messageModel := models.Message{
@@ -153,7 +149,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 		case "get_message_history":
 			// Client is requesting the chat history with another user.
 			if msg.Target == "" {
-				log.Printf("Invalid history request from %s: missing target", userID)
 				continue
 			}
 			dep.sendMessageHistory(conn, userID, msg.Target, msg.LastMessageTime)
@@ -191,12 +186,12 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 	// 1. Fetch all users and all last messages from the database.
 	allDBUsers, err := dep.Forum.GetAllUsers()
 	if err != nil {
-		log.Printf("broadcastUserListUpdate: Error getting all users: %v", err)
+		// log.Printf("broadcastUserListUpdate: Error getting all users: %v", err)
 		return
 	}
 	lastMessages, err := models.GetAllLastMessages()
 	if err != nil {
-		log.Printf("broadcastUserListUpdate: Error getting last messages: %v", err)
+		// log.Printf("broadcastUserListUpdate: Error getting last messages: %v", err)
 		return
 	}
 
