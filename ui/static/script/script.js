@@ -68,7 +68,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             alert('Failed to create post: user not logged in.');
             window.location.href = '/login';
         } else {
-            alert('Failed to create post.');
+            alert('Failed to create post.All fields required including category');
         }
     });
 

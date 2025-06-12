@@ -87,6 +87,10 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Missing required fields", http.StatusBadRequest)
 			return
 		}
+		if len(categories)==0{
+			http.Error(w, "Missing required fields", http.StatusBadRequest)
+			return
+		}
 
 		post := models.Post{
 			PostId:   postId,
