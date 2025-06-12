@@ -14,12 +14,12 @@ var DB *sql.DB
 // var f *ForumModel
 
 func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/"{
-		RenderTemplates(w, "error.html", map[string]string{
-			"Code":"404 Page Not Found",
-		})
-		return
-	}
+	// if r.URL.Path != "/"{
+	// 	RenderTemplates(w, "error.html", map[string]string{
+	// 		"Code":"404 Page Not Found",
+	// 	})
+	// 	return
+	// }
 	// if r.Method == http.MethodGet {
 
 	var categories []postCategory
@@ -267,7 +267,7 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
         WHERE p.user_uuid = ?
         ORDER BY p.created_at DESC
     `
-
+//Querry for user-specific posts
 	rows, err := DB.Query(query, userUUID)
 	if err != nil {
 		http.Error(w, "Failed to fetch your posts", http.StatusInternalServerError)
@@ -281,6 +281,7 @@ func RenderMyPostsPage(w http.ResponseWriter, r *http.Request) {
         fmt.Println(err)
         return
     }
+	// fmt.Println("My own posts",myPosts)
     var categories []postCategory
 	categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
 	if err != nil {
