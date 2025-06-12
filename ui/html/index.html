@@ -300,7 +300,7 @@
                                         <div class="category_names">
                                             <p>Categories: 
                                                 {{- range $i, $cat := .Categories -}}
-                                                {{ $cat.Name }}{{ if lt $i $.LastIndex }}, {{ end }}
+                                              {{- if $i }}, {{ end -}}{{- $cat.Name -}}
                                                 {{- end -}}
                                             </p>
                                         </div>
