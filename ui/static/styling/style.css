@@ -564,7 +564,7 @@ nav .uil{
 /* ---- User List Column ---- */
 .user-list-container {
     width: 100%; /* Take full width initially */
-    height: 100%;
+    height: auto;
     border-right: 1px solid var(--color-light);
     display: flex;
     flex-direction: column;
@@ -650,7 +650,7 @@ nav .uil{
 .message-area-container {
     flex-grow: 1; /* It will take the remaining space */
     width: 0; /* Initially has no width */
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
     transition: width 0.3s ease;
