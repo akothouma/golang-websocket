@@ -50,8 +50,10 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 	// 	})
 	// 	return
 	// }
-	if r.Method == http.MethodPost {
+	if r.Method != http.MethodPost {
 		log.Println("Method not allowed")
+		return
+	}
 
 		sessionId := r.Context().Value("session_id")
 		sess1, err := r.Cookie("session_id")
@@ -146,7 +148,7 @@ func (dep *Dependencies) PostHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("Post created successfully"))
 	}
-}
+
 
 // func (dep *Dependencies) AllPostsHandler(w http.ResponseWriter, r *http.Request) {
 // 	if r.Method != http.MethodGet {
