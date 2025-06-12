@@ -296,6 +296,15 @@
                                 <div class="info">
                                     <h3>{{.UserName}}</h3>
                                     <small> {{.CreatedAt}}</small>
+                                    <div class="category_names">
+                                        <div class="category_names">
+                                            <p>Categories: 
+                                                {{- range $i, $cat := .Categories -}}
+                                                {{ $cat.Name }}{{ if lt $i $.LastIndex }}, {{ end }}
+                                                {{- end -}}
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <span class="edit">
@@ -307,7 +316,7 @@
 
                         <!--======= POST CONTENT  =======-->
                         <div class="feed-content">
-                            <h3>{{.Title}}</h3>
+                            <h3>{{.Title}} </h3>
                             <pre>{{.Content}}</pre>
                         </div>
                         <!--======= END OF POST CONTENT  =======-->

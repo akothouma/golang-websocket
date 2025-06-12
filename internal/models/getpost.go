@@ -72,6 +72,7 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	data["ViewType"] = "all"
 	data["Posts"] = posts
 	data["Categories"] = categories
+	data["LastIndex"]=len(categories)-1
 
 	// fmt.Println("categories:", categories)
 

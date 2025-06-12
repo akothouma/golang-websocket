@@ -806,3 +806,13 @@ nav .uil{
 .back-button:hover {
     color: var(--color-primary);
 }
+
+.category_names{
+    display: flex;
+    flex-direction: row; 
+    color: var(--color-primary);
+    font-weight: bold;
+   
+}
+
+
