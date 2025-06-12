@@ -75,7 +75,8 @@ h1{
     width:100%;
      
 }
-button{
+
+.passButton button{
     padding: 20px;
     background-color: hsl(252,75%, 60%);;
     color: white;
