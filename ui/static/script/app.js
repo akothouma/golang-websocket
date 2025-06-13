@@ -15,6 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Global State Management ---
     // These variables are attached to the `window` object to be accessible
     // across different component files, acting as a simple shared state store.
+    const root = document.getElementById("message_layout");
+
+    if (root){
 
     /**
      * @property {Object} window.chatCache - A simple cache to store message history for each chat.
@@ -37,7 +40,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const { renderedView, updateUserList } = Card();
     
     // Find the designated layout container in `index.html` and append our chat system's root element.
-    const root = document.getElementById("message_layout");
     root.appendChild(renderedView);
 
     // --- WebSocket Initialization & Message Handling ---
@@ -126,4 +128,5 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log(`New message from ${otherUserID}, but chat is not active.`);
         }
     }
+}
 });
