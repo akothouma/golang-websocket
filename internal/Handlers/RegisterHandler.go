@@ -189,12 +189,12 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	dep.InfoLog.Printf("User successfully registered: UUID %s, Username %s", userUuid, regReq.Username)
-
-	// Send success response
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated) // 201 Created is conventional for successful resource creation
-	json.NewEncoder(w).Encode(map[string]string{
-		"message":  "Registration successful! You can now login.",
-		"redirect": "/login", // Or a path that shows the login form in your SPA
-	})
+ // Return success response for AJAX instead of redirect
+    fmt.Println("Registered successfully!!!")
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusCreated)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "Registration successful! You can now login.",
+        "redirect": "/login",
+    })
 }
