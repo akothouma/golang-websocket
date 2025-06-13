@@ -19,14 +19,14 @@ type ErrorResponseLogin struct {
 
 func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	var logReq LoginRequest
-	loginTemplate, err := template.ParseFiles("./ui/html/login.html")
+	loginTemplate, err := template.ParseFiles("./ui/html/index.html")
 	if err != nil {
 		http.Error(w, "NOT FOUND\nLogin template not found", http.StatusNotFound)
 		return
 	}
 	if r.Method == http.MethodGet {
 		csrfToken := r.Context().Value("csrf_token").(string)
-		loginTemplate.ExecuteTemplate(w, "login.html", map[string]interface{}{
+		loginTemplate.ExecuteTemplate(w, "index.html", map[string]interface{}{
 			"CSRFToken": csrfToken,
 		})
 		return
