@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"net/http"
 )
@@ -36,11 +37,11 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "Something went wrong.Try again later"})
-		return
-	}
+	// if err := r.ParseForm(); err != nil {
+	// 	w.WriteHeader(http.StatusInternalServerError)
+	// 	json.NewEncoder(w).Encode(ErrorResponseLogin{Error: "Something went wrong.Try again later"})
+	// 	return
+	// }
 	if err := json.NewDecoder(r.Body).Decode(&logReq); err != nil {
 		dep.ClientError(w, http.StatusInternalServerError)
 		return
@@ -81,5 +82,12 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	dep.CreateSession(w, r, user.UserID)
 
-	// http.Redirect(w, r, "/", http.StatusSeeOther)
+// For AJAX requests, return success response instead of redirect
+    fmt.Println("Login successful!!!")
+    w.Header().Set("Content-Type", "application/json")
+    w.WriteHeader(http.StatusOK)
+    json.NewEncoder(w).Encode(map[string]string{
+        "message": "Login successful",
+        "redirect": "/",
+    })
 }
