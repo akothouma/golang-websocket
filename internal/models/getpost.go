@@ -49,18 +49,30 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	// username := ""
 
 	// Check if the user is logged in
-	username, _ := LogedInUser(r)
-	// Get user details
-	f := &ForumModel{DB: DB}
-	user, err := f.GetUserByUsername(username)
-	if err == nil && user != nil {
-		if user.ProfilePicture != "" {
-			data["ProfilePicture"] = user.ProfilePicture
-			data["ContentType"] = user.ContentType
-		} else if len(username) > 0 {
-			data["Initial"] = string(username[0])
-		}
-	}
+	username,err := LogedInUser(r)
+	if err != nil {
+        // This is the guest user path. Log the error for debugging.
+        log.Printf("Could not get logged-in user: %v. Rendering as guest.", err)
+        // Set username to "" to ensure template renders the login/register buttons
+        username = ""
+    }
+
+  // Get user details (this code now runs safely even if username is empty)
+    if username != "" {
+        f := &ForumModel{DB: DB}
+        user, userErr := f.GetUserByUsername(username)
+        if userErr == nil && user != nil {
+            if user.ProfilePicture != "" {
+                data["ProfilePicture"] = user.ProfilePicture
+                data["ContentType"] = user.ContentType
+            } else {
+                data["Initial"] = string(username[0])
+            }
+        }
+    } else {
+        // Set guest initial explicitly
+        data["Initial"] = "G"
+    }
 
 	//pass csrf_token through the context
 	csrfToken := r.Context().Value("csrf_token").(string)
@@ -73,6 +85,8 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	data["Posts"] = posts
 	data["Categories"] = categories
 	data["LastIndex"]=len(categories)-1
+
+	// fmt.Println("usernme:",data)
 
 	// fmt.Println("categories:", categories)
 
