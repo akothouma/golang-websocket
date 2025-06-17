@@ -197,7 +197,7 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
                 requestHistory(lastTs); //...fetch the next page.
             }
         }
-    }, 1000)); // Limit to one request per second.
+    }, 10)); // Limit to one request per second.
     
     /** The submit event handler for the message input form. */
     messageForm.addEventListener('submit', (e) => {

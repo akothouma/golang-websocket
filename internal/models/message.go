@@ -57,7 +57,7 @@ func GetMessageHistory(user1, user2 string, lastTimestamp time.Time, limit int) 
 
 	// The base query selects all relevant columns and messages for a two-way conversation.
 	query = `SELECT messageID, sender, receiver, messageText, isRead, createdAt FROM messages 
-	WHERE (sender=? AND receiver=?) OR (sender=? AND receiver=?)`
+	WHERE ((sender=? AND receiver=?) OR (sender=? AND receiver=?))`
 	args = append(args, user1, user2, user2, user1)
 
 	// If `lastTimestamp` is provided, it's used as a cursor to fetch messages older than it.
