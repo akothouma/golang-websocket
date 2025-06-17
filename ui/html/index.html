@@ -84,7 +84,7 @@
                 <div class="overall">
                     <h1>Login</h1>
                     <!-- Display error message from server if present -->
-                    <p id="error-message"> {{if .LoginError}} {{.LoginError}} {{else}} Enter valid credentials to
+                    <p id="error-message"> {{if .ErrorResponseLogin}} {{.ErrorResponseLogin}} {{else}} Enter valid credentials to
                         login {{end}}</p>
                     <div class="passButton">
                         <input type="email" id="email" name="email" placeholder="Enter email"
@@ -106,7 +106,7 @@
             <div class="overall">
                 <h1>Create account</h1>
                 <!-- Display error message from server if present -->
-                <p id="error-message">{{if .RegisterError}} {{.RegisterError}} {{else}} Enter your details to
+                <p id="error-message">{{if .ErrorResponse}} {{.ErrorResponse}} {{else}} Enter your details to
                     register {{end}}</p>
                 <div class="BothNames">
                     <input type="text" id="firstName" name="firstName" required placeholder="First Name">
@@ -586,7 +586,7 @@
                 e.preventDefault();
                 showPageSection(loginSection);
                 // Optionally clear previous error messages when switching views
-                const loginErrorMsgEl = document.getElementById('login-error-message');
+                const loginErrorMsgEl = document.getElementById('error-message');
                 if (loginErrorMsgEl) loginErrorMsgEl.textContent = 'Enter valid credentials to login'; loginErrorMsgEl.style.color = 'inherit';
             });
         }
@@ -596,7 +596,7 @@
                 e.preventDefault();
                 showPageSection(registerSection);
                 // Optionally clear previous error messages when switching views
-                const registerErrorMsgEl = document.getElementById('register-error-message');
+                const registerErrorMsgEl = document.getElementById('error-message');
                 if (registerErrorMsgEl) registerErrorMsgEl.textContent = 'Enter your details to register'; registerErrorMsgEl.style.color = 'inherit';
             });
         }
@@ -612,7 +612,7 @@
             showRegisterLinkInLogin.addEventListener('click', (e) => {
                 e.preventDefault();
                 showPageSection(registerSection);
-                const registerErrorMsgEl = document.getElementById('register-error-message');
+                const registerErrorMsgEl = document.getElementById('error-message');
                 if (registerErrorMsgEl) registerErrorMsgEl.textContent = 'Enter your details to register'; registerErrorMsgEl.style.color = 'inherit';
             });
         }
@@ -621,7 +621,7 @@
             showLoginLinkInRegister.addEventListener('click', (e) => {
                 e.preventDefault();
                 showPageSection(loginSection);
-                const loginErrorMsgEl = document.getElementById('login-error-message');
+                const loginErrorMsgEl = document.getElementById('error-message');
                 if (loginErrorMsgEl) loginErrorMsgEl.textContent = 'Enter valid credentials to login'; loginErrorMsgEl.style.color = 'inherit';
 
             });
@@ -630,8 +630,8 @@
         // --- Initial Page State (Handle server-side errors on page load) ---
         // This part checks if the server rendered the page with an error,
         // which might mean main content is hidden and a specific form should be shown.
-        const loginErrorMsgInitial = document.getElementById('login-error-message');
-        const registerErrorMsgInitial = document.getElementById('register-error-message');
+        const loginErrorMsgInitial = document.getElementById('error-message');
+        const registerErrorMsgInitial = document.getElementById('error-message');
         const defaultLoginMsg = "Enter valid credentials to login";
         const defaultRegisterMsg = "Enter your details to register";
 
@@ -673,10 +673,10 @@
             let defaultMessage = "";
 
             if (formType === "login") {
-                messageElementId = "login-error-message";
+                messageElementId = "error-message";
                 defaultMessage = "Enter valid credentials to login";
             } else if (formType === "register") {
-                messageElementId = "register-error-message";
+                messageElementId = "error-message";
                 defaultMessage = "Enter your details to register";
             }
 
