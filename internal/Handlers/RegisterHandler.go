@@ -19,9 +19,9 @@ type RegisterRequest struct {
     LastName    string `json:"lastName"`
     Username    string `json:"username"`
     Email       string `json:"email"`
-    Age         int    `json:"age,omitempty"`    // omitempty because client might send null if age is not entered,
+    Age         int    `json:"age"`    // omitempty because client might send null if age is not entered,
                                                // and it allows the field to be absent in JSON too.
-    Gender      string `json:"gender,omitempty"` // similar to age, allows absence or null to become ""
+    Gender      string `json:"gender"` // similar to age, allows absence or null to become ""
     Password    string `json:"password"`
     Tac         bool   `json:"tac"`
     CsrfToken   string `json:"csrfToken"`      // Renamed struct field for clarity, tag matches client
