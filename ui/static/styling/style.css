@@ -815,4 +815,29 @@ nav .uil{
    
 }
 
+/* Add this to your existing CSS file */
+
+.user-card-info {
+    position: relative; /* Needed for absolute positioning of the badge */
+    flex-grow: 1;
+    overflow: hidden; /* Ensures long usernames don't push the badge out */
+}
+
+.unread-badge {
+    position: absolute;
+    top: 5px; /* Adjust as needed */
+    right: 5px; /* Adjust as needed */
+    background-color: #e63946; /* A nice red color */
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
 
