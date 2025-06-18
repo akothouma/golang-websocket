@@ -32,6 +32,7 @@ type WebSocketMessage struct {
 	Type            string           `json:"type"`                      // e.g., "get_user_list", "private_message", "get_message_history".
 	Content         string           `json:"content,omitempty"`         // The text content of a message being sent.
 	Target          string           `json:"target,omitempty"`          // The userID of the intended recipient.
+	Sender          string              `json:"sender,omitempty"`          // The userID of the sender, used for events like typing.
 	Messages        []models.Message `json:"messages,omitempty"`        // A slice of messages, used for sending chat history.
 	UserList        []UserChatInfo   `json:"userList,omitempty"`        // A slice of user info, used for updating the online users list.
 	LastMessageTime time.Time        `json:"lastMessageTime,omitempty"` // The timestamp of the oldest message received, used for paginating history (infinite scroll).
@@ -167,8 +168,41 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 			// After marking as read, broadcast an updated user list so the unread count badge disappears.
 			dep.broadcastUserListUpdate()
 
+			// ---- START: NEW TYPING CASES ----
+		case "start_typing":
+			dep.relayTypingEvent("typing_started", userID, msg.Target)
+
+		case "stop_typing":
+			dep.relayTypingEvent("typing_stopped", userID, msg.Target)
+
 		default:
 			log.Printf("Unknown message type '%s' from user %s", msg.Type, userID)
+		}
+	}
+}
+
+// internal/handlers/messagehandler.go
+
+// relayTypingEvent forwards a typing notification from a sender to a target user.
+// It does not persist anything and acts as a simple, real-time relay.
+func (dep *Dependencies) relayTypingEvent(eventType, senderID, targetID string) {
+	if targetID == "" {
+		return
+	}
+
+	ClientsMux.Lock()
+	defer ClientsMux.Unlock()
+
+	// Prepare the event payload to be sent to the recipient.
+	response := WebSocketMessage{
+		Type:   eventType,  // "typing_started" or "typing_stopped"
+		Sender: senderID,   // The ID of the user who is typing
+	}
+
+	// Find the recipient's connection and send them the event.
+	if targetConn, ok := Clients[targetID]; ok {
+		if err := targetConn.WriteJSON(response); err != nil {
+			log.Printf("Error relaying typing event to user %s: %v", targetID, err)
 		}
 	}
 }
@@ -221,7 +255,7 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 
 	// 3. Iterate through each connected client to send them a personalized user list.
 	for userID, clientConn := range Clients {
-		//Fetch the unread message counts specifically for the user receiving this update
+		// Fetch the unread message counts specifically for the user receiving this update
 		unreadCounts, err := models.GetUnreadMessageCounts(userID)
 		if err != nil {
 			log.Printf("Error getting unread counts for user %s: %v", userID, err)
@@ -234,10 +268,10 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 		for _, dbUser := range allDBUsers {
 			_, isOnline := Clients[dbUser.UserID]
 			userInfo := UserChatInfo{
-				UserID:   dbUser.UserID,
-				Username: dbUser.Username,
-				IsOnline: isOnline,
-				IsMe:     (dbUser.UserID == userID), // Tailor this flag for the recipient.
+				UserID:      dbUser.UserID,
+				Username:    dbUser.Username,
+				IsOnline:    isOnline,
+				IsMe:        (dbUser.UserID == userID), // Tailor this flag for the recipient.
 				UnreadCount: unreadCounts[dbUser.UserID],
 			}
 
