@@ -99,7 +99,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	// For now, relying on client-side check.
 
 	// Field presence validation (basic) - Add FirstName and LastName if they are mandatory
-	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" {
+	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" || regReq.Age ==0 || regReq.Gender==""{
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Required fields (First Name, Last Name, Email, Username, Password) cannot be empty."})
