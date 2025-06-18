@@ -77,6 +77,8 @@
     </nav>
     <!--========================== END OF NAV BAR ==========================-->
     <!-- Login Section -->
+
+    {{if not .UserName}}
     <div id="loginSection" class="page-section hidden">
         <div class="overall">
             <form id="loginForm" action="/login" method="POST">
@@ -143,6 +145,7 @@
             </div>
         </form>
     </div>
+    {{end}}
 
     <!----------------------- MAIN ----------------------->
     <main id="mainContentSection" class="page-section {{if or .LoginError .RegisterError}}hidden{{end}}">
