@@ -144,3 +144,45 @@ func GetConversationID(user1, user2 string) string {
 	sort.Strings(users)
 	return users[0] + ":" + users[1]
 }
+
+
+
+// GetUnreadMessageCounts returns a map where the key is the sender's ID and the value
+// is the count of unread messages they have sent to the specified receiver.
+// This is used to populate notification badges in the UI.
+func GetUnreadMessageCounts(receiverID string) (map[string]int, error) {
+	query := `
+		SELECT sender, COUNT(*) 
+		FROM messages 
+		WHERE receiver = ? AND isRead = false 
+		GROUP BY sender`
+
+	rows, err := DB.Query(query, receiverID)
+	if err != nil {
+		return nil, fmt.Errorf("failed to query unread message counts: %w", err)
+	}
+	defer rows.Close()
+
+	counts := make(map[string]int)
+	for rows.Next() {
+		var senderID string
+		var count int
+		if err := rows.Scan(&senderID, &count); err != nil {
+			return nil, fmt.Errorf("failed to scan unread message count: %w", err)
+		}
+		counts[senderID] = count
+	}
+	return counts, nil
+}
+
+// MarkMessagesAsRead updates the `isRead` status of all messages sent from a
+// specific sender to a specific receiver. This is triggered when the receiver
+// opens the chat window.
+func MarkMessagesAsRead(senderID, receiverID string) error {
+	query := "UPDATE messages SET isRead = true WHERE sender = ? AND receiver = ? AND isRead = false"
+	_, err := DB.Exec(query, senderID, receiverID)
+	if err != nil {
+		return fmt.Errorf("could not mark messages as read: %w", err)
+	}
+	return nil
+}
