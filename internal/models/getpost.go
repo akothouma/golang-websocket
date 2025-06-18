@@ -22,6 +22,18 @@ func RenderPostsPage(w http.ResponseWriter, r *http.Request) {
 	// }
 	// if r.Method == http.MethodGet {
 
+	sessionId := r.Context().Value("session_id")
+		sess1, err := r.Cookie("session_id")
+		if err != nil {
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
+			return
+		}
+		if sess1.Value != sessionId {
+			log.Println("sess1.Value", sess1.Value, sessionId)
+			log.Println("sessioId", sessionId)
+			http.Error(w, "User not logged in: ", http.StatusUnauthorized)
+			return
+		}
 	var categories []postCategory
 	categoryRows, err := DB.Query("SELECT id, name FROM categories ORDER BY name")
 	if err != nil {

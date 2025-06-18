@@ -189,16 +189,7 @@
                         <button type="submit">Upload</button>
                     </form>
                 </div>
-                {{ else }}
-                <div class="profile-card">
-                    <div class="profile-photo">
-                        <div class="initials">G</div>
-                    </div>
-                    <div class="handle">
-                        <h4>Guest Mode</h4>
-                        <p class="text-muted">Please login or create an account</p>
-                    </div>
-                </div>
+              
                 {{ end }}
 
 
@@ -519,10 +510,10 @@
             </div>
 
             <!--====================== RIGHT ======================-->
+            {{if .UserName}}
             <div class="right">
-                {{if .UserName}}
                 <div id="message_layout"></div>
-                {{end}}
+                
                 <div class="categories" style="box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.281);">
                     <div class="heading">
                         <h4> Filter by categories</h4>
@@ -546,6 +537,7 @@
 
 
             </div>
+            {{end}}
             <!--====================== END OF RIGHT ======================-->
         </div>
     </main>
@@ -783,26 +775,9 @@
                     }
                     const successData = await response.json();
                     displayFormMessage("register", successData.message || "Registration successful!", true);
-                    // if (successData.redirect) {
-                    //     setTimeout(() => { window.location.href = successData.redirect; }, 1500);
-                    // }
-                         // 3. Clear the registration form fields for good UX
-            registerForm.reset(); 
-
-            // 4. Wait for 1.5 seconds so the user can read the success message
-            setTimeout(() => {
-                // 5. Use your existing function to switch to the login form view
-                showPageSection(loginSection);
-
-                // 6. (Optional but recommended) Update the URL in the browser bar without reloading
-                history.pushState(null, '', '/login'); 
-
-                // 7. Clear the success message from the (now hidden) register form
-                displayFormMessage("register", ""); 
-
-            }, 1500); // 1500 milliseconds = 1.5 seconds
-
-
+                    if (successData.redirect) {
+                        window.location.href = successData.redirect; ;
+                    }
                 } catch (error) {
                     console.error("Registration Fetch Error:", error);
                     displayFormMessage("register", "Network error. Please try again.", false);
