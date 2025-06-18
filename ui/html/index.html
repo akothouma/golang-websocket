@@ -748,7 +748,7 @@
                 try {
                         // Correctly get the selected gender value
             const genderSelect = registerForm.querySelector('#gender'); // Get the <select> element
-            const selectedGender = genderSelect ? genderSelect.value : ""; // Get its value, default to ""
+          // Get its value, default to ""
 
                     // const genderRadio = registerForm.querySelector('input[name="gender"]:checked');
                     const formData = {
@@ -757,7 +757,7 @@
                         username: registerForm.register_username.value,
                         email: registerForm.register_email.value,
                         age: parseInt(registerForm.age.value),
-                        gender: genderRadio.value,
+                        gender:  genderSelect.value,
                         password: registerForm.register_password.value,
                         tac: registerForm.tac.checked,
                         csrfToken: registerForm.csrf_token.value
