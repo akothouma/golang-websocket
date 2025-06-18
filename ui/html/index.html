@@ -148,6 +148,7 @@
     {{end}}
 
     <!----------------------- MAIN ----------------------->
+    {{ if .UserName }}
     <main id="mainContentSection" class="page-section {{if or .LoginError .RegisterError}}hidden{{end}}">
         <div class="container">
 
@@ -155,7 +156,6 @@
             <div class="left">
 
                 <!------------ PROFILE ------------>
-                {{ if .UserName }}
                 <div class="profile-card">
                     <!-- Profile Photo Section -->
 
@@ -189,13 +189,12 @@
                         <button type="submit">Upload</button>
                     </form>
                 </div>
-              
-                {{ end }}
+            
 
 
                 <!------------ END OF PROFILE ------------>
 
-                {{ if .UserName}}
+                
                 <!------------- SIDEBAR ------------->
                 <div class="sidebar">
                     <!-- <a class="menu-item active"> -->
@@ -260,7 +259,7 @@
                     </div>
 
                 </div>
-                {{end}}
+               
             </div>
 
             <!--====================== END OF LEFT ======================-->
@@ -510,7 +509,7 @@
             </div>
 
             <!--====================== RIGHT ======================-->
-            {{if .UserName}}
+           
             <div class="right">
                 <div id="message_layout"></div>
                 
@@ -537,10 +536,11 @@
 
 
             </div>
-            {{end}}
+           
             <!--====================== END OF RIGHT ======================-->
         </div>
     </main>
+    {{end}}
     <!----------------------- END OF MAIN ----------------------->
 </body>
 
