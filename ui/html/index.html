@@ -730,6 +730,12 @@
                     displayFormMessage("register", "Passwords do not match", false);
                     return;
                 }
+                 //Client side validation
+                if (registerForm.register_password.value.length <8 ){
+                     displayFormMessage("register", "Passwords length must be 8 and above", false);
+                    return;
+
+                }
                   if (!registerForm.age.value || parseInt(registerForm.age.value, 10) <= 0) {
             displayFormMessage("register", "Please enter a valid age.", false);
             return;
