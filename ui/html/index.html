@@ -79,7 +79,7 @@
     <!-- Login Section -->
 
     {{if not .UserName}}
-    <div id="loginSection" class="page-section hidden">
+    <div id="loginSection" class="page-section">
         <div class="overall">
             <form id="loginForm" action="/login" method="POST">
                 <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
@@ -122,9 +122,9 @@
                     <input type="number" id="age" name="age" required placeholder="Age" min="1" max="150">
 
                     <div class="gender">
-                        <label for="gender">Enter your gender (optional):</label>
+                        <label for="gender">Enter your gender:</label>
                         <select name="gender" id="gender">
-                            <option value="" selected>Prefer not to say</option>
+                            <option value="Prefer not to say" selected>Prefer not to say</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                             <option value="other">Other</option>
@@ -561,7 +561,7 @@
         // If not, this part for main content won't work perfectly.
         // For now, it will focus on login/register toggling.
 
-        const allPageSections = [loginSection, registerSection, mainContentSection].filter(Boolean); // Filter out nulls if a section is not found
+        const allPageSections = [ registerSection, mainContentSection].filter(Boolean); // Filter out nulls if a section is not found
 
         function showPageSection(sectionToShow) {
             allPageSections.forEach(section => {
@@ -775,12 +775,12 @@
                     });
                     if (!response.ok) {
                         const errorData = await response.json();
-                        displayFormMessage("register", errorData.error || "Registration failed", false);
+                        displayFormMessage("register", errorData.error, false);
                         console.log(errorData)
                         return;
                     }
                     const successData = await response.json();
-                    displayFormMessage("register", successData.message || "Registration successful!", true);
+                    displayFormMessage("register", successData.message, true);
                     if (successData.redirect) {
                         window.location.href = successData.redirect; ;
                     }
