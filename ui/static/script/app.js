@@ -90,6 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     break;
 
+                             // ---- START: NEW TYPING HANDLERS ----
+                case 'typing_started':
+                    updateTypingIndicator(data.sender, true);
+                    break;
+
+                case 'typing_stopped':
+                    updateTypingIndicator(data.sender, false);
+                    break;
+                // ---- END: NEW TYPING HANDLERS ----
+
+
                 // Catch-all for any message types we don't recognize.
                 default:
                     console.warn("Unknown message type:", data.type, "Full data:", data);
@@ -98,6 +109,31 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error("WebSocket message handling error:", error, "Raw data was:", e.data);
         }
     });
+
+     /**
+     * Updates the UI to show or hide the "typing..." indicator for a specific user.
+     * @param {string} senderID The ID of the user who is typing.
+     * @param {boolean} isTyping True to show the indicator, false to hide it.
+     */
+    function updateTypingIndicator(senderID, isTyping) {
+        const userCard = document.querySelector(`.user-card[data-user-id='${senderID}']`);
+        if (!userCard) return;
+
+        const lastMessageElement = userCard.querySelector('.last-message');
+        if (!lastMessageElement) return;
+
+        if (isTyping) {
+            // Store the original message content before replacing it
+            lastMessageElement.dataset.originalText = lastMessageElement.textContent;
+            // Show the typing indicator
+            lastMessageElement.innerHTML = `<span class="typing-indicator">typing...</span>`;
+        } else {
+            // Restore the original message content if it was saved
+            if (lastMessageElement.dataset.originalText) {
+                lastMessageElement.textContent = lastMessageElement.dataset.originalText;
+            }
+        }
+    }
 
     /**
      * Handles an incoming `private_message`. It determines who the message is from/to,
