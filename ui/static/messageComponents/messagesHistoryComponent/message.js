@@ -31,10 +31,17 @@ function throttle(func, limit) {
  * @param {string} receiverId The unique ID of the user we are chatting with.
  * @param {string} receiverUsername The display name of the user we are chatting with.
  * @returns {HTMLElement} The root DOM element for the chat window.
- */
+*/
 export const MessageCarriers = (receiverId, receiverUsername) => {
     
     // ---- Component-Scoped State ----
+    const socket = window.globalSocket;
+
+       // ---- START: NEW TYPING-RELATED SETUP ----
+    let typingTimer;            // This will hold our timeout
+    let isTypingSent = false;   // A flag to prevent sending multiple "start_typing" events
+    const TYPING_TIMEOUT_MS = 2000; // 2 seconds
+    // ---- END: NEW TYPING-RELATED SETUP ----
     
     /** A flag to prevent multiple history fetch requests from being sent simultaneously. */
     let isFetchingHistory = false;
@@ -104,7 +111,6 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     // ---- Logic and Event Handlers ----
     
     /** Sends a request to the server to fetch a page of message history. */
-    const socket = window.globalSocket;
     function requestHistory(timestamp = null) {
         if (isFetchingHistory) return;
         isFetchingHistory = true;
@@ -211,10 +217,36 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
             }
         }
     }, 10)); // Limit to one request per second.
+
+      /** Function to send the stop_typing event and reset the state */
+    function sendStopTyping() {
+        clearTimeout(typingTimer);
+        if (isTypingSent) {
+            socket.send(JSON.stringify({ type: 'stop_typing', target: receiverId }));
+            isTypingSent = false;
+        }
+    }
+
+     // Listen for input in the message field
+    messageInput.addEventListener('input', () => {
+        // If a "start_typing" event hasn't been sent yet, send it.
+        if (!isTypingSent) {
+            socket.send(JSON.stringify({ type: 'start_typing', target: receiverId }));
+            isTypingSent = true;
+        }
+        
+        // Clear any existing timer to reset the timeout
+        clearTimeout(typingTimer);
+        
+        // Set a new timer. If the user doesn't type for TYPING_TIMEOUT_MS,
+        // we'll assume they stopped typing.
+        typingTimer = setTimeout(sendStopTyping, TYPING_TIMEOUT_MS);
+    });
     
     /** The submit event handler for the message input form. */
     messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
+         sendStopTyping(); // Immediately signal that typing has stopped.
         const content = messageInput.value.trim();
         if (content) { // Don't send empty messages.
             const socket = window.globalSocket;
@@ -225,10 +257,22 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
                     content: content,
                 }));
                 messageInput.value = ''; // Clear the input field.
-                socket.send(JSON.stringify({ type: 'get_user_list' }));
+                // socket.send(JSON.stringify({ type: 'get_user_list' }));
             }
         }
     });
+
+       // Also modify the back button to stop typing when leaving the chat
+    backButton.addEventListener('click', () => {
+        sendStopTyping(); // Ensure indicator is cleared when navigating away.
+        
+        // ... (rest of the existing backButton logic) ...
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'get_user_list' }));
+        }
+        // ...
+    });
+
 
     // --- Initial Data Fetch ---
     // The component is now fully set up, so we make the initial request for chat history.
