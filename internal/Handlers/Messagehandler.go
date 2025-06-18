@@ -22,6 +22,7 @@ type UserChatInfo struct {
 	IsOnline           bool      `json:"isOnline"`           // A boolean flag indicating if the user is currently connected via WebSocket.
 	LastMessageContent string    `json:"lastMessageContent"` // The content of the most recent message for sorting and display.
 	LastMessageTime    time.Time `json:"lastMessageTime"`    // The timestamp of the most recent message, used for sorting.
+	UnreadCount        int       `json:"unreadCount"`        // The count of unread messages from this user.
 	IsMe               bool      `json:"isMe,omitempty"`     // A flag set to true only for the user receiving this payload, used to identify self.
 }
 
@@ -152,6 +153,19 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 				continue
 			}
 			dep.sendMessageHistory(conn, userID, msg.Target, msg.LastMessageTime)
+		case "mark_messages_as_read":
+			// Client has opened a chat and is marking messages as read.
+			if msg.Target == "" {
+				continue
+			}
+
+			// Mark messages from the target (sender) to the current user (receiver) as read.
+			err := models.MarkMessagesAsRead(msg.Target, userID)
+			if err != nil {
+				log.Printf("Error marking messages as read for user %s from %s: %v", userID, msg.Target, err)
+			}
+			// After marking as read, broadcast an updated user list so the unread count badge disappears.
+			dep.broadcastUserListUpdate()
 
 		default:
 			log.Printf("Unknown message type '%s' from user %s", msg.Type, userID)
@@ -207,6 +221,13 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 
 	// 3. Iterate through each connected client to send them a personalized user list.
 	for userID, clientConn := range Clients {
+		//Fetch the unread message counts specifically for the user receiving this update
+		unreadCounts, err := models.GetUnreadMessageCounts(userID)
+		if err != nil {
+			log.Printf("Error getting unread counts for user %s: %v", userID, err)
+			// Continue with an empty map if there's an error
+			unreadCounts = make(map[string]int)
+		}
 		var usersWithStatus []UserChatInfo // Create a new list for each recipient.
 
 		// 4. Build the list of users with their online status and "IsMe" flag.
@@ -217,6 +238,7 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 				Username: dbUser.Username,
 				IsOnline: isOnline,
 				IsMe:     (dbUser.UserID == userID), // Tailor this flag for the recipient.
+				UnreadCount: unreadCounts[dbUser.UserID],
 			}
 
 			if !(userInfo.IsMe) {
@@ -287,7 +309,7 @@ func (dep *Dependencies) StartChatBroadcastHandler() {
 			dep.relayMessage(&msg)
 
 			// Step 3: Broadcast an updated user list so everyone's sidebar re-sorts with the new "last message".
-			//dep.broadcastUserListUpdate()
+			dep.broadcastUserListUpdate()
 		}
 	}()
 }
