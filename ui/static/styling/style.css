@@ -827,7 +827,7 @@ nav .uil{
     position: absolute;
     top: 5px; /* Adjust as needed */
     right: 5px; /* Adjust as needed */
-    background-color: #e63946; /* A nice red color */
+    background-color: #1830bd; /* A nice red color */
     color: white;
     border-radius: 50%;
     width: 20px;
@@ -838,6 +838,12 @@ nav .uil{
     align-items: center;
     justify-content: center;
     line-height: 1;
+}
+
+/* Add this to your main CSS file */
+.typing-indicator {
+    font-style: italic;
+    color: #00b894; /* Or any color you like */
 }
 
 
