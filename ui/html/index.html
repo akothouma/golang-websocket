@@ -189,16 +189,7 @@
                         <button type="submit">Upload</button>
                     </form>
                 </div>
-                {{ else }}
-                <div class="profile-card">
-                    <div class="profile-photo">
-                        <div class="initials">G</div>
-                    </div>
-                    <div class="handle">
-                        <h4>Guest Mode</h4>
-                        <p class="text-muted">Please login or create an account</p>
-                    </div>
-                </div>
+              
                 {{ end }}
 
 
@@ -519,10 +510,10 @@
             </div>
 
             <!--====================== RIGHT ======================-->
+            {{if .UserName}}
             <div class="right">
-                {{if .UserName}}
                 <div id="message_layout"></div>
-                {{end}}
+                
                 <div class="categories" style="box-shadow: 2px 4px 6px rgba(0, 0, 0, 0.281);">
                     <div class="heading">
                         <h4> Filter by categories</h4>
@@ -546,6 +537,7 @@
 
 
             </div>
+            {{end}}
             <!--====================== END OF RIGHT ======================-->
         </div>
     </main>
@@ -747,8 +739,8 @@
                         lastName: registerForm.lastName.value,
                         username: registerForm.register_username.value,
                         email: registerForm.register_email.value,
-                        age: registerForm.age.value ? parseInt(registerForm.age.value) : null,
-                        gender: genderRadio ? genderRadio.value : "",
+                        age: parseInt(registerForm.age.value),
+                        gender: genderRadio.value,
                         password: registerForm.register_password.value,
                         tac: registerForm.tac.checked,
                         csrfToken: registerForm.csrf_token.value
@@ -766,7 +758,7 @@
                     const successData = await response.json();
                     displayFormMessage("register", successData.message || "Registration successful!", true);
                     if (successData.redirect) {
-                        setTimeout(() => { window.location.href = successData.redirect; }, 1500);
+                        window.location.href = successData.redirect; ;
                     }
                 } catch (error) {
                     console.error("Registration Fetch Error:", error);

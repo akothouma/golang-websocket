@@ -190,7 +190,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 
 	dep.InfoLog.Printf("User successfully registered: UUID %s, Username %s", userUuid, regReq.Username)
  // Return success response for AJAX instead of redirect
-    fmt.Println("Registered successfully!!!")
+    // fmt.Println("Registered successfully!!!")
     w.Header().Set("Content-Type", "application/json")
     w.WriteHeader(http.StatusCreated)
     json.NewEncoder(w).Encode(map[string]string{
