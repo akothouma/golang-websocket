@@ -72,6 +72,11 @@ export const Card = () => {
                 ? `<span class="user-status online">Online</span>`
                 : `<span class="user-status offline">Offline</span>`;
 
+                  // ---- NEW: Create the unread badge conditionally ----
+            const unreadBadgeHTML = user.unreadCount > 0
+                ? `<span class="unread-badge">${user.unreadCount}</span>`
+                : '';
+
             // Use a template literal to construct the inner HTML for the card efficiently.
             userCard.innerHTML = `
                 <div class="user-card-avatar ${user.isOnline ? 'online' : ''}">
@@ -82,6 +87,7 @@ export const Card = () => {
                     <strong class="username">${user.username}</strong>
                     <p class="last-message">${user.lastMessageContent || 'Click to chat'}</p>
                     ${statusHTML}
+                     ${unreadBadgeHTML} <!-- Add the badge here -->
                 </div>
             `;
             
@@ -98,33 +104,42 @@ export const Card = () => {
      * It manipulates CSS classes to show the message panel and instantiates a new MessageCarriers component.
      * @param {Object} user - The user object associated with the card that was clicked.
      */
-    function openChatWith(user) {
-        // 1. Modify CSS classes to trigger the layout transition (sidebar shrinks, chat area appears).
-        cardContainer.classList.add('chat-active');
-        messageArea.classList.add('chat-active');
-        
-        // 2. Visually highlight the currently active chat in the sidebar.
-        document.querySelectorAll('.user-card.active').forEach(c => c.classList.remove('active'));
+   function openChatWith(user) {
+        // ---- START: CORRECTED LOGIC ----
+
+        // 1. Find the specific card that was clicked.
         const cardElement = document.querySelector(`.user-card[data-user-id='${user.userID}']`);
-        const lastMessage=document.querySelector(".last-message")
-        lastMessage.style.display="none"
-        if (cardElement) {
-            cardElement.classList.add('active');
+        if (!cardElement) return;
+
+        // 2. Visually highlight the currently active chat in the sidebar.
+        // First, remove 'active' from any other card.
+        document.querySelectorAll('.user-card.active').forEach(c => c.classList.remove('active'));
+        // Then, add 'active' to the clicked card.
+        cardElement.classList.add('active');
+
+        // Bonus Improvement: Hide the last message preview *only* on the active card.
+        const lastMessageElement = cardElement.querySelector(".last-message");
+        if (lastMessageElement) {
+            lastMessageElement.style.display = "none";
         }
 
-        // 3. Clean up any global state/functions left by the previously active chat window to prevent conflicts.
-        if (window.handleHistoryResponse) window.handleHistoryResponse = null;
-        if (window.appendMessageToActiveChat) window.appendMessageToActiveChat = null;
-        window.activeChatUserID = null;
-    
-        // 4. Create a new instance of the `MessageCarriers` component for this specific chat.
+        // 3. Create the new chat window component. This is the most important step.
+        // The constructor for MessageCarriers will set up all the necessary global handlers
+        // like `window.handleHistoryResponse` BEFORE any data is requested.
+        // This resolves the race condition.
         const chatWindow = MessageCarriers(user.userID, user.username);
 
-        // 5. Clear the message area and append the new chat window.
+        // 4. Now that the new component is ready, clear the old one from the DOM
+        // and append the new one.
         messageArea.innerHTML = '';
         messageArea.appendChild(chatWindow);
-    }
 
+        // 5. Finally, apply the CSS classes to trigger the layout transition.
+        cardContainer.classList.add('chat-active');
+        messageArea.classList.add('chat-active');
+
+        // ---- END: CORRECTED LOGIC ----
+    }
     // Expose the public API of this component.
     return { renderedView, updateUserList };
 };
