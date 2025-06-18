@@ -55,6 +55,16 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     // which chat is currently active.
     window.activeChatUserID = receiverId;
 
+        // ---- NEW: Mark messages as read as soon as the chat is opened ----
+    // const socket = window.globalSocket;
+    // if (socket && socket.readyState === WebSocket.OPEN) {
+    //     console.log(`Marking messages from ${receiverId} as read.`);
+    //     socket.send(JSON.stringify({
+    //         type: 'mark_messages_as_read',
+    //         target: receiverId // The 'target' is the user whose messages we are now reading.
+    //     }));
+    // }
+
     // --- Create Core DOM Elements ---
     
     const chatContainer = document.createElement('div');
@@ -167,7 +177,10 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
      */
     window.handleHistoryResponse = (target, messages) => {
         if (target !== receiverId) return; // Ignore if it's not for this chat.
-        
+         socket.send(JSON.stringify({
+            type: 'mark_messages_as_read',
+            target: receiverId // The 'target' is the user whose messages we are now reading.
+        }));
         // Keep the user's scroll position stable while adding new content at the top.
         const oldScrollHeight = chatHistory.scrollHeight;
         messages.forEach(msg => renderMessage(msg, true)); // Prepend each historical message.
