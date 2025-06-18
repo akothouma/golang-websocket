@@ -212,6 +212,7 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
                     content: content,
                 }));
                 messageInput.value = ''; // Clear the input field.
+                socket.send(JSON.stringify({ type: 'get_user_list' }));
             }
         }
     });
