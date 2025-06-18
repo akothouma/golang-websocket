@@ -19,9 +19,9 @@ type RegisterRequest struct {
     LastName    string `json:"lastName"`
     Username    string `json:"username"`
     Email       string `json:"email"`
-    Age         int    `json:"age,omitempty"`    // omitempty because client might send null if age is not entered,
+    Age         int    `json:"age"`    // omitempty because client might send null if age is not entered,
                                                // and it allows the field to be absent in JSON too.
-    Gender      string `json:"gender,omitempty"` // similar to age, allows absence or null to become ""
+    Gender      string `json:"gender"` // similar to age, allows absence or null to become ""
     Password    string `json:"password"`
     Tac         bool   `json:"tac"`
     CsrfToken   string `json:"csrfToken"`      // Renamed struct field for clarity, tag matches client
@@ -99,7 +99,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	// For now, relying on client-side check.
 
 	// Field presence validation (basic) - Add FirstName and LastName if they are mandatory
-	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" {
+	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" || regReq.Age ==0 || regReq.Gender==""{
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Required fields (First Name, Last Name, Email, Username, Password) cannot be empty."})

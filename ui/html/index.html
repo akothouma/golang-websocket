@@ -86,7 +86,7 @@
                 <div class="overall">
                     <h1>Login</h1>
                     <!-- Display error message from server if present -->
-                    <p id="error-message"> {{if .ErrorResponseLogin}} {{.ErrorResponseLogin}} {{else}} Enter valid credentials to
+                    <p id="login-error-message"> {{if .ErrorResponseLogin}} {{.ErrorResponseLogin}} {{else}} Enter valid credentials to
                         login {{end}}</p>
                     <div class="passButton">
                         <input type="email" id="email" name="email" placeholder="Enter email"
@@ -108,7 +108,7 @@
             <div class="overall">
                 <h1>Create account</h1>
                 <!-- Display error message from server if present -->
-                <p id="error-message">{{if .ErrorResponse}} {{.ErrorResponse}} {{else}} Enter your details to
+                <p id="register-error-message">{{if .ErrorResponse}} {{.ErrorResponse}} {{else}} Enter your details to
                     register {{end}}</p>
                 <div class="BothNames">
                     <input type="text" id="firstName" name="firstName" required placeholder="First Name">
@@ -668,10 +668,10 @@
             let defaultMessage = "";
 
             if (formType === "login") {
-                messageElementId = "error-message";
+                messageElementId = "login-error-message";
                 defaultMessage = "Enter valid credentials to login";
             } else if (formType === "register") {
-                messageElementId = "error-message";
+                messageElementId = "register-error-message";
                 defaultMessage = "Enter your details to register";
             }
 
@@ -724,16 +724,27 @@
                 event.preventDefault();
                 displayFormMessage("register", ""); // Clear previous specific message
 
+                //Client side validation
+
                 if (registerForm.register_password.value !== registerForm.confirmPassword.value) {
                     displayFormMessage("register", "Passwords do not match", false);
                     return;
                 }
+                  if (!registerForm.age.value || parseInt(registerForm.age.value, 10) <= 0) {
+            displayFormMessage("register", "Please enter a valid age.", false);
+            return;
+        }
+
                 if (!registerForm.tac.checked) {
                     displayFormMessage("register", "You must accept the terms and conditions", false);
                     return;
                 }
                 try {
-                    const genderRadio = registerForm.querySelector('input[name="gender"]:checked');
+                        // Correctly get the selected gender value
+            const genderSelect = registerForm.querySelector('#gender'); // Get the <select> element
+            const selectedGender = genderSelect ? genderSelect.value : ""; // Get its value, default to ""
+
+                    // const genderRadio = registerForm.querySelector('input[name="gender"]:checked');
                     const formData = {
                         firstName: registerForm.firstName.value,
                         lastName: registerForm.lastName.value,
@@ -745,6 +756,12 @@
                         tac: registerForm.tac.checked,
                         csrfToken: registerForm.csrf_token.value
                     };
+
+                      // Re-check for essential empty fields before sending
+            if (!formData.firstName || !formData.lastName || !formData.username || !formData.email || !formData.password) {
+                 displayFormMessage("register", "Please fill all required fields.", false);
+                 return;
+            }
                     const response = await fetch('/register', {
                         method: 'POST',
                         headers: { "Content-Type": "application/json" },
@@ -753,6 +770,7 @@
                     if (!response.ok) {
                         const errorData = await response.json();
                         displayFormMessage("register", errorData.error || "Registration failed", false);
+                        console.log(errorData)
                         return;
                     }
                     const successData = await response.json();
