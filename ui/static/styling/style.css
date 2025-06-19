@@ -372,6 +372,7 @@ input[type="text"]{
     border-radius: var(--card-border-radius);
     height: 5rem;
     color: var(--color-dark);
+    overflow-wrap: break-word;
 }
 .middle{
     height: 180vh;
@@ -844,6 +845,26 @@ nav .uil{
 .typing-indicator {
     font-style: italic;
     color: #00b894; /* Or any color you like */
+}
+
+
+/* --- CSS Fix for Post Display --- */
+
+/* For the title, in case it's a single long word */
+.feed-content h3 {
+    overflow-wrap: break-word;
+    word-wrap: break-word; /* Older browser support */
+}
+
+/* For the content inside the <pre> tag */
+.feed-content pre {
+    /* THIS IS THE MOST IMPORTANT RULE */
+    /* It tells the browser to preserve whitespace BUT wrap the text */
+    white-space: pre-wrap;
+
+    /* This rule forces long, unbreakable words/strings to break */
+    overflow-wrap: break-word;
+    word-wrap: break-word; /* Older browser support */
 }
 
 

@@ -1,5 +1,3 @@
-// internal/handlers/messagehandler.go
-
 // Package handlers contains the HTTP handlers for the application, including the WebSocket logic.
 package handlers
 
@@ -181,8 +179,6 @@ func (dep *Dependencies) handleClientConnections(userID string, conn *websocket.
 	}
 }
 
-// internal/handlers/messagehandler.go
-
 // relayTypingEvent forwards a typing notification from a sender to a target user.
 // It does not persist anything and acts as a simple, real-time relay.
 func (dep *Dependencies) relayTypingEvent(eventType, senderID, targetID string) {
@@ -286,26 +282,6 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 			}
 			usersWithStatus = append(usersWithStatus, userInfo)
 		}
-
-		// 5. Enrich the list with the last message details.
-		// for i, u := range usersWithStatus {
-		// 	// for _, otherUser := range usersWithStatus {
-		// 	// 	if u.UserID == otherUser.UserID {
-		// 	// 		continue
-		// 	// 	}
-		// 	if !(u.IsMe){
-		// 		key := models.GetConversationID(u.UserID, otherUser.UserID)
-		// 		if msg, ok := lastMessageMap[key]; ok {
-		// 			if msg.CreatedAt.After(usersWithStatus[i].LastMessageTime) {
-		// 				usersWithStatus[i].LastMessageContent = msg.Message
-		// 				usersWithStatus[i].LastMessageTime = msg.CreatedAt
-		// 			}
-		// 		}
-		// 	}
-
-		// 	}
-		// }
-
 		// 6. Send the final, enriched, and tailored list to the client.
 		response := WebSocketMessage{
 			Type:     "user_list_update",
@@ -316,15 +292,6 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 		}
 	}
 }
-
-// }
-
-// sendFullUserListToUser is a convenience function that triggers a broadcast.
-// Since the broadcast tailors the list for each user, it effectively sends a fresh list on demand.
-// func (dep *Dependencies) sendFullUserListToUser() {
-// 	dep.broadcastUserListUpdate()
-// }
-
 // StartChatBroadcastHandler runs as a single, long-lived goroutine.
 // It listens on the `broadcast` channel and processes messages sequentially.
 // This prevents race conditions and ensures messages are handled in order.
