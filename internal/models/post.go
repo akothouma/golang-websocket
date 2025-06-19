@@ -41,7 +41,7 @@ type Post struct {
 	UserName       string         `json:"UserName"`
 	Initial        string         `json:"Initial"`
 	Categories     []postCategory `json:"Categories"`
-	CreatedAt      time.Time       `json:"-"`
+	CreatedAt      time.Time      `json:"-"`
 	FormattedDate  string         `json:"CreatedAt"`
 }
 
@@ -176,7 +176,7 @@ func PostsRows(rows *sql.Rows) ([]Post, error) {
 			return nil, err
 		}
 
-		p.FormattedDate=p.CreatedAt.Format("January 2, 2006 at 3:04 PM")
+		p.FormattedDate = p.CreatedAt.Format("January 2, 2006 at 3:04 PM")
 
 		p.Initial = string(p.UserName[0])
 
@@ -189,7 +189,7 @@ func PostsRows(rows *sql.Rows) ([]Post, error) {
 
 		p.CommentsLenght = len(p.Comments)
 
-		p.Likes, p.Dislikes, err = PostCommentLikesDislikes("post" ,p.PostId)
+		p.Likes, p.Dislikes, err = PostCommentLikesDislikes("post", p.PostId)
 		if err != nil {
 			return nil, err
 		}

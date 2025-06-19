@@ -8,7 +8,6 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-
 func GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -30,4 +29,3 @@ func GetAllCommentsForPostHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(comments)
 }
-

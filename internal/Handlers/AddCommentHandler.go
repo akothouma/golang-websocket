@@ -31,7 +31,6 @@ func AddCommentHandler(w http.ResponseWriter, r *http.Request) {
 	postID := r.FormValue("post_id")
 	userID := r.Context().Value("user_uuid").(string)
 
-
 	content := r.FormValue("content")
 	content = strings.TrimSpace(content)
 	userID = strings.TrimSpace(userID)

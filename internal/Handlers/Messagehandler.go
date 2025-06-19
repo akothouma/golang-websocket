@@ -30,7 +30,7 @@ type WebSocketMessage struct {
 	Type            string           `json:"type"`                      // e.g., "get_user_list", "private_message", "get_message_history".
 	Content         string           `json:"content,omitempty"`         // The text content of a message being sent.
 	Target          string           `json:"target,omitempty"`          // The userID of the intended recipient.
-	Sender          string              `json:"sender,omitempty"`          // The userID of the sender, used for events like typing.
+	Sender          string           `json:"sender,omitempty"`          // The userID of the sender, used for events like typing.
 	Messages        []models.Message `json:"messages,omitempty"`        // A slice of messages, used for sending chat history.
 	UserList        []UserChatInfo   `json:"userList,omitempty"`        // A slice of user info, used for updating the online users list.
 	LastMessageTime time.Time        `json:"lastMessageTime,omitempty"` // The timestamp of the oldest message received, used for paginating history (infinite scroll).
@@ -191,8 +191,8 @@ func (dep *Dependencies) relayTypingEvent(eventType, senderID, targetID string) 
 
 	// Prepare the event payload to be sent to the recipient.
 	response := WebSocketMessage{
-		Type:   eventType,  // "typing_started" or "typing_stopped"
-		Sender: senderID,   // The ID of the user who is typing
+		Type:   eventType, // "typing_started" or "typing_stopped"
+		Sender: senderID,  // The ID of the user who is typing
 	}
 
 	// Find the recipient's connection and send them the event.
@@ -292,6 +292,7 @@ func (dep *Dependencies) broadcastUserListUpdate() {
 		}
 	}
 }
+
 // StartChatBroadcastHandler runs as a single, long-lived goroutine.
 // It listens on the `broadcast` channel and processes messages sequentially.
 // This prevents race conditions and ensures messages are handled in order.

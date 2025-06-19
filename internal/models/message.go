@@ -145,8 +145,6 @@ func GetConversationID(user1, user2 string) string {
 	return users[0] + ":" + users[1]
 }
 
-
-
 // GetUnreadMessageCounts returns a map where the key is the sender's ID and the value
 // is the count of unread messages they have sent to the specified receiver.
 // This is used to populate notification badges in the UI.

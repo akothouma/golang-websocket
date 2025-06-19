@@ -131,7 +131,6 @@ CREATE TABLE IF NOT EXISTS messages (
     	('travel'),
     	('other');`
 
-
 	if _, err := dataBase.Exec(query); err != nil {
 		dataBase.Close()
 		return nil, err

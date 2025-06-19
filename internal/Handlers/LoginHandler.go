@@ -82,12 +82,12 @@ func (dep *Dependencies) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	dep.CreateSession(w, r, user.UserID)
 
-// For AJAX requests, return success response instead of redirect
-    fmt.Println("Login successful!!!")
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusOK)
-    json.NewEncoder(w).Encode(map[string]string{
-        "message": "Login successful",
-        "redirect": "/",
-    })
+	// For AJAX requests, return success response instead of redirect
+	fmt.Println("Login successful!!!")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message":  "Login successful",
+		"redirect": "/",
+	})
 }

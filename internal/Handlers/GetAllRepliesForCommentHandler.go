@@ -9,7 +9,6 @@ import (
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
-
 func GetAllRepliesForCommentHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodGet {
 		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
@@ -29,7 +28,6 @@ func GetAllRepliesForCommentHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	var comment models.Comment
 	comment.ID = commentID
-
 
 	err = comment.GetAllRepliesForComment()
 	if err != nil {

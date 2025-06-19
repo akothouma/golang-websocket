@@ -1,12 +1,12 @@
 package tests
 
 import (
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/Handlers"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strings"
 	"testing"
-	"os"
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/Handlers"
 )
 
 func TestErrorHandler(t *testing.T) {

@@ -30,9 +30,7 @@ func AddReplyHandler(w http.ResponseWriter, r *http.Request) {
 	parent_comment_id := r.FormValue("parent_comment_id")
 	userID := r.Context().Value("user_uuid").(string)
 
-
 	content := r.FormValue("content")
-
 
 	if userID == "" || content == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)

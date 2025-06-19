@@ -3,10 +3,10 @@ package handlers
 import (
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -15,16 +15,16 @@ import (
 )
 
 type RegisterRequest struct {
-    FirstName   string `json:"firstName"`
-    LastName    string `json:"lastName"`
-    Username    string `json:"username"`
-    Email       string `json:"email"`
-    Age         int    `json:"age"`    // omitempty because client might send null if age is not entered,
-                                               // and it allows the field to be absent in JSON too.
-    Gender      string `json:"gender"` // similar to age, allows absence or null to become ""
-    Password    string `json:"password"`
-    Tac         bool   `json:"tac"`
-    CsrfToken   string `json:"csrfToken"`      // Renamed struct field for clarity, tag matches client
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Age       int    `json:"age"` // omitempty because client might send null if age is not entered,
+	// and it allows the field to be absent in JSON too.
+	Gender    string `json:"gender"` // similar to age, allows absence or null to become ""
+	Password  string `json:"password"`
+	Tac       bool   `json:"tac"`
+	CsrfToken string `json:"csrfToken"` // Renamed struct field for clarity, tag matches client
 }
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -49,16 +49,15 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	// 	http.ServeFile(w,r, "./ui/html/index.html") // Or however you serve your SPA entry point
 	// 	return
 	// }\
-// if r.Method == http.MethodGet {
-// 		csrfToken := r.Context().Value("csrf_token").(string)
-// 		w.Header().Set("Content-Type", "application/json")
-// 		json.NewEncoder(w).Encode(map[string]string{
-// 			"csrfToken": csrfToken,
-// 		})
-		
-// 		return
-// 	}
+	// if r.Method == http.MethodGet {
+	// 		csrfToken := r.Context().Value("csrf_token").(string)
+	// 		w.Header().Set("Content-Type", "application/json")
+	// 		json.NewEncoder(w).Encode(map[string]string{
+	// 			"csrfToken": csrfToken,
+	// 		})
 
+	// 		return
+	// 	}
 
 	if r.Method != http.MethodPost {
 		dep.ClientError(w, http.StatusMethodNotAllowed)
@@ -78,10 +77,8 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	// It's good practice to close the body if not already handled by a framework
 	defer r.Body.Close()
 
-
 	// Log the received request data for debugging
 	dep.InfoLog.Printf("Received registration request: %+v", regReq)
-
 
 	// CSRF Token Validation
 	// Assuming your middleware places the server-side token in the request context.
@@ -99,7 +96,7 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	// For now, relying on client-side check.
 
 	// Field presence validation (basic) - Add FirstName and LastName if they are mandatory
-	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" || regReq.Age ==0 || regReq.Gender==""{
+	if regReq.Email == "" || regReq.Username == "" || regReq.Password == "" || regReq.FirstName == "" || regReq.LastName == "" || regReq.Age == 0 || regReq.Gender == "" {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
 		json.NewEncoder(w).Encode(ErrorResponse{Error: "Required fields (First Name, Last Name, Email, Username, Password) cannot be empty."})
@@ -165,9 +162,9 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 		regReq.LastName,  // New
 		regReq.Email,
 		regReq.Username,
-		regReq.Password,  // This is the plain password, CreateUser will hash it
-		regReq.Age,       // New (will be 0 if not provided and not omitempty and no default in DB)
-		regReq.Gender,    // New (will be "" if not provided)
+		regReq.Password, // This is the plain password, CreateUser will hash it
+		regReq.Age,      // New (will be 0 if not provided and not omitempty and no default in DB)
+		regReq.Gender,   // New (will be "" if not provided)
 	)
 
 	if err != nil {
@@ -189,12 +186,12 @@ func (dep *Dependencies) RegisterHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	dep.InfoLog.Printf("User successfully registered: UUID %s, Username %s", userUuid, regReq.Username)
- // Return success response for AJAX instead of redirect
-    // fmt.Println("Registered successfully!!!")
-    w.Header().Set("Content-Type", "application/json")
-    w.WriteHeader(http.StatusCreated)
-    json.NewEncoder(w).Encode(map[string]string{
-        "message": "Registration successful! You can now login.",
-        "redirect": "/login",
-    })
+	// Return success response for AJAX instead of redirect
+	// fmt.Println("Registered successfully!!!")
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message":  "Registration successful! You can now login.",
+		"redirect": "/login",
+	})
 }

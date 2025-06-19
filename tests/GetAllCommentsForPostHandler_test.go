@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 	"learn.zone01kisumu.ke/git/clomollo/forum/internal/Handlers"
+	"learn.zone01kisumu.ke/git/clomollo/forum/internal/models"
 )
 
 // Mock function for GetAllCommentsForPost

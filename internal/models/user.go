@@ -10,28 +10,28 @@ import (
 )
 
 type User struct {
-    ID             int
-    UserID         string
-    FirstName      string `json:"firstName"` // Add if you want to receive and store
-    LastName       string `json:"lastName"`  // Add if you want to receive and store
-    Email          string `json:"email"`
-    Username       string `json:"username"`
-    Password       string `json:"password"` // This will store the HASH
-    Age            int    `json:"age,omitempty"`       // Add if you want to receive and store
-    Gender         string `json:"gender,omitempty"`    // Add if you want to receive and store
-    ProfilePicture string `json:"profilePicture,omitempty"`
-    ContentType    string `json:"contentType,omitempty"`
+	ID             int
+	UserID         string
+	FirstName      string `json:"firstName"` // Add if you want to receive and store
+	LastName       string `json:"lastName"`  // Add if you want to receive and store
+	Email          string `json:"email"`
+	Username       string `json:"username"`
+	Password       string `json:"password"`         // This will store the HASH
+	Age            int    `json:"age,omitempty"`    // Add if you want to receive and store
+	Gender         string `json:"gender,omitempty"` // Add if you want to receive and store
+	ProfilePicture string `json:"profilePicture,omitempty"`
+	ContentType    string `json:"contentType,omitempty"`
 }
 
 func (f *ForumModel) CreateUser(
 	userUuid string,
 	firstName string, // New parameter
-	lastName string,  // New parameter
+	lastName string, // New parameter
 	email string,
 	username string,
 	plainPassword string, // Renamed for clarity
-	age int,         // New parameter (pass 0 or a specific value if not provided/optional)
-	gender string,    // New parameter (pass empty string if not provided/optional)
+	age int, // New parameter (pass 0 or a specific value if not provided/optional)
+	gender string, // New parameter (pass empty string if not provided/optional)
 ) error {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(plainPassword), bcrypt.DefaultCost)
 	if err != nil {
@@ -62,8 +62,8 @@ func (f *ForumModel) CreateUser(
 		email,
 		username,
 		string(hashedPassword),
-		age,     // If age can be optional and your schema allows NULL, you might need sql.NullInt32
-		gender,  // If gender can be optional and your schema allows NULL, you might need sql.NullString
+		age,    // If age can be optional and your schema allows NULL, you might need sql.NullInt32
+		gender, // If gender can be optional and your schema allows NULL, you might need sql.NullString
 	)
 
 	if err != nil {
@@ -142,11 +142,11 @@ func (f *ForumModel) GetAllConnectedUsers(usersID []string) ([]User, error) {
 			}
 			return nil, fmt.Errorf(err.Error())
 		}
-		
+
 		var u User
 		for row.Next() {
 			var profilepic []byte
-			
+
 			err = row.Scan(&u.Username, &profilepic)
 			if err != nil {
 				return nil, fmt.Errorf(err.Error())
@@ -158,7 +158,6 @@ func (f *ForumModel) GetAllConnectedUsers(usersID []string) ([]User, error) {
 	}
 	return users, nil
 }
-
 
 func (f *ForumModel) GetAllUsers() ([]User, error) {
 	var users []User
@@ -190,4 +189,3 @@ func (f *ForumModel) GetAllUsers() ([]User, error) {
 
 	return users, nil
 }
-
