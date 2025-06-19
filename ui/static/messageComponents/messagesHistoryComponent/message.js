@@ -205,6 +205,11 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     window.appendMessageToActiveChat = (msg) => {
         renderMessage(msg, false); // Append live messages to the end.
         chatHistory.scrollTop = chatHistory.scrollHeight; // Auto-scroll to the bottom.
+        
+       socket.send(JSON.stringify({
+          type: 'mark_messages_as_read',
+          target: receiverId // The 'target' is the user whose messages we are now reading.
+      }));
     };
     
     /** The throttled scroll event listener for implementing infinite scroll. */
