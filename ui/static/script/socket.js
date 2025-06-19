@@ -21,6 +21,7 @@ export const initSocket = () => {
     
     socket.addEventListener('error', (error) => {
         console.error('WebSocket error:', error);
+        socket=null;
     });
     
     return socket;

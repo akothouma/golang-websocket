@@ -37,11 +37,9 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     // ---- Component-Scoped State ----
     const socket = window.globalSocket;
 
-       // ---- START: NEW TYPING-RELATED SETUP ----
     let typingTimer;            // This will hold our timeout
     let isTypingSent = false;   // A flag to prevent sending multiple "start_typing" events
-    const TYPING_TIMEOUT_MS = 2000; // 2 seconds
-    // ---- END: NEW TYPING-RELATED SETUP ----
+    const TYPING_TIMEOUT_MS = 500; // 2 seconds
     
     /** A flag to prevent multiple history fetch requests from being sent simultaneously. */
     let isFetchingHistory = false;
@@ -62,17 +60,6 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     // which chat is currently active.
     window.activeChatUserID = receiverId;
 
-        // ---- NEW: Mark messages as read as soon as the chat is opened ----
-    // const socket = window.globalSocket;
-    // if (socket && socket.readyState === WebSocket.OPEN) {
-    //     console.log(`Marking messages from ${receiverId} as read.`);
-    //     socket.send(JSON.stringify({
-    //         type: 'mark_messages_as_read',
-    //         target: receiverId // The 'target' is the user whose messages we are now reading.
-    //     }));
-    // }
-
-    // --- Create Core DOM Elements ---
     
     const chatContainer = document.createElement('div');
     chatContainer.className = 'chat-container';

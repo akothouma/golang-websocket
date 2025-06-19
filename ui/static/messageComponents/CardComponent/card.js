@@ -117,7 +117,7 @@ export const Card = () => {
         // Then, add 'active' to the clicked card.
         cardElement.classList.add('active');
 
-        // Bonus Improvement: Hide the last message preview *only* on the active card.
+        //Hide the last message preview *only* on the active card.
         const lastMessageElement = cardElement.querySelector(".last-message");
         if (lastMessageElement) {
             lastMessageElement.style.display = "none";
