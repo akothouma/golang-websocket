@@ -198,6 +198,54 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
           target: receiverId // The 'target' is the user whose messages we are now reading.
       }));
     };
+
+        /**
+     * This function is exposed globally to be called by app.js. It creates and
+     * removes the typing indicator bubble within this specific chat window.
+     * @param {string} type - 'typing_started' or 'typing_stopped'.
+     * @param {string} senderID - The ID of the user who is typing.
+     */
+
+        window.handleTypingIndicator = (type, senderID) => {
+        // Only handle events for the person we are currently chatting with.
+        if (senderID !== receiverId) {
+            return;
+        }
+
+        const indicatorId = `typing-indicator-bubble-${senderID}`;
+        const existingIndicator = document.getElementById(indicatorId);
+
+        if (type === 'typing_started') {
+            // If the indicator is already showing, do nothing.
+            if (existingIndicator) return;
+
+            // Create the bubble wrapper
+            const indicatorBubble = document.createElement('div');
+            indicatorBubble.id = indicatorId;
+            indicatorBubble.className = 'message-wrapper received'; // Style it like a received message
+
+            // Create the content with animated dots
+            indicatorBubble.innerHTML = `
+                <div class="message-bubble">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            `;
+            
+            // Add it to the chat and scroll down
+            chatHistory.appendChild(indicatorBubble);
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        } else if (type === 'typing_stopped') {
+            // If the indicator exists, remove it.
+            if (existingIndicator) {
+                existingIndicator.remove();
+            }
+        }
+    };
     
     /** The throttled scroll event listener for implementing infinite scroll. */
     chatHistory.addEventListener('scroll', throttle(() => {
@@ -239,6 +287,12 @@ export const MessageCarriers = (receiverId, receiverUsername) => {
     messageForm.addEventListener('submit', (e) => {
         e.preventDefault();
          sendStopTyping(); // Immediately signal that typing has stopped.
+
+          // Also immediately remove the indicator from our own view for instant feedback
+        const indicator = document.getElementById(`typing-indicator-bubble-${receiverId}`);
+        if (indicator) {
+            indicator.remove();
+        }
         const content = messageInput.value.trim();
         if (content) { // Don't send empty messages.
             const socket = window.globalSocket;
