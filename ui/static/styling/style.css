@@ -868,3 +868,65 @@ nav .uil{
 }
 
 
+/*
+  ==============================================
+  CSS FOR THE NEW TYPING INDICATOR BUBBLE
+  ==============================================
+*/
+
+/*
+ * The container for the dots, sits inside the message-bubble.
+ * It's given a height and flex properties to align the dots.
+ */
+.typing-dots {
+    display: flex;
+    align-items: center;
+    height: 17px; /* Adjust height to match your message bubble padding */
+    padding: 0 8px; /* Give it some horizontal space */
+}
+
+/*
+ * Each individual dot.
+ * They start small and transparent.
+ */
+.typing-dots span {
+    width: 8px;
+    height: 8px;
+    background-color: #a0a0a0; /* A light grey color for the dots */
+    border-radius: 50%;
+    margin: 0 2px;
+    display: inline-block;
+    
+    /* The magic happens here! We link it to our keyframe animation */
+    animation: typing-bounce 1.4s infinite ease-in-out;
+}
+
+/* 
+ * We apply a delay to the second and third dots to create
+ * the classic sequential "wave" effect.
+ */
+.typing-dots span:nth-of-type(2) {
+    animation-delay: -1.2s;
+}
+
+.typing-dots span:nth-of-type(3) {
+    animation-delay: -1.0s;
+}
+
+/*
+ * The Keyframe Animation: "typing-bounce"
+ * It makes each dot bounce up and down by changing its vertical position (transform)
+ * and its opacity for a smoother effect.
+ */
+@keyframes typing-bounce {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1.0) translateY(-3px);
+        opacity: 1;
+    }
+}
+
+
